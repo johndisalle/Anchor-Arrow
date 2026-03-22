@@ -94,19 +94,34 @@ struct OnboardingPage1: View {
 
             // Hero visual
             ZStack {
+                // Solid blue circle — anchor rendered white on top
                 SwiftUI.Circle()
-                    .fill(Color("BrandAnchor").opacity(0.12))
-                    .frame(width: 200, height: 200)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.75)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 190, height: 190)
+                    .shadow(color: Color("BrandAnchor").opacity(0.3), radius: 20, x: 0, y: 8)
 
-                VStack(spacing: 4) {
-                    Image(systemName: "anchor")
-                        .font(.system(size: 56, weight: .medium))
-                        .foregroundColor(Color("BrandAnchor"))
+                // Anchor — white, large, clearly visible
+                Image(systemName: "anchor")
+                    .font(.system(size: 80, weight: .bold))
+                    .foregroundColor(.white)
+
+                // Arrow badge — orange circle with white arrow, top-right
+                ZStack {
+                    SwiftUI.Circle()
+                        .fill(Color("BrandArrow"))
+                        .frame(width: 44, height: 44)
                     Image(systemName: "arrow.up.right")
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(Color("BrandArrow"))
-                        .offset(x: 20, y: -8)
+                        .font(.system(size: 20, weight: .black))
+                        .foregroundColor(.white)
                 }
+                .shadow(color: Color("BrandArrow").opacity(0.45), radius: 8, x: 0, y: 3)
+                .offset(x: 58, y: -58)
             }
             .scaleEffect(appeared ? 1.0 : 0.7)
             .opacity(appeared ? 1.0 : 0.0)
@@ -176,7 +191,7 @@ struct OnboardingPage2: View {
             // Two concepts
             HStack(spacing: 16) {
                 ConceptCard(
-                    icon: "anchor",
+                    icon: "anchor.circle.fill",
                     color: "BrandAnchor",
                     title: "The Anchor",
                     description: "Be watchful. Stand firm. Root yourself in Christ daily."

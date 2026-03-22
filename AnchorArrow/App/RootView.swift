@@ -49,40 +49,55 @@ struct RootView: View {
 
 // MARK: - Splash Screen
 struct SplashView: View {
-    @State private var rootsGrown = false
-    @State private var arrowLaunched = false
+    @State private var logoShown = false
+    @State private var arrowShown = false
     @State private var textOpacity = 0.0
 
     var body: some View {
         ZStack {
             Color("BackgroundPrimary").ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                // Logo / Icon area
+            VStack(spacing: 36) {
+                // Logo mark
                 ZStack {
-                    // Root system (anchor)
-                    AnchorRootsShape(progress: rootsGrown ? 1.0 : 0.0)
-                        .stroke(Color("BrandAnchor"), lineWidth: 2.5)
-                        .frame(width: 120, height: 80)
-                        .offset(y: 40)
-                        .animation(.easeOut(duration: 0.9), value: rootsGrown)
+                    // Solid gradient circle — anchor is white on top
+                    SwiftUI.Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.75)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 140, height: 140)
+                        .shadow(color: Color("BrandAnchor").opacity(0.35), radius: 24, x: 0, y: 10)
+                        .scaleEffect(logoShown ? 1.0 : 0.5)
+                        .opacity(logoShown ? 1.0 : 0.0)
+                        .animation(.spring(response: 0.6, dampingFraction: 0.7), value: logoShown)
 
-                    // Tree trunk
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("BrandEarth"))
-                        .frame(width: 8, height: rootsGrown ? 60 : 0)
-                        .offset(y: -10)
-                        .animation(.easeOut(duration: 0.6).delay(0.4), value: rootsGrown)
+                    // Anchor — white, bold, large and clearly legible
+                    Image(systemName: "anchor")
+                        .font(.system(size: 68, weight: .bold))
+                        .foregroundColor(.white)
+                        .scaleEffect(logoShown ? 1.0 : 0.4)
+                        .opacity(logoShown ? 1.0 : 0.0)
+                        .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15), value: logoShown)
 
-                    // Arrow (purpose)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(Color("BrandArrow"))
-                        .offset(x: arrowLaunched ? 24 : 0, y: arrowLaunched ? -48 : -40)
-                        .opacity(arrowLaunched ? 1 : 0)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.6).delay(1.0), value: arrowLaunched)
+                    // Arrow — brand orange, shoots out from top-right of circle
+                    ZStack {
+                        SwiftUI.Circle()
+                            .fill(Color("BrandArrow"))
+                            .frame(width: 40, height: 40)
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 18, weight: .black))
+                            .foregroundColor(.white)
+                    }
+                    .shadow(color: Color("BrandArrow").opacity(0.5), radius: 8, x: 0, y: 3)
+                    .offset(x: arrowShown ? 54 : 20, y: arrowShown ? -54 : -20)
+                    .opacity(arrowShown ? 1.0 : 0.0)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.5), value: arrowShown)
                 }
-                .frame(width: 160, height: 160)
+                .frame(width: 180, height: 180)
 
                 VStack(spacing: 6) {
                     Text("ANCHOR & ARROW")
@@ -100,8 +115,8 @@ struct SplashView: View {
             }
         }
         .onAppear {
-            rootsGrown = true
-            arrowLaunched = true
+            logoShown = true
+            arrowShown = true
             textOpacity = 1.0
         }
     }
