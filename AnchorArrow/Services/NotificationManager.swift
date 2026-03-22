@@ -35,7 +35,7 @@ class NotificationManager: ObservableObject {
 
     // MARK: - Schedule Reminders
     func scheduleReminders(morningHour: Int, eveningHour: Int) async {
-        guard permissionGranted else {
+        if !permissionGranted {
             await requestPermission()
             guard permissionGranted else { return }
         }
