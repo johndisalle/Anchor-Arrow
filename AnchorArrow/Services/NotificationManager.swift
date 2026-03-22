@@ -2,6 +2,7 @@
 // Push notification scheduling for morning anchor + evening arrow reminders
 
 import Foundation
+import Combine
 import UserNotifications
 import SwiftUI
 
@@ -129,7 +130,7 @@ class NotificationManager: ObservableObject {
     func cancelAll() {
         notificationCenter.removeAllPendingNotificationRequests()
         notificationCenter.removeAllDeliveredNotifications()
-        UIApplication.shared.applicationIconBadgeNumber = 0
+        Task { try? await notificationCenter.setBadgeCount(0) }
     }
 
     func cancelStreakWarning() {

@@ -2,6 +2,7 @@
 // Audio prayer player using AVFoundation
 
 import SwiftUI
+import Combine
 import AVFoundation
 
 // MARK: - PrayerAudioPlayerView (Sheet)
@@ -23,7 +24,7 @@ struct PrayerAudioPlayerView: View {
 
             // Icon
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(Color("BrandAnchor").opacity(0.1))
                     .frame(width: 90, height: 90)
 
@@ -90,7 +91,7 @@ struct PrayerAudioPlayerView: View {
                     player.isPlaying ? player.pause() : player.play()
                 } label: {
                     ZStack {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(Color("BrandAnchor"))
                             .frame(width: 64, height: 64)
                         Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")

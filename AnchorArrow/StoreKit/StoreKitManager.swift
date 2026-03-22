@@ -2,6 +2,7 @@
 // StoreKit 2 subscription management
 
 import Foundation
+import Combine
 import StoreKit
 import FirebaseAuth
 

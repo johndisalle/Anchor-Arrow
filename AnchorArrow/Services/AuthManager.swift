@@ -2,6 +2,7 @@
 // Firebase Authentication — email/password + Apple Sign-In
 
 import SwiftUI
+import Combine
 import Firebase
 import FirebaseAuth
 import AuthenticationServices
@@ -82,10 +83,10 @@ class AuthManager: NSObject, ObservableObject {
                 throw AuthError.appleSignInFailed
             }
 
-            let credential = OAuthProvider.credential(
-                withProviderID: "apple.com",
-                idToken: idTokenString,
-                rawNonce: nonce
+            let credential = OAuthProvider.appleCredential(
+                withIDToken: idTokenString,
+                rawNonce: nonce,
+                fullName: appleIDCredential.fullName
             )
 
             let authResult = try await Auth.auth().signIn(with: credential)

@@ -2,6 +2,7 @@
 // Central observable state for the logged-in user — drives all views
 
 import SwiftUI
+import Combine
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
