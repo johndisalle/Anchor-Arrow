@@ -3,6 +3,7 @@
 
 import SwiftUI
 import StoreKit
+import FirebaseAuth
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthManager
