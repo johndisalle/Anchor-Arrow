@@ -237,7 +237,7 @@ struct ArrowView: View {
             } label: {
                 ZStack {
                     if isSubmitting {
-                        ProgressView().tint(.white)
+                        SwiftUI.ProgressView().tint(.white)
                     } else {
                         HStack {
                             Image(systemName: "arrow.up.right.circle.fill")

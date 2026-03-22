@@ -134,7 +134,7 @@ struct MainTabView: View {
                     }
                     .tag(2)
 
-                ProgressView()
+                SwiftUI.ProgressView()
                     .tabItem {
                         Label("Progress", systemImage: "chart.bar.fill")
                     }

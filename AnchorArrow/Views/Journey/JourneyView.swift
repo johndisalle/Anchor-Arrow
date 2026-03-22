@@ -133,7 +133,7 @@ struct JourneyView: View {
             } label: {
                 ZStack {
                     if isStarting {
-                        ProgressView().tint(.white)
+                        SwiftUI.ProgressView().tint(.white)
                     } else {
                         HStack {
                             Image(systemName: "flag.fill")

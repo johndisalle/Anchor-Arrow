@@ -2,6 +2,7 @@
 // Iron Sharpeners – private accountability circles
 
 import SwiftUI
+import FirebaseAuth
 
 struct CirclesView: View {
     @EnvironmentObject var userStore: UserStore
@@ -19,7 +20,7 @@ struct CirclesView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView("Loading circles...")
+                    SwiftUI.ProgressView("Loading circles...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if circles.isEmpty {
                     emptyState
@@ -270,7 +271,7 @@ struct CreateCircleView: View {
                     Task { await createCircle() }
                 } label: {
                     ZStack {
-                        if isCreating { ProgressView().tint(.white) }
+                        if isCreating { SwiftUI.ProgressView().tint(.white) }
                         else {
                             Text("Create Circle")
                                 .font(.system(size: 17, weight: .bold))
@@ -344,7 +345,7 @@ struct JoinCircleView: View {
                     .cornerRadius(14)
                     .padding(.horizontal, 24)
                     .focused($focused)
-                    .onChange(of: code) { code = String($0.prefix(6).uppercased()) }
+                    .onChange(of: code) { _, newValue in code = String(newValue.prefix(6).uppercased()) }
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
@@ -356,7 +357,7 @@ struct JoinCircleView: View {
                     Task { await joinCircle() }
                 } label: {
                     ZStack {
-                        if isJoining { ProgressView().tint(.white) }
+                        if isJoining { SwiftUI.ProgressView().tint(.white) }
                         else {
                             Text("Join Circle")
                                 .font(.system(size: 17, weight: .bold))
@@ -413,7 +414,7 @@ struct CircleDetailView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView()
+                    SwiftUI.ProgressView()
                 } else if posts.isEmpty {
                     VStack(spacing: 16) {
                         Spacer()

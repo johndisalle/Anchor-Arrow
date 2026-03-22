@@ -231,7 +231,7 @@ struct DriftLogView: View {
         } label: {
             ZStack {
                 if isLogging {
-                    ProgressView().tint(.white)
+                    SwiftUI.ProgressView().tint(.white)
                 } else {
                     HStack {
                         Image(systemName: "exclamationmark.shield.fill")

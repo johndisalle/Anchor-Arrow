@@ -82,7 +82,7 @@ struct PremiumUpsellView: View {
                         } label: {
                             ZStack {
                                 if storeKitManager.isPurchasing {
-                                    ProgressView().tint(.white)
+                                    SwiftUI.ProgressView().tint(.white)
                                 } else {
                                     VStack(spacing: 2) {
                                         Text("Start Premium")

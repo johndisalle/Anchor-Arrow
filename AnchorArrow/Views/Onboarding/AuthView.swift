@@ -111,7 +111,7 @@ struct AuthView: View {
                 } label: {
                     ZStack {
                         if isLoading {
-                            ProgressView()
+                            SwiftUI.ProgressView()
                                 .tint(.white)
                         } else {
                             Text(isSignUp ? "Create Account" : "Sign In")

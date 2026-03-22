@@ -170,7 +170,7 @@ struct DashboardView: View {
                     .foregroundColor(Color("TextPrimary"))
                 Spacer()
                 NavigationLink("See All") {
-                    ProgressView()
+                    SwiftUI.ProgressView()
                 }
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color("BrandAnchor"))
