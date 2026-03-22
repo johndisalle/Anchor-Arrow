@@ -274,27 +274,29 @@ struct AuthTextField: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundStyle(.secondary)
                 .frame(width: 20)
 
             if isSecure {
                 SecureField(placeholder, text: $text)
                     .font(.system(size: 16))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundStyle(.primary)
+                    .tint(Color("BrandAnchor"))
             } else {
                 TextField(placeholder, text: $text)
                     .font(.system(size: 16))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundStyle(.primary)
                     .keyboardType(keyboardType)
+                    .tint(Color("BrandAnchor"))
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 15)
-        .background(Color("CardBackground"))
+        .background(Color(UIColor.secondarySystemBackground))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color("TextSecondary").opacity(0.2), lineWidth: 1)
+                .stroke(Color(UIColor.separator).opacity(0.5), lineWidth: 1)
         )
     }
 }
