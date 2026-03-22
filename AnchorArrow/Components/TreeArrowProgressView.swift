@@ -14,90 +14,101 @@ struct TreeArrowProgressView: View {
     @State private var trunkAnimated = false
     @State private var canopyAnimated = false
     @State private var arrowsAnimated = false
-    @State private var arrowOffset: CGFloat = 0
 
     var body: some View {
         ZStack {
             // Ground line
             Rectangle()
-                .fill(Color("BrandEarth").opacity(0.3))
-                .frame(height: 2)
+                .fill(Color("BrandEarth").opacity(0.25))
+                .frame(height: 1.5)
                 .frame(maxWidth: .infinity)
                 .offset(y: 60)
 
-            // Root system (anchor = stand firm)
-            RootsView(progress: rootsAnimated ? anchorProgress : 0)
+            // Root system
+            RootsView(progress: rootsAnimated ? max(0.3, anchorProgress) : 0)
                 .offset(y: 60)
 
             // Trunk
-            RoundedRectangle(cornerRadius: 5)
+            RoundedRectangle(cornerRadius: 6)
                 .fill(
                     LinearGradient(
-                        colors: [Color("BrandEarth"), Color("BrandEarth").opacity(0.6)],
+                        colors: [Color("BrandEarth"), Color("BrandEarth").opacity(0.55)],
                         startPoint: .bottom,
                         endPoint: .top
                     )
                 )
-                .frame(width: 12, height: trunkAnimated ? trunkHeight : 0)
+                .frame(width: 14, height: trunkAnimated ? trunkHeight : 0)
                 .offset(y: trunkAnimated ? trunkOffsetY : 60)
                 .animation(.easeOut(duration: 0.7).delay(0.4), value: trunkAnimated)
 
-            // Canopy (foliage)
+            // Canopy (3-tier tree crown)
             if canopyAnimated {
                 CanopyView(size: canopySize)
                     .offset(y: canopyOffsetY)
                     .transition(.scale(scale: 0, anchor: .bottom).combined(with: .opacity))
             }
 
-            // Flying arrows (arrow progress)
-            ForEach(0..<arrowCount, id: \.self) { index in
+            // Arrows flying from canopy
+            ForEach(0..<displayArrowCount, id: \.self) { index in
                 ArrowProjectile(
                     index: index,
-                    total: arrowCount,
-                    animated: arrowsAnimated
+                    total: displayArrowCount,
+                    animated: arrowsAnimated,
+                    isEarned: index < earnedArrowCount
                 )
-                .offset(y: canopyOffsetY - 20)
+                .offset(y: canopyOffsetY - 10)
             }
 
-            // Streak number on trunk
-            if streak > 0 && trunkAnimated {
-                VStack(spacing: 2) {
+            // Anchor icon at base (always visible after trunk)
+            if trunkAnimated {
+                Image(systemName: "anchor")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Color("BrandAnchor").opacity(0.5))
+                    .offset(y: 68)
+                    .opacity(canopyAnimated ? 1 : 0)
+                    .animation(.easeIn(duration: 0.3).delay(1.2), value: canopyAnimated)
+            }
+
+            // Streak on trunk
+            if streak > 0 && canopyAnimated {
+                VStack(spacing: 1) {
                     Text("\(streak)")
-                        .font(.system(size: 16, weight: .heavy))
+                        .font(.system(size: 13, weight: .heavy))
                         .foregroundColor(.white)
                     Text("days")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.system(size: 8, weight: .bold))
                         .foregroundColor(.white.opacity(0.8))
                 }
-                .offset(y: trunkOffsetY + 8)
-                .opacity(canopyAnimated ? 1 : 0)
+                .offset(y: trunkOffsetY + 4)
                 .animation(.easeIn(duration: 0.3).delay(1.2), value: canopyAnimated)
             }
         }
         .frame(maxWidth: .infinity)
         .onAppear {
             guard animate else { return }
-            withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
-            withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
+            triggerAnimations()
         }
         .onChange(of: animate) { _, newValue in
-            if newValue {
-                withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
-                withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
-            }
+            if newValue { triggerAnimations() }
         }
     }
 
+    private func triggerAnimations() {
+        withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
+        withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
+        withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
+    }
+
     // MARK: - Computed sizes
-    private var trunkHeight: CGFloat { 60 + CGFloat(anchorProgress * 40) }
+    private var trunkHeight: CGFloat { 70 + CGFloat(anchorProgress * 50) }
     private var trunkOffsetY: CGFloat { 30 - trunkHeight / 2 }
-    private var canopySize: CGFloat { 80 + CGFloat(anchorProgress * 60) }
-    private var canopyOffsetY: CGFloat { trunkOffsetY - trunkHeight / 2 - canopySize / 3 }
-    private var arrowCount: Int { max(0, Int(arrowProgress * 5)) }  // 0-5 arrows
+    private var canopySize: CGFloat { 90 + CGFloat(anchorProgress * 60) }
+    private var canopyOffsetY: CGFloat { trunkOffsetY - trunkHeight / 2 - canopySize * 0.28 }
+
+    // Always show 3 arrow slots so user understands the concept; earned ones are bright
+    private var displayArrowCount: Int { 3 }
+    private var earnedArrowCount: Int { max(0, Int(arrowProgress * 5)) }
 }
 
 // MARK: - Roots (Anchor visual)
@@ -109,9 +120,8 @@ struct RootsView: View {
             let center = CGPoint(x: size.width / 2, y: 0)
             let rootColor = Color("BrandAnchor")
 
-            // Draw 5 root branches spreading outward and downward
             let roots: [(angle: Double, length: Double)] = [
-                (-80, 60), (-50, 80), (-10, 90), (30, 80), (60, 60)
+                (-75, 55), (-45, 72), (-10, 82), (25, 72), (55, 55)
             ]
 
             for root in roots {
@@ -121,9 +131,8 @@ struct RootsView: View {
                 var path = Path()
                 path.move(to: center)
 
-                // Curved root with 2 segments
                 let mid = CGPoint(
-                    x: center.x + cos(endAngle) * fullLength * 0.5 + (Double.random(in: -8...8)),
+                    x: center.x + cos(endAngle) * fullLength * 0.5,
                     y: center.y + sin(endAngle.magnitude) * fullLength * 0.4
                 )
                 let end = CGPoint(
@@ -132,23 +141,15 @@ struct RootsView: View {
                 )
 
                 path.addQuadCurve(to: end, control: mid)
+                context.stroke(path, with: .color(rootColor.opacity(0.7)),
+                               style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
 
-                context.stroke(
-                    path,
-                    with: .color(rootColor),
-                    style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
-                )
-
-                // Tiny taproot at end
                 if progress > 0.4 {
                     var tapPath = Path()
                     tapPath.move(to: end)
-                    tapPath.addLine(to: CGPoint(x: end.x, y: end.y + 12 * progress))
-                    context.stroke(
-                        tapPath,
-                        with: .color(rootColor.opacity(0.6)),
-                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round)
-                    )
+                    tapPath.addLine(to: CGPoint(x: end.x, y: end.y + 10 * progress))
+                    context.stroke(tapPath, with: .color(rootColor.opacity(0.4)),
+                                   style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
                 }
             }
         }
@@ -157,46 +158,39 @@ struct RootsView: View {
     }
 }
 
-// MARK: - Tree Canopy
+// MARK: - Tree Canopy (3-tier layered crown)
 struct CanopyView: View {
     let size: CGFloat
 
-    // Use a green color for foliage rather than earth brown
-    private let foliageColor = Color(red: 0.25, green: 0.55, blue: 0.30)
+    private let darkGreen  = Color(red: 0.18, green: 0.45, blue: 0.22)
+    private let midGreen   = Color(red: 0.24, green: 0.54, blue: 0.28)
+    private let lightGreen = Color(red: 0.30, green: 0.62, blue: 0.33)
 
     var body: some View {
         ZStack {
-            // Back layers (side puffs)
-            SwiftUI.Circle()
-                .fill(foliageColor.opacity(0.55))
-                .frame(width: size * 0.65, height: size * 0.65)
-                .offset(x: -size * 0.28, y: size * 0.12)
-
-            SwiftUI.Circle()
-                .fill(foliageColor.opacity(0.55))
-                .frame(width: size * 0.6, height: size * 0.6)
-                .offset(x: size * 0.28, y: size * 0.12)
-
-            // Main canopy (slightly wider than tall — tree-like)
+            // Tier 1 — bottom / widest
             Ellipse()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            foliageColor.opacity(0.95),
-                            foliageColor.opacity(0.65)
-                        ],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size / 2
-                    )
-                )
-                .frame(width: size, height: size * 0.78)
+                .fill(darkGreen.opacity(0.85))
+                .frame(width: size, height: size * 0.45)
+                .offset(y: size * 0.18)
 
-            // Highlight
+            // Tier 2 — middle
+            Ellipse()
+                .fill(midGreen.opacity(0.9))
+                .frame(width: size * 0.78, height: size * 0.46)
+                .offset(y: -size * 0.02)
+
+            // Tier 3 — top / narrowest
+            Ellipse()
+                .fill(lightGreen)
+                .frame(width: size * 0.54, height: size * 0.44)
+                .offset(y: -size * 0.20)
+
+            // Top highlight
             Ellipse()
                 .fill(Color.white.opacity(0.10))
-                .frame(width: size * 0.45, height: size * 0.25)
-                .offset(y: -size * 0.18)
+                .frame(width: size * 0.28, height: size * 0.16)
+                .offset(y: -size * 0.28)
         }
     }
 }
@@ -206,34 +200,37 @@ struct ArrowProjectile: View {
     let index: Int
     let total: Int
     let animated: Bool
+    let isEarned: Bool      // earned = bright + launched; unearned = faint hint
 
     @State private var launched = false
 
     private var angle: Double {
-        let angles: [Double] = [-60, -35, -10, 15, 40]
-        return angles[safe: index] ?? -20
+        let angles: [Double] = [-50, -10, 30]
+        return angles[safe: index] ?? -10
     }
 
     private var delay: Double { Double(index) * 0.15 }
 
     var body: some View {
         Image(systemName: "arrow.up.right")
-            .font(.system(size: 20, weight: .bold))
-            .foregroundColor(Color("BrandArrow"))
+            .font(.system(size: isEarned ? 20 : 16, weight: .bold))
+            .foregroundColor(
+                isEarned
+                    ? Color("BrandArrow")
+                    : Color("BrandArrow").opacity(0.25)
+            )
             .rotationEffect(.degrees(angle))
             .offset(
-                x: launched ? cos(angle * .pi / 180) * 80 : 0,
-                y: launched ? sin(angle * .pi / 180) * -80 : 0
+                x: launched ? cos(angle * .pi / 180) * 75 : 0,
+                y: launched ? sin(angle * .pi / 180) * -75 : 0
             )
-            .opacity(launched ? 0.85 : 0)
+            .opacity(launched ? (isEarned ? 0.9 : 0.4) : 0)
             .animation(
                 .spring(response: 0.5, dampingFraction: 0.6).delay(delay),
                 value: launched
             )
             .onAppear {
-                if animated {
-                    launched = true
-                }
+                if animated { launched = true }
             }
             .onChange(of: animated) { _, newValue in
                 launched = newValue
