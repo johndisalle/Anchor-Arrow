@@ -187,7 +187,7 @@ struct AnchorView: View {
             } label: {
                 HStack(spacing: 14) {
                     ZStack {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(Color("BrandAnchor").opacity(0.15))
                             .frame(width: 48, height: 48)
                         Image(systemName: "play.circle.fill")
@@ -349,7 +349,7 @@ struct CompletionOverlay: View {
 
             VStack(spacing: 20) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(Color(color).opacity(0.2))
                         .frame(width: 100, height: 100)
                     Image(systemName: "checkmark.circle.fill")

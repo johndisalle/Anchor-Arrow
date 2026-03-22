@@ -266,7 +266,7 @@ struct JourneyDayRow: View {
             HStack(spacing: 14) {
                 // Day number / status
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(circleColor)
                         .frame(width: 40, height: 40)
 
