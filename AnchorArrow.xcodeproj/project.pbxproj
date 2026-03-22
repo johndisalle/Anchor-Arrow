@@ -1,0 +1,64 @@
+// !$*UTF8*$!
+// AnchorArrow.xcodeproj/project.pbxproj
+// NOTE: This is a template .pbxproj for reference.
+// In practice, Xcode generates this automatically when you create a new project.
+// Create the actual Xcode project using the instructions in SETUP.md, then
+// add all the Swift files from the AnchorArrow/ directory to the project.
+//
+// File structure to add in Xcode Navigator:
+//
+// AnchorArrow/
+// ├── App/
+// │   ├── AnchorArrowApp.swift
+// │   └── RootView.swift
+// ├── Models/
+// │   ├── UserModel.swift
+// │   ├── DailyEntry.swift
+// │   ├── Badge.swift
+// │   ├── Circle.swift
+// │   └── Prompts.swift
+// ├── Services/
+// │   ├── AuthManager.swift
+// │   ├── FirestoreService.swift
+// │   ├── UserStore.swift
+// │   └── NotificationManager.swift
+// ├── Views/
+// │   ├── Onboarding/
+// │   │   ├── OnboardingContainerView.swift
+// │   │   └── AuthView.swift
+// │   ├── Dashboard/
+// │   │   └── DashboardView.swift
+// │   ├── Anchor/
+// │   │   └── AnchorView.swift
+// │   ├── Arrow/
+// │   │   └── ArrowView.swift
+// │   ├── Drift/
+// │   │   └── DriftLogView.swift
+// │   ├── Progress/
+// │   │   └── ProgressView.swift
+// │   ├── Journey/
+// │   │   └── JourneyView.swift
+// │   ├── Circles/
+// │   │   └── CirclesView.swift
+// │   └── Settings/
+// │       └── SettingsView.swift
+// ├── Components/
+// │   ├── TreeArrowProgressView.swift
+// │   └── PrayerAudioPlayerView.swift
+// ├── StoreKit/
+// │   ├── StoreKitManager.swift
+// │   └── PremiumUpsellView.swift
+// ├── Resources/
+// │   └── Assets.xcassets/  (add color assets per Colors.md)
+// ├── Preview Content/
+// │   └── PreviewData.swift
+// └── GoogleService-Info.plist  (download from Firebase Console)
+//
+// SPM Dependencies to add:
+// - https://github.com/firebase/firebase-ios-sdk
+//   Products: FirebaseAuth, FirebaseFirestore, FirebaseFirestoreSwift, FirebaseStorage
+//
+// Capabilities to enable:
+// - Sign in with Apple
+// - Push Notifications
+// - Background Modes (Remote notifications)

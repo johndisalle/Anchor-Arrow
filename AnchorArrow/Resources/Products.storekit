@@ -1,0 +1,83 @@
+{
+  "identifier" : "AnchorArrowSubscriptions",
+  "nonRenewingSubscriptions" : [],
+  "products" : [],
+  "settings" : {
+    "_developerProgramRole" : "Agent",
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      }
+    ]
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "anchor-arrow-premium",
+      "localizations" : [],
+      "name" : "Anchor & Arrow Premium",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "anchor_arrow_monthly_001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full access to Anchor & Arrow Premium features: unlimited circles, voice prayers, teaching packs, and custom goals.",
+              "displayName" : "Monthly Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.yourcompany.anchorarrow.premium.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly Premium",
+          "subscriptionGroupID" : "anchor-arrow-premium",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [],
+          "displayPrice" : "59.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "anchor_arrow_annual_001",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full access to Anchor & Arrow Premium features: unlimited circles, voice prayers, teaching packs, and custom goals. Best value.",
+              "displayName" : "Annual Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.yourcompany.anchorarrow.premium.annual",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual Premium",
+          "subscriptionGroupID" : "anchor-arrow-premium",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
