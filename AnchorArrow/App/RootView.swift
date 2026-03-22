@@ -124,7 +124,7 @@ struct MainTabView: View {
 
                 AnchorView()
                     .tabItem {
-                        Label("Anchor", systemImage: "anchor")
+                        Label("Anchor", systemImage: "anchor.circle.fill")
                     }
                     .tag(1)
 
