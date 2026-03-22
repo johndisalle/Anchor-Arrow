@@ -377,7 +377,7 @@ struct JourneyDayDetailView: View {
                             .font(.system(size: 24, weight: .heavy, design: .rounded))
                             .foregroundColor(Color("TextPrimary"))
 
-                        Text(""\(day.scripture)"")
+                        Text("\"\(day.scripture)\"")
                             .font(.system(size: 17, weight: .medium, design: .serif))
                             .italic()
                             .foregroundColor(Color("TextPrimary"))
