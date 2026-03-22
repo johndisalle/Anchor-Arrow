@@ -41,7 +41,7 @@ struct ProgressView: View {
             .navigationBarTitleDisplayMode(.large)
         }
         .onAppear { loadCalendarEntries() }
-        .onChange(of: selectedMonth) { _ in loadCalendarEntries() }
+        .onChange(of: selectedMonth) { loadCalendarEntries() }
     }
 
     // MARK: - Streak Hero

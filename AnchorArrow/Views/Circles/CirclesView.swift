@@ -304,8 +304,8 @@ struct CreateCircleView: View {
         isCreating = true
         let newCircle = Circle.new(name: circleName, creatorId: uid)
         do {
-            let id = try await FirestoreService.shared.createCircle(circle: newCircle)
-            var created = newCircle
+            _ = try await FirestoreService.shared.createCircle(circle: newCircle)
+            let created = newCircle
             // Note: @DocumentID won't be set locally; handle in production with fetch
             onCreate(created)
             dismiss()

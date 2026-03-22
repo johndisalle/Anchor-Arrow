@@ -82,7 +82,7 @@ struct TreeArrowProgressView: View {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
             withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
         }
-        .onChange(of: animate) { newValue in
+        .onChange(of: animate) { _, newValue in
             if newValue {
                 withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
                 withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
@@ -232,7 +232,7 @@ struct ArrowProjectile: View {
                     launched = true
                 }
             }
-            .onChange(of: animated) { newValue in
+            .onChange(of: animated) { _, newValue in
                 launched = newValue
             }
     }

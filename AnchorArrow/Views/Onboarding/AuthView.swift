@@ -153,7 +153,7 @@ struct AuthView: View {
                             do {
                                 try await authManager.handleAppleSignIn(result: result)
                                 if isSignUp {
-                                    try await userStore.loadUserData(uid: authManager.currentUID ?? "")
+                                    await userStore.loadUserData(uid: authManager.currentUID ?? "")
                                     userStore.completeOnboarding()
                                 }
                             } catch {
