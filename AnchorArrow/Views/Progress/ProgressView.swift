@@ -78,10 +78,10 @@ struct ProgressView: View {
 
                 // Circular progress
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .stroke(.white.opacity(0.2), lineWidth: 8)
                         .frame(width: 90, height: 90)
-                    Circle()
+                    SwiftUI.Circle()
                         .trim(from: 0, to: streakProgress)
                         .stroke(.white, style: StrokeStyle(lineWidth: 8, lineCap: .round))
                         .frame(width: 90, height: 90)
@@ -429,14 +429,14 @@ struct WeekDayDot: View {
 
             ZStack {
                 // Background
-                Circle()
+                SwiftUI.Circle()
                     .fill(anchorDone && arrowDone ? Color("BrandGold")
                           : anchorDone ? Color("BrandAnchor")
                           : arrowDone  ? Color("BrandArrow")
                           : Color("CardBackground"))
                     .frame(width: 30, height: 30)
                     .overlay(
-                        Circle().stroke(isToday ? Color("BrandAnchor") : Color.clear, lineWidth: 2)
+                        SwiftUI.Circle().stroke(isToday ? Color("BrandAnchor") : Color.clear, lineWidth: 2)
                     )
 
                 if anchorDone || arrowDone {
@@ -483,7 +483,7 @@ struct BadgeGridCell: View {
         } label: {
             VStack(spacing: 6) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(isEarned ? badgeType.color.opacity(0.15) : Color("CardBackground"))
                         .frame(width: 52, height: 52)
                     Image(systemName: badgeType.icon)
@@ -527,7 +527,7 @@ struct BadgeDetailSheet: View {
                 .padding(.top, 12)
 
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(isEarned ? badgeType.color.opacity(0.15) : Color("CardBackground"))
                     .frame(width: 100, height: 100)
                 Image(systemName: badgeType.icon)

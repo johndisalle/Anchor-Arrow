@@ -174,7 +174,7 @@ struct DriftLogView: View {
             } label: {
                 HStack(spacing: 14) {
                     ZStack {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(Color("BrandAnchor").opacity(0.15))
                             .frame(width: 44, height: 44)
                         Image(systemName: "play.fill")
@@ -294,7 +294,7 @@ struct DriftCategoryButton: View {
         Button(action: action) {
             VStack(spacing: 6) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(isSelected ? Color("BrandWarning").opacity(0.2) : Color("CardBackground"))
                         .frame(width: 46, height: 46)
                     Image(systemName: tag.icon)

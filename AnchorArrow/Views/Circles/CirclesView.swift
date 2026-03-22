@@ -201,7 +201,7 @@ struct CircleCard: View {
             HStack(spacing: 16) {
                 // Avatar
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(Color("BrandAnchor").opacity(0.15))
                         .frame(width: 52, height: 52)
                     Text(String(circle.name.prefix(2)).uppercased())

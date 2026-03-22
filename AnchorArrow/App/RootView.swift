@@ -157,7 +157,7 @@ struct MainTabView: View {
                         showDriftLog = true
                     } label: {
                         ZStack {
-                            Circle()
+                            SwiftUI.Circle()
                                 .fill(
                                     LinearGradient(
                                         colors: [Color("BrandWarning"), Color("BrandDanger")],

@@ -164,12 +164,12 @@ struct CanopyView: View {
     var body: some View {
         ZStack {
             // Back layers (darker)
-            Circle()
+            SwiftUI.Circle()
                 .fill(Color("BrandEarth").opacity(0.4))
                 .frame(width: size * 0.7, height: size * 0.7)
                 .offset(x: -size * 0.2, y: size * 0.1)
 
-            Circle()
+            SwiftUI.Circle()
                 .fill(Color("BrandEarth").opacity(0.4))
                 .frame(width: size * 0.65, height: size * 0.65)
                 .offset(x: size * 0.2, y: size * 0.1)

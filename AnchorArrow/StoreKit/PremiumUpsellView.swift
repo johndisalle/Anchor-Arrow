@@ -18,7 +18,7 @@ struct PremiumUpsellView: View {
                     // Header
                     VStack(spacing: 12) {
                         ZStack {
-                            Circle()
+                            SwiftUI.Circle()
                                 .fill(Color("BrandGold").opacity(0.15))
                                 .frame(width: 80, height: 80)
                             Image(systemName: "crown.fill")
@@ -214,11 +214,11 @@ struct SubscriptionOptionCard: View {
                 Spacer()
 
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .stroke(isSelected ? Color("BrandGold") : Color("TextSecondary").opacity(0.3), lineWidth: 2)
                         .frame(width: 22, height: 22)
                     if isSelected {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(Color("BrandGold"))
                             .frame(width: 14, height: 14)
                     }

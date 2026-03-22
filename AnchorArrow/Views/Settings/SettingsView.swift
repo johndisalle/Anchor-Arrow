@@ -137,7 +137,7 @@ struct SettingsView: View {
     private var profileHeader: some View {
         HStack(spacing: 16) {
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(
                         LinearGradient(
                             colors: [Color("BrandAnchor"), Color("BrandArrow")],
