@@ -161,39 +161,42 @@ struct RootsView: View {
 struct CanopyView: View {
     let size: CGFloat
 
+    // Use a green color for foliage rather than earth brown
+    private let foliageColor = Color(red: 0.25, green: 0.55, blue: 0.30)
+
     var body: some View {
         ZStack {
-            // Back layers (darker)
+            // Back layers (side puffs)
             SwiftUI.Circle()
-                .fill(Color("BrandEarth").opacity(0.4))
-                .frame(width: size * 0.7, height: size * 0.7)
-                .offset(x: -size * 0.2, y: size * 0.1)
-
-            SwiftUI.Circle()
-                .fill(Color("BrandEarth").opacity(0.4))
+                .fill(foliageColor.opacity(0.55))
                 .frame(width: size * 0.65, height: size * 0.65)
-                .offset(x: size * 0.2, y: size * 0.1)
+                .offset(x: -size * 0.28, y: size * 0.12)
 
-            // Main canopy
+            SwiftUI.Circle()
+                .fill(foliageColor.opacity(0.55))
+                .frame(width: size * 0.6, height: size * 0.6)
+                .offset(x: size * 0.28, y: size * 0.12)
+
+            // Main canopy (slightly wider than tall — tree-like)
             Ellipse()
                 .fill(
                     RadialGradient(
                         colors: [
-                            Color("BrandEarth"),
-                            Color("BrandEarth").opacity(0.7)
+                            foliageColor.opacity(0.95),
+                            foliageColor.opacity(0.65)
                         ],
                         center: .center,
                         startRadius: 0,
                         endRadius: size / 2
                     )
                 )
-                .frame(width: size, height: size * 0.85)
+                .frame(width: size, height: size * 0.78)
 
-            // Highlight (light top)
+            // Highlight
             Ellipse()
-                .fill(Color.white.opacity(0.08))
-                .frame(width: size * 0.5, height: size * 0.3)
-                .offset(y: -size * 0.15)
+                .fill(Color.white.opacity(0.10))
+                .frame(width: size * 0.45, height: size * 0.25)
+                .offset(y: -size * 0.18)
         }
     }
 }
