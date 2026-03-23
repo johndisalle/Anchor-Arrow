@@ -64,7 +64,7 @@ struct TreeArrowProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .onAppear { triggerAnimation() }
-        .onChange(of: animate) { newValue in if newValue { triggerAnimation() } }
+        .onChange(of: animate) { if animate { triggerAnimation() } }
     }
 
     private func triggerAnimation() {
