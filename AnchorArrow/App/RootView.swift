@@ -75,10 +75,10 @@ struct SplashView: View {
                         .opacity(logoShown ? 1.0 : 0.0)
                         .animation(.spring(response: 0.6, dampingFraction: 0.7), value: logoShown)
 
-                    // Anchor — white, bold, large and clearly legible
-                    Image(systemName: "anchor")
-                        .font(.system(size: 68, weight: .bold))
-                        .foregroundColor(.white)
+                    // Anchor — custom drawn to match brand style
+                    AnchorShape()
+                        .stroke(.white, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                        .frame(width: 60, height: 70)
                         .scaleEffect(logoShown ? 1.0 : 0.4)
                         .opacity(logoShown ? 1.0 : 0.0)
                         .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.15), value: logoShown)
@@ -139,13 +139,13 @@ struct MainTabView: View {
 
                 AnchorView()
                     .tabItem {
-                        Label("Anchor", systemImage: "anchor.circle.fill")
+                        Label("Anchor", image: "anchor-tab")
                     }
                     .tag(1)
 
                 ArrowView()
                     .tabItem {
-                        Label("Arrow", systemImage: "arrow.up.right.circle.fill")
+                        Label("Arrow", image: "crossed-arrows-tab")
                     }
                     .tag(2)
 
@@ -197,5 +197,47 @@ struct MainTabView: View {
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
         }
+    }
+}
+
+// MARK: - Anchor Shape (used in splash screen)
+private struct AnchorShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        let cx = rect.midX
+        var p = Path()
+
+        // Ring at top
+        let ringR = w * 0.16
+        p.addEllipse(in: CGRect(x: cx - ringR, y: 0, width: ringR * 2, height: ringR * 2))
+
+        // Vertical shaft
+        p.move(to: CGPoint(x: cx, y: ringR * 2))
+        p.addLine(to: CGPoint(x: cx, y: h * 0.88))
+
+        // Crossbar
+        p.move(to: CGPoint(x: cx - w * 0.43, y: h * 0.35))
+        p.addLine(to: CGPoint(x: cx + w * 0.43, y: h * 0.35))
+
+        // Left fluke
+        p.move(to: CGPoint(x: cx, y: h * 0.88))
+        p.addCurve(
+            to: CGPoint(x: cx - w * 0.41, y: h * 0.74),
+            control1: CGPoint(x: cx - w * 0.07, y: h * 0.96),
+            control2: CGPoint(x: cx - w * 0.30, y: h * 0.93)
+        )
+        p.addLine(to: CGPoint(x: cx - w * 0.41, y: h * 0.62))
+
+        // Right fluke
+        p.move(to: CGPoint(x: cx, y: h * 0.88))
+        p.addCurve(
+            to: CGPoint(x: cx + w * 0.41, y: h * 0.74),
+            control1: CGPoint(x: cx + w * 0.07, y: h * 0.96),
+            control2: CGPoint(x: cx + w * 0.30, y: h * 0.93)
+        )
+        p.addLine(to: CGPoint(x: cx + w * 0.41, y: h * 0.62))
+
+        return p
     }
 }
