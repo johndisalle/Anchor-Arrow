@@ -357,7 +357,7 @@ struct CircleDetailView: View {
                 Button("Leave", role: .destructive) { Task { await leaveCircle() } }
                 Button("Cancel", role: .cancel) { }
             } message: {
-                Text("You'll need an invite code to rejoin "\(circle.name)".")
+                Text("You'll need an invite code to rejoin \"\(circle.name)\".")
             }
         }
         .task { await loadData() }

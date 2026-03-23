@@ -85,7 +85,7 @@ struct AnchorView: View {
                 Spacer()
             }
 
-            Text(""\(prompt.scripture)"")
+            Text("\"\(prompt.scripture)\"")
                 .font(.system(size: 20, weight: .medium, design: .serif))
                 .italic()
                 .foregroundColor(Color("TextPrimary"))

@@ -5,7 +5,6 @@ import Foundation
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 
 // MARK: - FirestoreService
 class FirestoreService {
