@@ -43,8 +43,9 @@ struct PremiumUpsellView: View {
 
                     // Feature list
                     VStack(spacing: 12) {
+                        PremiumFeatureRow(icon: "heart.fill", color: "BrandDanger", text: "Kingdom Funded — All profits donated to missions & service")
                         PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Unlimited Iron Sharpeners circles")
-PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "Deeper teaching & theme packs")
+                        PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "Deeper teaching & theme packs")
                         PremiumFeatureRow(icon: "target", color: "BrandWarning", text: "Custom personal goals")
                         PremiumFeatureRow(icon: "rectangle.slash.fill", color: "TextSecondary", text: "Ad-free experience")
                         PremiumFeatureRow(icon: "mappin.and.ellipse", color: "BrandArrow", text: "Full 30-day Stand Firm Journey")

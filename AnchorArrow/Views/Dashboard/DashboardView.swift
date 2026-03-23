@@ -197,7 +197,7 @@ struct DashboardView: View {
         } label: {
             HStack(spacing: 16) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(Color("BrandArrow").opacity(0.15))
                         .frame(width: 48, height: 48)
                     Image(systemName: "map.fill")
@@ -351,7 +351,7 @@ struct BadgePill: View {
     var body: some View {
         VStack(spacing: 6) {
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(badge.color.opacity(0.15))
                     .frame(width: 44, height: 44)
                 Image(systemName: badge.icon)

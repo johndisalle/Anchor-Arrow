@@ -387,6 +387,22 @@ struct JourneyDayDetailView: View {
                     .background(Color("CardBackground"))
                     .cornerRadius(20)
 
+                    // Devotional
+                    if !day.devotional.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Label("Today's Devotional", systemImage: "book.fill")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Color("BrandAnchor"))
+                            Text(day.devotional)
+                                .font(.system(size: 15))
+                                .foregroundColor(Color("TextPrimary"))
+                                .lineSpacing(6)
+                        }
+                        .padding(20)
+                        .background(Color("CardBackground"))
+                        .cornerRadius(20)
+                    }
+
                     // Anchor prompt
                     journeyReflectionField(
                         icon: "anchor",

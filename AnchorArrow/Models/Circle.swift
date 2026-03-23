@@ -102,6 +102,7 @@ struct JourneyDay: Identifiable, Codable {
     var week: Int         // 1-4
     var theme: String
     var scripture: String
+    var devotional: String = ""
     var anchorPrompt: String
     var arrowPrompt: String
     var isUnlocked: Bool
