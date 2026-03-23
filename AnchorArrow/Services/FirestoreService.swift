@@ -35,6 +35,10 @@ class FirestoreService {
         db.collection("circles").document(circleId).collection("posts")
     }
 
+    private func commentsRef(circleId: String, postId: String) -> CollectionReference {
+        db.collection("circles").document(circleId).collection("posts").document(postId).collection("comments")
+    }
+
     // MARK: - User CRUD
 
     /// Create user document on sign-up
@@ -204,6 +208,45 @@ class FirestoreService {
     func createCircle(circle: Circle) async throws -> String {
         let ref = try circlesRef().addDocument(from: circle)
         return ref.documentID
+    }
+
+    func fetchCircle(circleId: String) async throws -> Circle {
+        let doc = try await circlesRef().document(circleId).getDocument()
+        return try doc.data(as: Circle.self)
+    }
+
+    func leaveCircle(circleId: String, uid: String) async throws {
+        try await circlesRef().document(circleId).updateData([
+            "memberIds": FieldValue.arrayRemove([uid])
+        ])
+    }
+
+    func fetchMemberNames(memberIds: [String]) async throws -> [String: String] {
+        var names: [String: String] = [:]
+        try await withThrowingTaskGroup(of: (String, String).self) { group in
+            for uid in memberIds {
+                group.addTask {
+                    let doc = try await self.db.collection("users").document(uid).getDocument()
+                    let name = (doc.data()?["displayName"] as? String) ?? "A Brother"
+                    return (uid, name)
+                }
+            }
+            for try await (uid, name) in group {
+                names[uid] = name
+            }
+        }
+        return names
+    }
+
+    func fetchComments(circleId: String, postId: String) async throws -> [CircleComment] {
+        let snapshot = try await commentsRef(circleId: circleId, postId: postId)
+            .order(by: "timestamp", descending: false)
+            .getDocuments()
+        return snapshot.documents.compactMap { try? $0.data(as: CircleComment.self) }
+    }
+
+    func postComment(comment: CircleComment) async throws {
+        try commentsRef(circleId: comment.circleId, postId: comment.postId).addDocument(from: comment)
     }
 
     func fetchUserCircles(uid: String) async throws -> [Circle] {

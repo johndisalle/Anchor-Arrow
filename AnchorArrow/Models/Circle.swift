@@ -45,6 +45,18 @@ struct CirclePost: Codable, Identifiable {
     var totalReactions: Int { reactions.values.reduce(0, +) }
 }
 
+// MARK: - CircleComment
+struct CircleComment: Codable, Identifiable {
+    @DocumentID var id: String?
+    var postId: String
+    var circleId: String
+    var authorId: String
+    var authorName: String
+    var content: String
+    var isAnonymous: Bool
+    var timestamp: Date
+}
+
 // MARK: - PostType
 enum PostType: String, Codable, CaseIterable {
     case anchor  = "anchor"

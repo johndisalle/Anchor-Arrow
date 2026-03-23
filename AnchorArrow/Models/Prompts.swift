@@ -213,4 +213,44 @@ struct PromptLibrary {
         let index = dayOfYear % arrowPrompts.count
         return arrowPrompts[index]
     }
+
+    // MARK: - Circle Daily Prompts
+    static let circlePrompts: [String] = [
+        "What's one thing God is teaching you this week that you haven't told anyone yet?",
+        "Where did you feel the strongest pull toward drift in the last 24 hours?",
+        "Name one person outside this circle you're actively praying for by name.",
+        "What's one area where you need your brothers to hold you accountable right now?",
+        "What does being an anchored man look like in your specific role this week?",
+        "Share a win — no matter how small. What did you do right today?",
+        "What lie are you fighting most right now? What is the truth that counters it?",
+        "How are you leading in your home, workplace, or community this week?",
+        "What would change if you fully surrendered this one thing to God today?",
+        "Who in your life needs to hear the gospel, and what's holding you back?",
+        "What does your prayer life actually look like right now — honest answer?",
+        "Where have you felt God's presence most powerfully in the last week?",
+        "What temptation came at you hardest this week, and how did you respond?",
+        "Are you running toward God or just avoiding going further from Him right now?",
+        "What would 'being strong and courageous' look like in your life today?",
+        "How are you serving the people God has put in your immediate circle of influence?",
+        "What part of your identity in Christ do you struggle to actually believe on hard days?",
+        "Where are you most tempted to fake it — to present a version of yourself that isn't real?",
+        "What sacrifice is God asking you to make right now that you've been resisting?",
+        "If your brothers could only pray one thing for you today, what would it be?",
+        "What does iron sharpening iron actually look like in your life right now?",
+        "Where are you growing? Name something specific, not general.",
+        "What conversation have you been avoiding that God keeps bringing back to your mind?",
+        "How did you provide or protect someone in your care this week?",
+        "What piece of God's armor do you most need to pick up today?",
+        "Where is your faith being tested right now, and how are you responding?",
+        "What habit or pattern in your life needs to die for the man God is calling you to become?",
+        "Who sharpened you recently? Name them and what they said.",
+        "What are you grateful for that you haven't actually thanked God for yet?",
+        "What's one thing you'd do differently this week if you were fully walking in the Spirit?"
+    ]
+
+    static func circlePromptForToday() -> String {
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        let index = dayOfYear % circlePrompts.count
+        return circlePrompts[index]
+    }
 }
