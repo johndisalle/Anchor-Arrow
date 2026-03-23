@@ -46,12 +46,10 @@ struct AnchorArrowApp: App {
         navAppearance.configureWithOpaqueBackground()
         navAppearance.backgroundColor = UIColor(named: "BackgroundPrimary")
         navAppearance.titleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 18, weight: .bold),
-            .foregroundColor: UIColor(named: "TextPrimary") ?? .label
+            .font: UIFont.systemFont(ofSize: 18, weight: .bold)
         ]
         navAppearance.largeTitleTextAttributes = [
-            .font: UIFont.systemFont(ofSize: 34, weight: .heavy),
-            .foregroundColor: UIColor(named: "TextPrimary") ?? .label
+            .font: UIFont.systemFont(ofSize: 34, weight: .heavy)
         ]
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance

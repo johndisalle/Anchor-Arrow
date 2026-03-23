@@ -109,8 +109,9 @@ struct ProgressView: View {
                 title: "Total Anchors",
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 subtitle: "Morning completions",
-                icon: "anchor",
-                color: "BrandAnchor"
+                icon: "anchor-tab",
+                color: "BrandAnchor",
+                isCustomImage: true
             )
             StatsCard(
                 title: "Total Arrows",
@@ -288,12 +289,21 @@ struct StatsCard: View {
     let subtitle: String
     let icon: String
     let color: String
+    var isCustomImage: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(Color(color))
+            if isCustomImage {
+                Image(icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(Color(color))
+            } else {
+                Image(systemName: icon)
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundColor(Color(color))
+            }
 
             Text(value)
                 .font(.system(size: 30, weight: .heavy))
