@@ -3,6 +3,7 @@
 
 import SwiftUI
 import StoreKit
+import FirebaseAuth
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -137,7 +138,7 @@ struct SettingsView: View {
     private var profileHeader: some View {
         HStack(spacing: 16) {
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(
                         LinearGradient(
                             colors: [Color("BrandAnchor"), Color("BrandArrow")],
@@ -199,7 +200,7 @@ struct SettingsView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(Color("TextPrimary"))
                             }
-                            Text("Unlimited circles • Voice prayers • Journey packs")
+                            Text("Unlimited circles • Full Journey • Theme packs")
                                 .font(.system(size: 12))
                                 .foregroundColor(Color("TextSecondary"))
                         }

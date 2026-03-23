@@ -440,9 +440,18 @@ struct WeekDayDot: View {
                     )
 
                 if anchorDone || arrowDone {
-                    Image(systemName: anchorDone && arrowDone ? "checkmark" : (anchorDone ? "anchor" : "arrow.up.right"))
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.white)
+                    if anchorDone && arrowDone {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                    } else if anchorDone {
+                        Image(systemName: "anchor")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.white)
+                    } else {
+                        CrossedArrowsView(color: .white)
+                            .frame(width: 20, height: 13)
+                    }
                 }
             }
         }

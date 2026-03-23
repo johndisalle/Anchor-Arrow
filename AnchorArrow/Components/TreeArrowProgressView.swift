@@ -78,6 +78,8 @@ struct TreeArrowProgressView: View {
 
 // MARK: - Crossed Archery Arrows
 struct CrossedArrowsView: View {
+    var color: Color = Color("BrandArrow")
+
     var body: some View {
         Canvas { context, size in
             let cx = size.width / 2
@@ -88,7 +90,7 @@ struct CrossedArrowsView: View {
                 in: context,
                 tip: CGPoint(x: cx - 52, y: cy - 30),
                 tail: CGPoint(x: cx + 52, y: cy + 30),
-                color: Color("BrandArrow")
+                color: color
             )
 
             // Arrow 2: tip at top-right, tail at bottom-left
@@ -96,7 +98,7 @@ struct CrossedArrowsView: View {
                 in: context,
                 tip: CGPoint(x: cx + 52, y: cy - 30),
                 tail: CGPoint(x: cx - 52, y: cy + 30),
-                color: Color("BrandArrow")
+                color: color
             )
         }
     }

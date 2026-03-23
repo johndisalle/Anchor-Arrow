@@ -133,7 +133,7 @@ struct MainTabView: View {
 
                 ArrowView()
                     .tabItem {
-                        Label("Arrow", systemImage: "arrow.up.right.circle.fill")
+                        Label("Arrow", systemImage: "scope")
                     }
                     .tag(2)
 

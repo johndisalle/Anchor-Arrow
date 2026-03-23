@@ -98,14 +98,12 @@ struct OnboardingPage1: View {
                     .fill(Color("BrandAnchor").opacity(0.12))
                     .frame(width: 200, height: 200)
 
-                VStack(spacing: 4) {
+                VStack(spacing: 6) {
+                    CrossedArrowsView()
+                        .frame(width: 110, height: 68)
                     Image(systemName: "anchor")
                         .font(.system(size: 56, weight: .medium))
                         .foregroundColor(Color("BrandAnchor"))
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 36, weight: .bold))
-                        .foregroundColor(Color("BrandArrow"))
-                        .offset(x: 20, y: -8)
                 }
             }
             .scaleEffect(appeared ? 1.0 : 0.7)

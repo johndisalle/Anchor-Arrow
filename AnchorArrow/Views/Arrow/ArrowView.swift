@@ -239,12 +239,13 @@ struct ArrowView: View {
                     if isSubmitting {
                         ProgressView().tint(.white)
                     } else {
-                        HStack {
-                            Image(systemName: "arrow.up.right.circle.fill")
+                        HStack(spacing: 10) {
+                            CrossedArrowsView(color: .white)
+                                .frame(width: 28, height: 18)
                             Text("Loose the Arrow")
                                 .font(.system(size: 17, weight: .bold))
+                                .foregroundColor(.white)
                         }
-                        .foregroundColor(.white)
                     }
                 }
                 .frame(maxWidth: .infinity)
