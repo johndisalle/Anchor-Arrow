@@ -9,7 +9,6 @@ struct DriftLogView: View {
 
     @State private var selectedCategory: AnchorTag?
     @State private var note = ""
-    @State private var showPrayerPlayer = false
     @State private var showSuccess = false
     @State private var isLogging = false
     @FocusState private var noteFocused: Bool
@@ -168,59 +167,29 @@ struct DriftLogView: View {
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(Color("TextPrimary"))
 
-            Button {
-                noteFocused = false
-                showPrayerPlayer = true
-            } label: {
-                HStack(spacing: 14) {
-                    ZStack {
-                        SwiftUI.Circle()
-                            .fill(Color("BrandAnchor").opacity(0.15))
-                            .frame(width: 44, height: 44)
-                        Image(systemName: "play.fill")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Color("BrandAnchor"))
-                    }
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Play Anchoring Prayer")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("TextPrimary"))
-                        Text("~20 sec • Direct • Grounding")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
-                    }
-                    Spacer()
-                    Image(systemName: "speaker.wave.2.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color("BrandAnchor").opacity(0.5))
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "hands.sparkles")
+                        .font(.system(size: 15))
+                        .foregroundColor(Color("BrandAnchor"))
+                    Text("Pray this aloud")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color("BrandAnchor"))
                 }
-                .padding(14)
-                .background(Color("CardBackground"))
-                .cornerRadius(14)
-            }
-            .buttonStyle(.plain)
-
-            // Text prayer (fallback, always visible)
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Or read aloud:")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color("TextSecondary"))
 
                 Text(driftPrayerText(for: category))
-                    .font(.system(size: 14, weight: .medium, design: .serif))
+                    .font(.system(size: 15, weight: .regular, design: .serif))
                     .italic()
                     .foregroundColor(Color("TextPrimary"))
-                    .lineSpacing(5)
+                    .lineSpacing(6)
             }
-            .padding(14)
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color("BrandAnchor").opacity(0.06))
-            .cornerRadius(12)
-        }
-        .sheet(isPresented: $showPrayerPlayer) {
-            PrayerAudioPlayerView(
-                title: "Anchoring Prayer",
-                fileName: category.audioPrayer,
-                prayerText: driftPrayerText(for: category)
+            .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(Color("BrandAnchor").opacity(0.2), lineWidth: 1)
             )
         }
     }

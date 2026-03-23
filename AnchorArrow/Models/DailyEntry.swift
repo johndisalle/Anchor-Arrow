@@ -81,16 +81,6 @@ enum AnchorTag: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// Audio file name for the anchoring prayer
-    var audioPrayer: String {
-        switch self {
-        case .temptation, .lust: return "drift_temptation"
-        case .pride:             return "drift_pride"
-        case .anger:             return "drift_anger"
-        case .avoidance:         return "drift_avoidance"
-        default:                 return "drift_anchor"
-        }
-    }
 }
 
 // MARK: - ArrowRole (biblical manhood roles)
