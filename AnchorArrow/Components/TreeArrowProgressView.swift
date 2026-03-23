@@ -1,244 +1,158 @@
 // TreeArrowProgressView.swift
-// Animated rooted tree with arrows — central visual of the app
+// Home screen hero visual — nautical anchor + crossed archery arrows
 
 import SwiftUI
 
-// MARK: - Main Tree + Arrow Progress View
+// MARK: - Hero View (anchor + arrows)
 struct TreeArrowProgressView: View {
-    let anchorProgress: Double    // 0.0 – 1.0 (drives root depth)
-    let arrowProgress: Double     // 0.0 – 1.0 (drives number of arrows)
+    let anchorProgress: Double
+    let arrowProgress: Double
     let streak: Int
     let animate: Bool
 
-    @State private var rootsAnimated = false
-    @State private var trunkAnimated = false
-    @State private var canopyAnimated = false
-    @State private var arrowsAnimated = false
-    @State private var arrowOffset: CGFloat = 0
+    @State private var anchorRevealed = false
+    @State private var arrowsRevealed = false
 
     var body: some View {
-        ZStack {
+        VStack(spacing: 4) {
+
+            // Crossed archery arrows
+            CrossedArrowsView()
+                .frame(width: 140, height: 88)
+                .scaleEffect(arrowsRevealed ? 1.0 : 0.15)
+                .opacity(arrowsRevealed ? 1.0 : 0)
+
             // Ground line
             Rectangle()
-                .fill(Color("BrandEarth").opacity(0.3))
-                .frame(height: 2)
-                .frame(maxWidth: .infinity)
-                .offset(y: 60)
+                .fill(Color("BrandEarth").opacity(0.25))
+                .frame(height: 1.5)
+                .frame(maxWidth: 200)
 
-            // Root system (anchor = stand firm)
-            RootsView(progress: rootsAnimated ? anchorProgress : 0)
-                .offset(y: 60)
-
-            // Trunk
-            RoundedRectangle(cornerRadius: 5)
-                .fill(
-                    LinearGradient(
-                        colors: [Color("BrandEarth"), Color("BrandEarth").opacity(0.6)],
-                        startPoint: .bottom,
-                        endPoint: .top
+            // Nautical anchor
+            ZStack(alignment: .bottom) {
+                Image(systemName: "anchor")
+                    .font(.system(size: 86, weight: .thin))
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.6)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
-                .frame(width: 12, height: trunkAnimated ? trunkHeight : 0)
-                .offset(y: trunkAnimated ? trunkOffsetY : 60)
-                .animation(.easeOut(duration: 0.7).delay(0.4), value: trunkAnimated)
+                    .scaleEffect(anchorRevealed ? 1.0 : 0.1)
+                    .opacity(anchorRevealed ? 1.0 : 0)
 
-            // Canopy (foliage)
-            if canopyAnimated {
-                CanopyView(size: canopySize)
-                    .offset(y: canopyOffsetY)
-                    .transition(.scale(scale: 0, anchor: .bottom).combined(with: .opacity))
-            }
-
-            // Flying arrows (arrow progress)
-            ForEach(0..<arrowCount, id: \.self) { index in
-                ArrowProjectile(
-                    index: index,
-                    total: arrowCount,
-                    animated: arrowsAnimated
-                )
-                .offset(y: canopyOffsetY - 20)
-            }
-
-            // Streak number on trunk
-            if streak > 0 && trunkAnimated {
-                VStack(spacing: 2) {
-                    Text("\(streak)")
-                        .font(.system(size: 16, weight: .heavy))
-                        .foregroundColor(.white)
-                    Text("days")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white.opacity(0.8))
+                // Streak badge below anchor
+                if streak > 0 {
+                    VStack(spacing: 1) {
+                        Text("\(streak)")
+                            .font(.system(size: 14, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                        Text("days")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.white.opacity(0.85))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color("BrandAnchor"))
+                    .cornerRadius(8)
+                    .offset(y: 28)
+                    .opacity(anchorRevealed ? 1 : 0)
                 }
-                .offset(y: trunkOffsetY + 8)
-                .opacity(canopyAnimated ? 1 : 0)
-                .animation(.easeIn(duration: 0.3).delay(1.2), value: canopyAnimated)
             }
+            .padding(.bottom, streak > 0 ? 28 : 0)
         }
         .frame(maxWidth: .infinity)
-        .onAppear {
-            guard animate else { return }
-            withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
-            withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
-            withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
-        }
-        .onChange(of: animate) { newValue in
-            if newValue {
-                withAnimation(.easeOut(duration: 0.8)) { rootsAnimated = true }
-                withAnimation(.easeOut(duration: 0.7).delay(0.4)) { trunkAnimated = true }
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.0)) { canopyAnimated = true }
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.6).delay(1.4)) { arrowsAnimated = true }
-            }
-        }
+        .onAppear { triggerAnimation() }
+        .onChange(of: animate) { newValue in if newValue { triggerAnimation() } }
     }
 
-    // MARK: - Computed sizes
-    private var trunkHeight: CGFloat { 60 + CGFloat(anchorProgress * 40) }
-    private var trunkOffsetY: CGFloat { 30 - trunkHeight / 2 }
-    private var canopySize: CGFloat { 80 + CGFloat(anchorProgress * 60) }
-    private var canopyOffsetY: CGFloat { trunkOffsetY - trunkHeight / 2 - canopySize / 3 }
-    private var arrowCount: Int { max(0, Int(arrowProgress * 5)) }  // 0-5 arrows
+    private func triggerAnimation() {
+        guard animate else { return }
+        withAnimation(.spring(response: 0.9, dampingFraction: 0.65).delay(0.2)) {
+            anchorRevealed = true
+        }
+        withAnimation(.spring(response: 0.7, dampingFraction: 0.65).delay(1.0)) {
+            arrowsRevealed = true
+        }
+    }
 }
 
-// MARK: - Roots (Anchor visual)
-struct RootsView: View {
-    let progress: Double
-
+// MARK: - Crossed Archery Arrows
+struct CrossedArrowsView: View {
     var body: some View {
         Canvas { context, size in
-            let center = CGPoint(x: size.width / 2, y: 0)
-            let rootColor = Color("BrandAnchor")
+            let cx = size.width / 2
+            let cy = size.height / 2
 
-            // Draw 5 root branches spreading outward and downward
-            let roots: [(angle: Double, length: Double)] = [
-                (-80, 60), (-50, 80), (-10, 90), (30, 80), (60, 60)
-            ]
+            // Arrow 1: tip at top-left, tail at bottom-right
+            drawArcheryArrow(
+                in: context,
+                tip: CGPoint(x: cx - 52, y: cy - 30),
+                tail: CGPoint(x: cx + 52, y: cy + 30),
+                color: Color("BrandArrow")
+            )
 
-            for root in roots {
-                let endAngle = root.angle * .pi / 180
-                let fullLength = root.length * progress
-
-                var path = Path()
-                path.move(to: center)
-
-                // Curved root with 2 segments
-                let mid = CGPoint(
-                    x: center.x + cos(endAngle) * fullLength * 0.5 + (Double.random(in: -8...8)),
-                    y: center.y + sin(endAngle.magnitude) * fullLength * 0.4
-                )
-                let end = CGPoint(
-                    x: center.x + cos(endAngle) * fullLength,
-                    y: center.y + sin(endAngle.magnitude) * fullLength
-                )
-
-                path.addQuadCurve(to: end, control: mid)
-
-                context.stroke(
-                    path,
-                    with: .color(rootColor),
-                    style: StrokeStyle(lineWidth: 2.5, lineCap: .round)
-                )
-
-                // Tiny taproot at end
-                if progress > 0.4 {
-                    var tapPath = Path()
-                    tapPath.move(to: end)
-                    tapPath.addLine(to: CGPoint(x: end.x, y: end.y + 12 * progress))
-                    context.stroke(
-                        tapPath,
-                        with: .color(rootColor.opacity(0.6)),
-                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round)
-                    )
-                }
-            }
+            // Arrow 2: tip at top-right, tail at bottom-left
+            drawArcheryArrow(
+                in: context,
+                tip: CGPoint(x: cx + 52, y: cy - 30),
+                tail: CGPoint(x: cx - 52, y: cy + 30),
+                color: Color("BrandArrow")
+            )
         }
-        .frame(width: 200, height: 100)
-        .animation(.easeOut(duration: 0.8), value: progress)
     }
-}
 
-// MARK: - Tree Canopy
-struct CanopyView: View {
-    let size: CGFloat
+    private func drawArcheryArrow(in context: GraphicsContext, tip: CGPoint, tail: CGPoint, color: Color) {
+        let shading = GraphicsContext.Shading.color(color)
 
-    var body: some View {
-        ZStack {
-            // Back layers (darker)
-            Circle()
-                .fill(Color("BrandEarth").opacity(0.4))
-                .frame(width: size * 0.7, height: size * 0.7)
-                .offset(x: -size * 0.2, y: size * 0.1)
+        // Shaft
+        var shaft = Path()
+        shaft.move(to: tail)
+        shaft.addLine(to: tip)
+        context.stroke(shaft, with: shading, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
 
-            Circle()
-                .fill(Color("BrandEarth").opacity(0.4))
-                .frame(width: size * 0.65, height: size * 0.65)
-                .offset(x: size * 0.2, y: size * 0.1)
+        // Arrowhead at tip
+        let angle = atan2(tip.y - tail.y, tip.x - tail.x)
+        let headLen: CGFloat = 13
+        let headSpread: CGFloat = .pi / 5
 
-            // Main canopy
-            Ellipse()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color("BrandEarth"),
-                            Color("BrandEarth").opacity(0.7)
-                        ],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: size / 2
-                    )
-                )
-                .frame(width: size, height: size * 0.85)
+        var head = Path()
+        head.move(to: tip)
+        head.addLine(to: CGPoint(
+            x: tip.x - headLen * cos(angle - headSpread),
+            y: tip.y - headLen * sin(angle - headSpread)
+        ))
+        head.move(to: tip)
+        head.addLine(to: CGPoint(
+            x: tip.x - headLen * cos(angle + headSpread),
+            y: tip.y - headLen * sin(angle + headSpread)
+        ))
+        context.stroke(head, with: shading, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
 
-            // Highlight (light top)
-            Ellipse()
-                .fill(Color.white.opacity(0.08))
-                .frame(width: size * 0.5, height: size * 0.3)
-                .offset(y: -size * 0.15)
+        // Fletching chevrons at tail (2 marks)
+        let dx = tip.x - tail.x
+        let dy = tip.y - tail.y
+        let len = sqrt(dx * dx + dy * dy)
+        let ux = dx / len  // unit vector toward tip
+        let uy = dy / len
+        let px = -uy    // perpendicular
+        let py = ux
+        let fletchLen: CGFloat = 7
+
+        for offset: CGFloat in [8, 17] {
+            let base = CGPoint(x: tail.x + offset * ux, y: tail.y + offset * uy)
+            var fletch = Path()
+            fletch.move(to: CGPoint(x: base.x - fletchLen * px, y: base.y - fletchLen * py))
+            fletch.addLine(to: base)
+            fletch.addLine(to: CGPoint(x: base.x + fletchLen * px, y: base.y + fletchLen * py))
+            context.stroke(fletch, with: .color(color.opacity(0.65)),
+                           style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
         }
     }
 }
 
-// MARK: - Arrow Projectile
-struct ArrowProjectile: View {
-    let index: Int
-    let total: Int
-    let animated: Bool
-
-    @State private var launched = false
-
-    private var angle: Double {
-        let angles: [Double] = [-60, -35, -10, 15, 40]
-        return angles[safe: index] ?? -20
-    }
-
-    private var delay: Double { Double(index) * 0.15 }
-
-    var body: some View {
-        Image(systemName: "arrow.up.right")
-            .font(.system(size: 20, weight: .bold))
-            .foregroundColor(Color("BrandArrow"))
-            .rotationEffect(.degrees(angle))
-            .offset(
-                x: launched ? cos(angle * .pi / 180) * 80 : 0,
-                y: launched ? sin(angle * .pi / 180) * -80 : 0
-            )
-            .opacity(launched ? 0.85 : 0)
-            .animation(
-                .spring(response: 0.5, dampingFraction: 0.6).delay(delay),
-                value: launched
-            )
-            .onAppear {
-                if animated {
-                    launched = true
-                }
-            }
-            .onChange(of: animated) { newValue in
-                launched = newValue
-            }
-    }
-}
-
-// MARK: - Anchor Roots Shape (for splash screen)
+// MARK: - Anchor Roots Shape (used by SplashView)
 struct AnchorRootsShape: Shape {
     var progress: Double
 
