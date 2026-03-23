@@ -94,7 +94,7 @@ struct OnboardingPage1: View {
 
             // Hero visual
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(Color("BrandAnchor").opacity(0.12))
                     .frame(width: 200, height: 200)
 
@@ -290,7 +290,7 @@ struct HowItWorksRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(Color(color).opacity(0.15))
                     .frame(width: 40, height: 40)
                 Text(number)
