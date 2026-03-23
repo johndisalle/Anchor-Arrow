@@ -43,8 +43,8 @@ struct PremiumUpsellView: View {
 
                     // Feature list
                     VStack(spacing: 12) {
+                        PremiumFeatureRow(icon: "heart.fill", color: "BrandArrow", text: "Kingdom Funded — all profits donated/tithed to support service and missions", isHighlighted: true)
                         PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Unlimited Iron Sharpeners circles")
-                        PremiumFeatureRow(icon: "waveform", color: "BrandGold", text: "Voice-guided prayer audios")
                         PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "Deeper teaching & theme packs")
                         PremiumFeatureRow(icon: "target", color: "BrandWarning", text: "Custom personal goals")
                         PremiumFeatureRow(icon: "rectangle.slash.fill", color: "TextSecondary", text: "Ad-free experience")
@@ -158,6 +158,7 @@ struct PremiumFeatureRow: View {
     let icon: String
     let color: String
     let text: String
+    var isHighlighted: Bool = false
 
     var body: some View {
         HStack(spacing: 14) {
@@ -167,15 +168,23 @@ struct PremiumFeatureRow: View {
                 .frame(width: 24)
 
             Text(text)
-                .font(.system(size: 15))
-                .foregroundColor(Color("TextPrimary"))
+                .font(.system(size: 15, weight: isHighlighted ? .semibold : .regular))
+                .foregroundColor(isHighlighted ? Color(color) : Color("TextPrimary"))
 
             Spacer()
 
-            Image(systemName: "checkmark")
+            Image(systemName: isHighlighted ? "cross.fill" : "checkmark")
                 .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.green)
+                .foregroundColor(isHighlighted ? Color(color) : .green)
         }
+        .padding(isHighlighted ? 12 : 0)
+        .background(isHighlighted ? Color(color).opacity(0.08) : Color.clear)
+        .cornerRadius(isHighlighted ? 12 : 0)
+        .overlay(
+            isHighlighted
+            ? RoundedRectangle(cornerRadius: 12).stroke(Color(color).opacity(0.25), lineWidth: 1)
+            : nil
+        )
     }
 }
 
