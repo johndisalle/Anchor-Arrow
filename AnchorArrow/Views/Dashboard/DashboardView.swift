@@ -291,7 +291,7 @@ struct TodayStatusCard: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     ZStack {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(isComplete ? Color.green.opacity(0.12) : Color(color).opacity(0.12))
                             .frame(width: 42, height: 42)
                         if isComplete {
