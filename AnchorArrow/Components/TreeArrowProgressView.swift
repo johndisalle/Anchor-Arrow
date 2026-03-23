@@ -61,8 +61,10 @@ struct TreeArrowProgressView: View {
 
             // Anchor icon at base (always visible after trunk)
             if trunkAnimated {
-                Image(systemName: "anchor")
-                    .font(.system(size: 13, weight: .semibold))
+                Image("anchor-tab")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 14, height: 14)
                     .foregroundColor(Color("BrandAnchor").opacity(0.5))
                     .offset(y: 68)
                     .opacity(canopyAnimated ? 1 : 0)
@@ -212,29 +214,53 @@ struct ArrowProjectile: View {
     private var delay: Double { Double(index) * 0.15 }
 
     var body: some View {
-        Image(systemName: "arrow.up.right")
-            .font(.system(size: isEarned ? 20 : 16, weight: .bold))
-            .foregroundColor(
-                isEarned
-                    ? Color("BrandArrow")
-                    : Color("BrandArrow").opacity(0.25)
-            )
-            .rotationEffect(.degrees(angle))
-            .offset(
-                x: launched ? cos(angle * .pi / 180) * 75 : 0,
-                y: launched ? sin(angle * .pi / 180) * -75 : 0
-            )
-            .opacity(launched ? (isEarned ? 0.9 : 0.4) : 0)
-            .animation(
-                .spring(response: 0.5, dampingFraction: 0.6).delay(delay),
-                value: launched
-            )
-            .onAppear {
-                if animated { launched = true }
-            }
-            .onChange(of: animated) { _, newValue in
-                launched = newValue
-            }
+        let arrowColor = isEarned ? Color("BrandArrow") : Color("BrandArrow").opacity(0.28)
+        Canvas { ctx, size in
+            let w = size.width
+            let h = size.height
+            let mid = h / 2
+
+            // Shaft
+            var shaft = Path()
+            shaft.move(to: CGPoint(x: w * 0.16, y: mid))
+            shaft.addLine(to: CGPoint(x: w * 0.80, y: mid))
+            ctx.stroke(shaft, with: .color(arrowColor),
+                       style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+
+            // Triangular arrowhead (tip at right)
+            var head = Path()
+            head.move(to: CGPoint(x: w,      y: mid))
+            head.addLine(to: CGPoint(x: w * 0.77, y: mid - h * 0.44))
+            head.addLine(to: CGPoint(x: w * 0.77, y: mid + h * 0.44))
+            head.closeSubpath()
+            ctx.fill(head, with: .color(arrowColor))
+
+            // Fletching — two feather lines at tail
+            var fletch = Path()
+            fletch.move(to: CGPoint(x: w * 0.19, y: mid))
+            fletch.addLine(to: CGPoint(x: 0, y: mid - h * 0.46))
+            fletch.move(to: CGPoint(x: w * 0.19, y: mid))
+            fletch.addLine(to: CGPoint(x: 0, y: mid + h * 0.46))
+            ctx.stroke(fletch, with: .color(arrowColor),
+                       style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+        }
+        .frame(width: isEarned ? 38 : 30, height: 11)
+        .rotationEffect(.degrees(angle))
+        .offset(
+            x: launched ? cos(angle * .pi / 180) * 75 : 0,
+            y: launched ? sin(angle * .pi / 180) * -75 : 0
+        )
+        .opacity(launched ? (isEarned ? 0.9 : 0.4) : 0)
+        .animation(
+            .spring(response: 0.5, dampingFraction: 0.6).delay(delay),
+            value: launched
+        )
+        .onAppear {
+            if animated { launched = true }
+        }
+        .onChange(of: animated) { _, newValue in
+            launched = newValue
+        }
     }
 }
 

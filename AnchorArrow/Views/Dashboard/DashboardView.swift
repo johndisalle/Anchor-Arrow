@@ -20,14 +20,38 @@ struct DashboardView: View {
                     headerSection
 
                     // Central Tree + Arrow Visual
-                    TreeArrowProgressView(
-                        anchorProgress: anchorProgress,
-                        arrowProgress: arrowProgress,
-                        streak: userStore.currentStreak,
-                        animate: animateTree
-                    )
-                    .frame(height: 280)
-                    .padding(.horizontal, 24)
+                    VStack(spacing: 6) {
+                        TreeArrowProgressView(
+                            anchorProgress: anchorProgress,
+                            arrowProgress: arrowProgress,
+                            streak: userStore.currentStreak,
+                            animate: animateTree
+                        )
+                        .frame(height: 256)
+                        .padding(.horizontal, 24)
+
+                        // Legend
+                        HStack(spacing: 18) {
+                            HStack(spacing: 5) {
+                                RoundedRectangle(cornerRadius: 1)
+                                    .fill(Color("BrandAnchor"))
+                                    .frame(width: 14, height: 3)
+                                Text("Roots = Anchor days")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(Color("TextSecondary"))
+                            }
+                            HStack(spacing: 5) {
+                                Image("crossed-arrows-tab")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 11, height: 11)
+                                    .foregroundColor(Color("BrandArrow"))
+                                Text("Arrows = Arrow days")
+                                    .font(.system(size: 11, weight: .medium))
+                                    .foregroundColor(Color("TextSecondary"))
+                            }
+                        }
+                    }
 
                     // Today's Status Cards
                     todayStatusSection
@@ -51,9 +75,9 @@ struct DashboardView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .principal) {
                     Text("Anchor & Arrow")
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .font(.system(size: 17, weight: .heavy, design: .rounded))
                         .foregroundColor(Color("TextPrimary"))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -119,7 +143,7 @@ struct DashboardView: View {
     private var todayStatusSection: some View {
         HStack(spacing: 14) {
             TodayStatusCard(
-                icon: "anchor",
+                icon: "anchor-tab",
                 title: "Anchor",
                 subtitle: "Morning",
                 isComplete: userStore.isAnchorDoneToday,
@@ -127,7 +151,7 @@ struct DashboardView: View {
                 destination: AnyView(AnchorView())
             )
             TodayStatusCard(
-                icon: "arrow.up.right.circle.fill",
+                icon: "crossed-arrows-tab",
                 title: "Arrow",
                 subtitle: "Evening",
                 isComplete: userStore.isArrowDoneToday,
@@ -149,8 +173,9 @@ struct DashboardView: View {
             StatPill(
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 label: "Anchors",
-                icon: "anchor",
-                color: "BrandAnchor"
+                icon: "anchor-tab",
+                color: "BrandAnchor",
+                isCustomIcon: true
             )
             StatPill(
                 value: "\(userStore.appUser?.totalArrowDays ?? 0)",
@@ -265,9 +290,22 @@ struct TodayStatusCard: View {
         NavigationLink(destination: destination) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Image(systemName: isComplete ? "checkmark.circle.fill" : icon)
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(isComplete ? .green : Color(color))
+                    ZStack {
+                        Circle()
+                            .fill(isComplete ? Color.green.opacity(0.12) : Color(color).opacity(0.12))
+                            .frame(width: 42, height: 42)
+                        if isComplete {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundColor(.green)
+                        } else {
+                            Image(icon)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 22, height: 22)
+                                .foregroundColor(Color(color))
+                        }
+                    }
                     Spacer()
                     if isComplete {
                         Text("Done")
@@ -324,12 +362,21 @@ struct StatPill: View {
     let label: String
     let icon: String
     let color: String
+    var isCustomIcon: Bool = false
 
     var body: some View {
         VStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(color))
+            if isCustomIcon {
+                Image(icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
+                    .foregroundColor(Color(color))
+            } else {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(color))
+            }
             Text(value)
                 .font(.system(size: 22, weight: .heavy))
                 .foregroundColor(Color("TextPrimary"))
