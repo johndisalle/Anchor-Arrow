@@ -558,6 +558,7 @@ struct NewCirclePostView: View {
     @State private var selectedType: PostType = .general
     @State private var isAnonymous = false
     @State private var isPosting = false
+    @State private var postErrorMessage = ""
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -605,6 +606,13 @@ struct NewCirclePostView: View {
                 .background(Color("CardBackground"))
                 .cornerRadius(14)
                 .padding(.horizontal, 20)
+
+                if !postErrorMessage.isEmpty {
+                    Text(postErrorMessage)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color("BrandDanger"))
+                        .padding(.horizontal, 20)
+                }
 
                 // Anonymous toggle
                 Toggle(isOn: $isAnonymous) {
@@ -659,7 +667,9 @@ struct NewCirclePostView: View {
             try await FirestoreService.shared.postToCircle(post: post)
             onPost(post)
             dismiss()
-        } catch { }
+        } catch {
+            postErrorMessage = "Failed to post. Check your connection and try again."
+        }
         isPosting = false
     }
 }

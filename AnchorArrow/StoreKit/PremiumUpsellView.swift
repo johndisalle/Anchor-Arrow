@@ -173,7 +173,7 @@ struct PremiumFeatureRow: View {
 
             Spacer()
 
-            Image(systemName: isHighlighted ? "cross.fill" : "checkmark")
+            Image(systemName: isHighlighted ? "checkmark.seal.fill" : "checkmark")
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(isHighlighted ? Color(color) : .green)
         }

@@ -130,6 +130,9 @@ struct AnchorView: View {
                     .scrollContentBackground(.hidden)
                     .focused($reflectionFocused)
                     .frame(minHeight: 120)
+                    .onChange(of: reflection) { _, newValue in
+                        if newValue.count > 500 { reflection = String(newValue.prefix(500)) }
+                    }
             }
             .padding(14)
             .background(Color("CardBackground"))
@@ -141,7 +144,7 @@ struct AnchorView: View {
 
             Text("\(reflection.count) / 500")
                 .font(.system(size: 12))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(reflection.count >= 500 ? Color("BrandDanger") : Color("TextSecondary"))
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }

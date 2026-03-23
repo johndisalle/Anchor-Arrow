@@ -16,6 +16,8 @@ struct AuthView: View {
     @State private var isLoading = false
     @State private var errorMessage = ""
     @State private var showError = false
+    @State private var successMessage = ""
+    @State private var showSuccess = false
     @FocusState private var focusedField: AuthField?
 
     enum AuthField { case name, email, password, confirm }
@@ -95,8 +97,15 @@ struct AuthView: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Error
-                if showError {
+                // Feedback
+                if showSuccess {
+                    Text(successMessage)
+                        .font(.system(size: 14))
+                        .foregroundColor(.green)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 12)
+                        .multilineTextAlignment(.center)
+                } else if showError {
                     Text(errorMessage)
                         .font(.system(size: 14))
                         .foregroundColor(Color("BrandDanger"))
@@ -171,8 +180,14 @@ struct AuthView: View {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isSignUp.toggle()
+                        email = ""
+                        password = ""
+                        displayName = ""
+                        confirmPassword = ""
                         errorMessage = ""
                         showError = false
+                        successMessage = ""
+                        showSuccess = false
                     }
                 } label: {
                     Text(isSignUp
@@ -250,7 +265,9 @@ struct AuthView: View {
         }
         do {
             try await authManager.resetPassword(email: email)
-            showAuthError("Reset email sent! Check your inbox.")
+            successMessage = "Reset email sent! Check your inbox."
+            showSuccess = true
+            showError = false
         } catch {
             showAuthError(authManager.friendlyError(error))
         }
@@ -259,6 +276,7 @@ struct AuthView: View {
     private func showAuthError(_ message: String) {
         errorMessage = message
         showError = true
+        showSuccess = false
     }
 }
 

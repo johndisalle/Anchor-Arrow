@@ -155,12 +155,13 @@ struct JourneyView: View {
     }
 
     private var journeyProgressBar: some View {
-        let currentDay = userStore.appUser?.journeyDay ?? 0
-        let progress = Double(currentDay) / 30.0
+        let completedDays = userStore.appUser?.journeyDay ?? 0
+        let currentDay = min(completedDays + 1, 30)
+        let progress = Double(completedDays) / 30.0
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Day \(currentDay) of 30")
+                Text(completedDays == 30 ? "Journey Complete! 🎉" : "Day \(currentDay) of 30")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(Color("TextPrimary"))
                 Spacer()
