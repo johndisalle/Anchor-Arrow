@@ -602,6 +602,7 @@ struct NewCirclePostView: View {
                         .focused($focused)
                         .frame(minHeight: 120)
                 }
+                .onTapGesture { focused = true }
                 .padding(14)
                 .background(Color("CardBackground"))
                 .cornerRadius(14)

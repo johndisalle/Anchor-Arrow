@@ -134,6 +134,7 @@ struct AnchorView: View {
                         if newValue.count > 500 { reflection = String(newValue.prefix(500)) }
                     }
             }
+            .onTapGesture { reflectionFocused = true }
             .padding(14)
             .background(Color("CardBackground"))
             .cornerRadius(14)

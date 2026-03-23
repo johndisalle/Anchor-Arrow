@@ -490,6 +490,7 @@ struct JourneyDayDetailView: View {
                     .focused($focusedField, equals: field)
                     .frame(minHeight: 90)
             }
+            .onTapGesture { focusedField = field }
             .padding(12)
             .background(Color("CardBackground"))
             .cornerRadius(12)

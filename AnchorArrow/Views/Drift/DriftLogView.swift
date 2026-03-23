@@ -151,6 +151,7 @@ struct DriftLogView: View {
                     .focused($noteFocused)
                     .frame(minHeight: 80, maxHeight: 120)
             }
+            .onTapGesture { noteFocused = true }
             .padding(12)
             .background(Color("CardBackground"))
             .cornerRadius(12)
