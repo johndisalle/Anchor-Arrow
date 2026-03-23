@@ -53,7 +53,7 @@ struct DashboardView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Text("Anchor & Arrow")
-                        .font(.system(size: 18, weight: .heavy, design: .rounded))
+                        .font(.system(size: 14, weight: .heavy, design: .rounded))
                         .foregroundColor(Color("TextPrimary"))
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {

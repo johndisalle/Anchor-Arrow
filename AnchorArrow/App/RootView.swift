@@ -49,40 +49,42 @@ struct RootView: View {
 
 // MARK: - Splash Screen
 struct SplashView: View {
-    @State private var rootsGrown = false
-    @State private var arrowLaunched = false
+    @State private var anchorShown = false
+    @State private var arrowsShown = false
     @State private var textOpacity = 0.0
 
     var body: some View {
         ZStack {
             Color("BackgroundPrimary").ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                // Logo / Icon area
-                ZStack {
-                    // Root system (anchor)
-                    AnchorRootsShape(progress: rootsGrown ? 1.0 : 0.0)
-                        .stroke(Color("BrandAnchor"), lineWidth: 2.5)
-                        .frame(width: 120, height: 80)
-                        .offset(y: 40)
-                        .animation(.easeOut(duration: 0.9), value: rootsGrown)
+            VStack(spacing: 28) {
+                // Hero: crossed arrows above ground line, anchor below
+                VStack(spacing: 0) {
+                    CrossedArrowsView()
+                        .frame(width: 150, height: 94)
+                        .scaleEffect(arrowsShown ? 1.0 : 0.1)
+                        .opacity(arrowsShown ? 1.0 : 0)
+                        .animation(.spring(response: 0.7, dampingFraction: 0.65).delay(0.9), value: arrowsShown)
 
-                    // Tree trunk
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("BrandEarth"))
-                        .frame(width: 8, height: rootsGrown ? 60 : 0)
-                        .offset(y: -10)
-                        .animation(.easeOut(duration: 0.6).delay(0.4), value: rootsGrown)
+                    Rectangle()
+                        .fill(Color("BrandEarth").opacity(0.3))
+                        .frame(height: 1.5)
+                        .frame(maxWidth: 180)
+                        .padding(.vertical, 6)
 
-                    // Arrow (purpose)
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(Color("BrandArrow"))
-                        .offset(x: arrowLaunched ? 24 : 0, y: arrowLaunched ? -48 : -40)
-                        .opacity(arrowLaunched ? 1 : 0)
-                        .animation(.spring(response: 0.5, dampingFraction: 0.6).delay(1.0), value: arrowLaunched)
+                    Image(systemName: "anchor")
+                        .font(.system(size: 110, weight: .thin))
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.55)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .scaleEffect(anchorShown ? 1.0 : 0.05)
+                        .opacity(anchorShown ? 1.0 : 0)
+                        .animation(.spring(response: 0.9, dampingFraction: 0.62).delay(0.15), value: anchorShown)
                 }
-                .frame(width: 160, height: 160)
 
                 VStack(spacing: 6) {
                     Text("ANCHOR & ARROW")
@@ -96,13 +98,14 @@ struct SplashView: View {
                         .foregroundColor(Color("TextSecondary"))
                 }
                 .opacity(textOpacity)
-                .animation(.easeIn(duration: 0.6).delay(0.3), value: textOpacity)
             }
         }
         .onAppear {
-            rootsGrown = true
-            arrowLaunched = true
-            textOpacity = 1.0
+            anchorShown = true
+            arrowsShown = true
+            withAnimation(.easeIn(duration: 0.6).delay(0.3)) {
+                textOpacity = 1.0
+            }
         }
     }
 }

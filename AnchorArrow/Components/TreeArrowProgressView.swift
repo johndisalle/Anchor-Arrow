@@ -14,7 +14,7 @@ struct TreeArrowProgressView: View {
     @State private var arrowsRevealed = false
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 0) {
 
             // Crossed archery arrows
             CrossedArrowsView()
@@ -27,40 +27,38 @@ struct TreeArrowProgressView: View {
                 .fill(Color("BrandEarth").opacity(0.25))
                 .frame(height: 1.5)
                 .frame(maxWidth: 200)
+                .padding(.vertical, 5)
 
             // Nautical anchor
-            ZStack(alignment: .bottom) {
-                Image(systemName: "anchor")
-                    .font(.system(size: 86, weight: .thin))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.6)],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
+            Image(systemName: "anchor")
+                .font(.system(size: 120, weight: .thin))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.6)],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
-                    .scaleEffect(anchorRevealed ? 1.0 : 0.1)
-                    .opacity(anchorRevealed ? 1.0 : 0)
+                )
+                .scaleEffect(anchorRevealed ? 1.0 : 0.1)
+                .opacity(anchorRevealed ? 1.0 : 0)
 
-                // Streak badge below anchor
-                if streak > 0 {
-                    VStack(spacing: 1) {
-                        Text("\(streak)")
-                            .font(.system(size: 14, weight: .heavy, design: .rounded))
-                            .foregroundColor(.white)
-                        Text("days")
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundColor(.white.opacity(0.85))
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color("BrandAnchor"))
-                    .cornerRadius(8)
-                    .offset(y: 28)
-                    .opacity(anchorRevealed ? 1 : 0)
+            // Streak badge below anchor
+            if streak > 0 {
+                HStack(spacing: 5) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(.white)
+                    Text("\(streak) day streak")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
                 }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color("BrandAnchor"))
+                .cornerRadius(10)
+                .opacity(anchorRevealed ? 1 : 0)
+                .padding(.top, 10)
             }
-            .padding(.bottom, streak > 0 ? 28 : 0)
         }
         .frame(maxWidth: .infinity)
         .onAppear { triggerAnimation() }
