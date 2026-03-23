@@ -19,6 +19,7 @@ class UserStore: ObservableObject {
     @Published var errorMessage: String?
 
     private var userListener: ListenerRegistration?
+    private var authListener: AuthStateDidChangeListenerHandle?
     private let firestoreService = FirestoreService.shared
     private let defaults = UserDefaults.standard
 
@@ -27,7 +28,7 @@ class UserStore: ObservableObject {
         hasCompletedOnboarding = defaults.bool(forKey: "onboardingComplete")
 
         // Listen for auth changes
-        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+        authListener = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             Task { @MainActor [weak self] in
                 if let user {
                     await self?.loadUserData(uid: user.uid)

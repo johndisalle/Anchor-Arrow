@@ -21,7 +21,7 @@ struct CirclesView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView("Loading circles...")
+                    SwiftUI.ProgressView("Loading circles...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if circles.isEmpty {
                     emptyState
@@ -186,7 +186,7 @@ struct CircleCard: View {
         Button(action: onTap) {
             HStack(spacing: 16) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(Color("BrandAnchor").opacity(0.15))
                         .frame(width: 52, height: 52)
                     Text(String(circle.name.prefix(2)).uppercased())
@@ -354,7 +354,7 @@ struct CircleDetailView: View {
                 CommentsSheet(post: post, circle: circle)
             }
             .alert("Leave Circle?", isPresented: $showLeaveAlert) {
-                Button("Leave", role: .destructive) { Task { await leaveCircle() } }
+                Button("Leave", role: .destructive) { Task { await leaveSwiftUI.Circle() } }
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need an invite code to rejoin \"\(circle.name)\".")
@@ -439,7 +439,7 @@ struct CircleDetailView: View {
         }
     }
 
-    private func leaveCircle() async {
+    private func leaveSwiftUI.Circle() async {
         guard let circleId = circle.id,
               let uid = Auth.auth().currentUser?.uid else { return }
         do {
@@ -459,11 +459,11 @@ struct MemberListSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(circle.memberIds, id: \.self) { uid in
+                ForEach(circle.memberIds as [String], id: \.self) { uid in
                     let name = memberNames[uid] ?? "A Brother"
                     HStack(spacing: 14) {
                         ZStack {
-                            Circle()
+                            SwiftUI.Circle()
                                 .fill(Color("BrandAnchor").opacity(0.15))
                                 .frame(width: 40, height: 40)
                             Text(String(name.prefix(1)).uppercased())
@@ -722,7 +722,7 @@ struct CommentRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(Color("BrandAnchor").opacity(0.1))
                     .frame(width: 30, height: 30)
                 Text(comment.isAnonymous ? "?" : String(comment.authorName.prefix(1)).uppercased())
@@ -777,7 +777,7 @@ struct CreateCircleView: View {
                 }
 
                 Button {
-                    Task { await createCircle() }
+                    Task { await createSwiftUI.Circle() }
                 } label: {
                     ZStack {
                         if isCreating { ProgressView().tint(.white) }
@@ -808,7 +808,7 @@ struct CreateCircleView: View {
         }
     }
 
-    private func createCircle() async {
+    private func createSwiftUI.Circle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isCreating = true
         let newCircle = Circle.new(name: circleName, creatorId: uid)
@@ -854,7 +854,7 @@ struct JoinCircleView: View {
                     .cornerRadius(14)
                     .padding(.horizontal, 24)
                     .focused($focused)
-                    .onChange(of: code) { code = String($0.prefix(6).uppercased()) }
+                    .onChange(of: code) { code = String(code.prefix(6).uppercased()) }
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
@@ -863,7 +863,7 @@ struct JoinCircleView: View {
                 }
 
                 Button {
-                    Task { await joinCircle() }
+                    Task { await joinSwiftUI.Circle() }
                 } label: {
                     ZStack {
                         if isJoining { ProgressView().tint(.white) }
@@ -894,7 +894,7 @@ struct JoinCircleView: View {
         }
     }
 
-    private func joinCircle() async {
+    private func joinSwiftUI.Circle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isJoining = true
         errorMessage = ""

@@ -247,9 +247,8 @@ struct SettingsView: View {
                     selection: $morningTime,
                     displayedComponents: .hourAndMinute
                 )
-                .onChange(of: morningTime) { time in
+                .onChange(of: morningTime) { _, time in
                     let hour = Calendar.current.component(.hour, from: time)
-                    let minute = Calendar.current.component(.minute, from: time)
                     Task {
                         await notificationManager.scheduleReminders(morningHour: hour, eveningHour: userStore.appUser?.eveningReminderHour ?? 20)
                         if let uid = Auth.auth().currentUser?.uid {
@@ -263,7 +262,7 @@ struct SettingsView: View {
                     selection: $eveningTime,
                     displayedComponents: .hourAndMinute
                 )
-                .onChange(of: eveningTime) { time in
+                .onChange(of: eveningTime) { _, time in
                     let hour = Calendar.current.component(.hour, from: time)
                     Task {
                         await notificationManager.scheduleReminders(morningHour: userStore.appUser?.morningReminderHour ?? 7, eveningHour: hour)
