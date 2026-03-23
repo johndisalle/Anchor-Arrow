@@ -18,7 +18,7 @@ struct PremiumUpsellView: View {
                     // Header
                     VStack(spacing: 12) {
                         ZStack {
-                            Circle()
+                            SwiftUI.Circle()
                                 .fill(Color("BrandGold").opacity(0.15))
                                 .frame(width: 80, height: 80)
                             Image(systemName: "crown.fill")
@@ -44,8 +44,7 @@ struct PremiumUpsellView: View {
                     // Feature list
                     VStack(spacing: 12) {
                         PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Unlimited Iron Sharpeners circles")
-                        PremiumFeatureRow(icon: "waveform", color: "BrandGold", text: "Voice-guided prayer audios")
-                        PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "Deeper teaching & theme packs")
+PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "Deeper teaching & theme packs")
                         PremiumFeatureRow(icon: "target", color: "BrandWarning", text: "Custom personal goals")
                         PremiumFeatureRow(icon: "rectangle.slash.fill", color: "TextSecondary", text: "Ad-free experience")
                         PremiumFeatureRow(icon: "mappin.and.ellipse", color: "BrandArrow", text: "Full 30-day Stand Firm Journey")
@@ -214,11 +213,11 @@ struct SubscriptionOptionCard: View {
                 Spacer()
 
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .stroke(isSelected ? Color("BrandGold") : Color("TextSecondary").opacity(0.3), lineWidth: 2)
                         .frame(width: 22, height: 22)
                     if isSelected {
-                        Circle()
+                        SwiftUI.Circle()
                             .fill(Color("BrandGold"))
                             .frame(width: 14, height: 14)
                     }

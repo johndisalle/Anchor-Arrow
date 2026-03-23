@@ -7,7 +7,6 @@ struct AnchorView: View {
     @EnvironmentObject var userStore: UserStore
     @State private var reflection = ""
     @State private var selectedTags: Set<AnchorTag> = []
-    @State private var showPrayerPlayer = false
     @State private var showCompletionAnimation = false
     @State private var isSubmitting = false
     @FocusState private var reflectionFocused: Bool
@@ -182,41 +181,12 @@ struct AnchorView: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(Color("TextPrimary"))
 
-            Button {
-                showPrayerPlayer = true
-            } label: {
-                HStack(spacing: 14) {
-                    ZStack {
-                        SwiftUI.Circle()
-                            .fill(Color("BrandAnchor").opacity(0.15))
-                            .frame(width: 48, height: 48)
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: 28))
-                            .foregroundColor(Color("BrandAnchor"))
-                    }
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Morning Anchor Prayer")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundColor(Color("TextPrimary"))
-                        Text("~30 seconds • Grounding")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
-                    }
-                    Spacer()
-                    Image(systemName: "waveform")
-                        .font(.system(size: 18))
-                        .foregroundColor(Color("BrandAnchor").opacity(0.6))
-                }
-                .padding(16)
-                .background(Color("CardBackground"))
-                .cornerRadius(16)
-            }
-            .buttonStyle(.plain)
-            .sheet(isPresented: $showPrayerPlayer) {
-                PrayerAudioPlayerView(
-                    title: "Morning Anchor Prayer",
-                    fileName: "anchor_morning",
-                    prayerText: """
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Pray this out loud", systemImage: "mouth.fill")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(Color("BrandAnchor"))
+
+                Text("""
                     Lord Jesus, I anchor myself in You this morning.
                     Not in my own strength, my plans, or what the world is offering.
                     You are my rock. You are my truth.
@@ -225,9 +195,15 @@ struct AnchorView: View {
                     Give me courage to act like the man You've called me to be — watchful, firm, strong in love.
                     Let everything I do today be done for Your glory.
                     Amen.
-                    """
-                )
+                    """)
+                    .font(.system(size: 15, weight: .medium, design: .serif))
+                    .italic()
+                    .foregroundColor(Color("TextPrimary"))
+                    .lineSpacing(6)
             }
+            .padding(16)
+            .background(Color("CardBackground"))
+            .cornerRadius(16)
         }
     }
 
