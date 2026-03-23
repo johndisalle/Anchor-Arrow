@@ -354,7 +354,7 @@ struct CircleDetailView: View {
                 CommentsSheet(post: post, circle: circle)
             }
             .alert("Leave Circle?", isPresented: $showLeaveAlert) {
-                Button("Leave", role: .destructive) { Task { await leaveSwiftUI.Circle() } }
+                Button("Leave", role: .destructive) { Task { await leaveCircle() } }
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need an invite code to rejoin \"\(circle.name)\".")
@@ -439,7 +439,7 @@ struct CircleDetailView: View {
         }
     }
 
-    private func leaveSwiftUI.Circle() async {
+    private func leaveCircle() async {
         guard let circleId = circle.id,
               let uid = Auth.auth().currentUser?.uid else { return }
         do {
@@ -777,7 +777,7 @@ struct CreateCircleView: View {
                 }
 
                 Button {
-                    Task { await createSwiftUI.Circle() }
+                    Task { await createCircle() }
                 } label: {
                     ZStack {
                         if isCreating { ProgressView().tint(.white) }
@@ -808,7 +808,7 @@ struct CreateCircleView: View {
         }
     }
 
-    private func createSwiftUI.Circle() async {
+    private func createCircle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isCreating = true
         let newCircle = Circle.new(name: circleName, creatorId: uid)
@@ -863,7 +863,7 @@ struct JoinCircleView: View {
                 }
 
                 Button {
-                    Task { await joinSwiftUI.Circle() }
+                    Task { await joinCircle() }
                 } label: {
                     ZStack {
                         if isJoining { ProgressView().tint(.white) }
@@ -894,7 +894,7 @@ struct JoinCircleView: View {
         }
     }
 
-    private func joinSwiftUI.Circle() async {
+    private func joinCircle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isJoining = true
         errorMessage = ""
