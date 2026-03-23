@@ -48,14 +48,9 @@ struct DashboardView: View {
                 .padding(.top, 8)
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
-            .navigationTitle("")
+            .navigationTitle("Anchor & Arrow")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Text("Anchor & Arrow")
-                        .font(.system(size: 14, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color("TextPrimary"))
-                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {
                         SettingsView()
@@ -328,6 +323,7 @@ struct StatPill: View {
     var body: some View {
         VStack(spacing: 6) {
             Image(systemName: icon)
+                .renderingMode(.template)
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(Color(color))
             Text(value)

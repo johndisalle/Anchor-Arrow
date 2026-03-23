@@ -31,14 +31,9 @@ struct TreeArrowProgressView: View {
 
             // Nautical anchor
             Image(systemName: "anchor")
+                .renderingMode(.template)
                 .font(.system(size: 120, weight: .thin))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.6)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .foregroundStyle(Color("BrandAnchor"))
                 .scaleEffect(anchorRevealed ? 1.0 : 0.1)
                 .opacity(anchorRevealed ? 1.0 : 0)
 

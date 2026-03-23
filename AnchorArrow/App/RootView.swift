@@ -58,33 +58,26 @@ struct SplashView: View {
             Color("BackgroundPrimary").ignoresSafeArea()
 
             VStack(spacing: 28) {
-                // Hero: crossed arrows above ground line, anchor below
-                VStack(spacing: 0) {
+                // Hero: anchor centered with crossed arrows above it
+                ZStack(alignment: .bottom) {
+                    // Crossed arrows sit above, overlapping top of anchor
                     CrossedArrowsView()
-                        .frame(width: 150, height: 94)
+                        .frame(width: 160, height: 100)
                         .scaleEffect(arrowsShown ? 1.0 : 0.1)
                         .opacity(arrowsShown ? 1.0 : 0)
                         .animation(.spring(response: 0.7, dampingFraction: 0.65).delay(0.9), value: arrowsShown)
+                        .offset(y: -52)
 
-                    Rectangle()
-                        .fill(Color("BrandEarth").opacity(0.3))
-                        .frame(height: 1.5)
-                        .frame(maxWidth: 180)
-                        .padding(.vertical, 6)
-
+                    // Anchor as the grounded base
                     Image(systemName: "anchor")
-                        .font(.system(size: 110, weight: .thin))
-                        .foregroundStyle(
-                            LinearGradient(
-                                colors: [Color("BrandAnchor"), Color("BrandAnchor").opacity(0.55)],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
+                        .renderingMode(.template)
+                        .font(.system(size: 72, weight: .thin))
+                        .foregroundStyle(Color("BrandAnchor"))
                         .scaleEffect(anchorShown ? 1.0 : 0.05)
                         .opacity(anchorShown ? 1.0 : 0)
                         .animation(.spring(response: 0.9, dampingFraction: 0.62).delay(0.15), value: anchorShown)
                 }
+                .frame(width: 180, height: 160)
 
                 VStack(spacing: 6) {
                     Text("ANCHOR & ARROW")
