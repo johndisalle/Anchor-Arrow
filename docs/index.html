@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anchor &amp; Arrow — Legal</title>
+    <title>Anchor &amp; Arrow — Support</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #F8F4EF;
             color: #1C1917;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             min-height: 100vh;
             padding: 40px 20px;
         }
-        .card {
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .header {
             text-align: center;
-            max-width: 400px;
+            margin-bottom: 48px;
         }
         h1 {
             font-size: 28px;
@@ -26,38 +27,158 @@
             color: #2C5F8A;
             margin-bottom: 8px;
         }
-        p {
+        .subtitle {
             color: #888;
             font-size: 14px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1C1917;
+            margin-bottom: 16px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        p {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        .faq-item {
+            margin-bottom: 20px;
+        }
+        .faq-item strong {
+            font-size: 15px;
+            color: #1C1917;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .faq-item p {
+            margin-bottom: 0;
+        }
+        .contact-box {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
             margin-bottom: 32px;
         }
-        .links { display: flex; flex-direction: column; gap: 12px; }
-        a {
-            display: block;
-            padding: 16px 24px;
+        .contact-box p {
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .contact-box a.email {
+            display: inline-block;
+            padding: 14px 32px;
             background: #2C5F8A;
             color: white;
             text-decoration: none;
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
             font-size: 16px;
             transition: opacity 0.2s;
         }
-        a:hover { opacity: 0.85; }
-        a.secondary {
+        .contact-box a.email:hover { opacity: 0.85; }
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        a.link-btn {
+            display: block;
+            padding: 16px 24px;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: opacity 0.2s;
             background: transparent;
             color: #2C5F8A;
             border: 2px solid #2C5F8A;
         }
+        a.link-btn:hover { opacity: 0.85; }
+        .footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            font-size: 13px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Anchor &amp; Arrow</h1>
-        <p>Stand Firm Edition</p>
-        <div class="links">
-            <a href="privacy-policy.html">Privacy Policy</a>
-            <a href="terms-of-use.html" class="secondary">Terms of Use</a>
+    <div class="container">
+        <div class="header">
+            <h1>Anchor &amp; Arrow</h1>
+            <p class="subtitle">Stand Firm Edition</p>
+        </div>
+
+        <div class="section">
+            <h2>Support</h2>
+            <p>Need help with Anchor &amp; Arrow? We're here for you, brother. Check the frequently asked questions below or reach out directly.</p>
+        </div>
+
+        <div class="section">
+            <h2>Frequently Asked Questions</h2>
+
+            <div class="faq-item">
+                <strong>How do I reset my password?</strong>
+                <p>Tap "Forgot Password" on the sign-in screen. You'll receive a reset link at the email address associated with your account.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>How do I manage or cancel my subscription?</strong>
+                <p>Subscriptions are managed through Apple. Go to Settings &gt; Apple ID &gt; Subscriptions on your device to view, change, or cancel your plan.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>Can I restore my subscription on a new device?</strong>
+                <p>Yes. Sign in with the same account and tap "Restore Purchases" in the app's settings. Your subscription is tied to your Apple ID.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>How do I delete my account and data?</strong>
+                <p>Go to Settings &gt; Delete Account within the app. This permanently removes your account and all associated data including reflections, drift logs, and circle posts.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>How do I join an accountability circle?</strong>
+                <p>Tap the Iron Sharpeners tab and enter the 6-character invite code shared by the circle creator. You can also create your own circle and invite brothers directly.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>I lost my streak. Can it be restored?</strong>
+                <p>Premium members receive one Grace Day per 30-day period that preserves your streak if you miss a day. Unfortunately, we cannot manually restore streaks beyond this.</p>
+            </div>
+
+            <div class="faq-item">
+                <strong>Is my journal data private?</strong>
+                <p>Yes. Your Anchor reflections, Arrow entries, and drift logs are private to your account. Only posts you share in circles are visible to other circle members.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Contact Us</h2>
+            <div class="contact-box">
+                <p>Can't find what you're looking for? Reach out and we'll get back to you as soon as possible.</p>
+                <a class="email" href="mailto:support@anchorandarrow.app">support@anchorandarrow.app</a>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Legal</h2>
+            <div class="links">
+                <a class="link-btn" href="privacy-policy.html">Privacy Policy</a>
+                <a class="link-btn" href="terms-of-use.html">Terms of Use</a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2026 Ellasid. All rights reserved.</p>
         </div>
     </div>
 </body>
