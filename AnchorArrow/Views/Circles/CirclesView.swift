@@ -304,6 +304,9 @@ struct CircleCard: View {
             .cornerRadius(16)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(circle.name), \(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers"), \(circle.isPublic ? "public" : "private") circle")
+        .accessibilityHint("Double tap to open this circle")
     }
 }
 

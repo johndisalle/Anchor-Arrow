@@ -40,7 +40,9 @@ struct DashboardView: View {
                     streakStatsSection
 
                     // Recent Badges
-                    if !userStore.earnedBadges.isEmpty {
+                    if userStore.earnedBadges.isEmpty {
+                        badgesEmptyState
+                    } else {
                         recentBadgesSection
                     }
 
@@ -171,6 +173,28 @@ struct DashboardView: View {
                     .frame(width: 20, height: 20)
             }
         }
+        .padding(.horizontal, 24)
+    }
+
+    private var badgesEmptyState: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "star.circle")
+                .font(.system(size: 28))
+                .foregroundColor(Color("BrandGold").opacity(0.5))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Badges")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Text("Complete your first Anchor and Arrow to earn your first badge.")
+                    .font(.system(size: 13))
+                    .foregroundColor(Color("TextSecondary"))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color("CardBackground"))
+        .cornerRadius(16)
         .padding(.horizontal, 24)
     }
 

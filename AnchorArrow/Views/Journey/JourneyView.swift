@@ -511,6 +511,9 @@ struct JourneyDayRow: View {
         }
         .buttonStyle(.plain)
         .disabled(!isUnlocked)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Day \(day.id), \(day.theme). \(isCompleted ? "Completed" : isCurrent ? "Today's day" : isUnlocked ? "Available" : "Locked")")
+        .accessibilityHint(isUnlocked && !isCompleted ? "Double tap to start this day" : isCompleted ? "Double tap to review" : "Complete previous days to unlock")
     }
 
     private var circleColor: Color {

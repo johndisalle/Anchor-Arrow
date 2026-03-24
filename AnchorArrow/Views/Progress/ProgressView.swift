@@ -51,7 +51,9 @@ struct ProgressView: View {
                     weeklySummarySection
 
                     // Drift History
-                    if !userStore.driftLogs.isEmpty {
+                    if userStore.driftLogs.isEmpty {
+                        driftEmptyState
+                    } else {
                         driftHistorySection
                     }
 
@@ -627,6 +629,27 @@ struct ProgressView: View {
         .cornerRadius(20)
     }
 
+    // MARK: - Drift Empty State
+    private var driftEmptyState: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "checkmark.shield.fill")
+                .font(.system(size: 28))
+                .foregroundColor(Color("BrandArrow").opacity(0.5))
+            Text("No Drift Logs Yet")
+                .font(.system(size: 15, weight: .bold))
+                .foregroundColor(Color("TextPrimary"))
+            Text("When you feel yourself drifting, tap the shield button to log it and anchor back. Your drift history will appear here.")
+                .font(.system(size: 13))
+                .foregroundColor(Color("TextSecondary"))
+                .multilineTextAlignment(.center)
+                .lineSpacing(3)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
     // MARK: - Drift History
     private var driftHistorySection: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -751,6 +774,8 @@ struct StatsCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color("CardBackground"))
         .cornerRadius(16)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value). \(subtitle)")
     }
 }
 
@@ -975,6 +1000,9 @@ struct BadgeGridCell: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(badgeType.name) badge, \(isEarned ? "earned" : "locked")")
+        .accessibilityHint(isEarned ? "Double tap for details" : "Complete the challenge to earn this badge")
         .sheet(isPresented: $showDetail) {
             BadgeDetailSheet(badgeType: badgeType, isEarned: isEarned)
         }
