@@ -300,7 +300,9 @@ struct ProgressView: View {
                 // Month navigation
                 HStack(spacing: 16) {
                     Button {
-                        selectedMonth = calendar.date(byAdding: .month, value: -1, to: selectedMonth)!
+                        if let prev = calendar.date(byAdding: .month, value: -1, to: selectedMonth) {
+                            selectedMonth = prev
+                        }
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 14, weight: .semibold))
@@ -311,8 +313,10 @@ struct ProgressView: View {
                         .foregroundColor(Color("TextPrimary"))
                         .frame(width: 120, alignment: .center)
                     Button {
-                        let next = calendar.date(byAdding: .month, value: 1, to: selectedMonth)!
-                        if next <= Date() { selectedMonth = next }
+                        if let next = calendar.date(byAdding: .month, value: 1, to: selectedMonth),
+                           next <= Date() {
+                            selectedMonth = next
+                        }
                     } label: {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .semibold))
@@ -585,7 +589,7 @@ struct StreakCalendarGrid: View {
     }
 
     private var daysInMonth: [Int] {
-        let range = calendar.range(of: .day, in: .month, for: month)!
+        guard let range = calendar.range(of: .day, in: .month, for: month) else { return [] }
         return Array(range)
     }
 

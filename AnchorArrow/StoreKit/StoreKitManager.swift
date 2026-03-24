@@ -149,7 +149,7 @@ class StoreKitManager: ObservableObject {
     // MARK: - Update Firebase Premium Flag
     private func updatePremiumStatus(expiryDate: Date?) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
-        let isPremium = expiryDate != nil && expiryDate! > Date()
+        let isPremium = (expiryDate ?? .distantPast) > Date()
         try? await FirestoreService.shared.setPremium(uid: uid, isPremium: isPremium, expiry: expiryDate)
         hasActiveSubscription = isPremium
         activeSubscriptionExpiry = expiryDate

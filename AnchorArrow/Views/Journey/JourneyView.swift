@@ -775,7 +775,7 @@ struct JourneyCompletionView: View {
         let screenWidth = UIScreen.main.bounds.width
         confettiParticles = (0..<60).map { _ in
             ConfettiParticle(
-                color: colors.randomElement()!,
+                color: colors.randomElement() ?? Color("BrandGold"),
                 size: CGFloat.random(in: 4...10),
                 position: CGPoint(
                     x: CGFloat.random(in: 0...screenWidth),

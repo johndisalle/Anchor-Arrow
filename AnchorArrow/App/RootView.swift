@@ -142,6 +142,8 @@ struct MainTabView: View {
     @State private var selectedTab = 0
     @State private var showDriftLog = false
     @State private var showNotificationPrompt = false
+    @State private var showErrorToast = false
+    @State private var errorToastMessage = ""
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -206,6 +208,45 @@ struct MainTabView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     showNotificationPrompt = true
                 }
+            }
+        }
+        .onChange(of: userStore.errorMessage) { _, newValue in
+            if let message = newValue, !message.isEmpty {
+                errorToastMessage = message
+                showErrorToast = true
+                userStore.errorMessage = nil
+                // Auto-dismiss after 4 seconds
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                    showErrorToast = false
+                }
+            }
+        }
+        .overlay(alignment: .top) {
+            if showErrorToast {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text(errorToastMessage)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                    Spacer()
+                    Button {
+                        showErrorToast = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+                .padding(14)
+                .background(Color("BrandDanger").cornerRadius(12))
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.4), value: showErrorToast)
+                .zIndex(100)
             }
         }
     }

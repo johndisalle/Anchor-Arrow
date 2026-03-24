@@ -149,11 +149,13 @@ class FirestoreService {
         while true {
             if activeDates.contains(checkDate) {
                 streak += 1
-                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+                guard let prev = Calendar.current.date(byAdding: .day, value: -1, to: checkDate) else { break }
+                checkDate = prev
             } else if graceDayAvailable && !usedGraceDay && checkDate != today && streak > 0 {
                 // Grace day: skip this gap, don't increment streak count
                 usedGraceDay = true
-                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+                guard let prev = Calendar.current.date(byAdding: .day, value: -1, to: checkDate) else { break }
+                checkDate = prev
             } else {
                 break
             }
