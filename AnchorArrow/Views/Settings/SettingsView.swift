@@ -56,7 +56,7 @@ struct SettingsView: View {
                     Section {
                         journeyRow
                     } header: {
-                        Text("Stand Firm Journey")
+                        Text("\(userStore.currentJourneySeries.displayName) Journey")
                     }
                 }
 
@@ -279,19 +279,15 @@ struct SettingsView: View {
     // MARK: - Theme Picker
     private var themePicker: some View {
         Picker("App Theme", selection: .init(
-            get: { userStore.appUser?.theme ?? .system },
+            get: { AppTheme(rawValue: userStore.savedTheme) ?? .system },
             set: { theme in
-                let previous = userStore.appUser?.theme ?? .system
-                // Apply immediately so the color scheme reacts without a round-trip
+                // Write to @AppStorage for instant local switch
+                userStore.savedTheme = theme.rawValue
                 userStore.appUser?.theme = theme
+                // Persist to Firestore for cross-device sync
                 Task {
                     if let uid = Auth.auth().currentUser?.uid {
-                        do {
-                            try await FirestoreService.shared.updateUser(uid: uid, fields: ["theme": theme.rawValue])
-                        } catch {
-                            // Revert local change so the UI stays consistent with persisted state
-                            await MainActor.run { userStore.appUser?.theme = previous }
-                        }
+                        try? await FirestoreService.shared.updateUser(uid: uid, fields: ["theme": theme.rawValue])
                     }
                 }
             }

@@ -6,10 +6,12 @@ import SwiftUI
 struct JourneyView: View {
     @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss
-    @State private var journeyDays = PromptLibrary.journeyDays()
+    @State private var journeyDays: [JourneyDay] = []
     @State private var showDayDetail: JourneyDay?
     @State private var showStartConfirm = false
     @State private var isStarting = false
+    @State private var selectedSeries: JourneySeries = .standFirm
+    @State private var showSeriesPicker = false
 
     var body: some View {
         NavigationStack {
@@ -21,6 +23,10 @@ struct JourneyView: View {
 
                     // Not started yet
                     if !(userStore.appUser?.journeyActive ?? false) {
+                        // Series picker for premium users or those who completed a journey
+                        if userStore.isPremium || !(userStore.appUser?.completedJourneys ?? []).isEmpty {
+                            seriesPickerSection
+                        }
                         startJourneyCTA
                     } else {
                         // Progress bar
@@ -36,7 +42,7 @@ struct JourneyView: View {
                 .padding(.top, 16)
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
-            .navigationTitle("Stand Firm Journey")
+            .navigationTitle(activeSeries.displayName + " Journey")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -45,14 +51,15 @@ struct JourneyView: View {
                 }
             }
             .sheet(item: $showDayDetail) { day in
-                JourneyDayDetailView(day: day) {
-                    // On complete
-                    Task { await userStore.advanceJourneyDay() }
+                JourneyDayDetailView(day: day) { anchorText, arrowText in
+                    Task {
+                        await userStore.completeJourneyDay(anchorReflection: anchorText, arrowReflection: arrowText)
+                    }
                     showDayDetail = nil
                 }
             }
             .confirmationDialog(
-                "Start the 30-day Stand Firm Journey?",
+                "Start the 30-day \(selectedSeries.displayName) Journey?",
                 isPresented: $showStartConfirm,
                 titleVisibility: .visible
             ) {
@@ -62,6 +69,27 @@ struct JourneyView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Commit to 30 days of guided Scripture, daily anchoring, and purposeful action. One day at a time.")
+            }
+            .onAppear {
+                let series = userStore.currentJourneySeries
+                selectedSeries = series
+                journeyDays = PromptLibrary.journeyDays(for: series)
+            }
+            .fullScreenCover(isPresented: $userStore.showJourneyComplete) {
+                JourneyCompletionView(
+                    series: userStore.completedJourneySeries ?? .standFirm,
+                    onStartNext: { nextSeries in
+                        userStore.showJourneyComplete = false
+                        Task {
+                            await userStore.startJourney(series: nextSeries)
+                            selectedSeries = nextSeries
+                            journeyDays = PromptLibrary.journeyDays(for: nextSeries)
+                        }
+                    },
+                    onDismiss: {
+                        userStore.showJourneyComplete = false
+                    }
+                )
             }
         }
     }
@@ -79,7 +107,9 @@ struct JourneyView: View {
                     .foregroundColor(Color("BrandArrow"))
             }
 
-            Text("Four weeks of deep, sequential truth — from watchful rootedness to purposeful love. Each day unlocks the next.")
+            Text(activeSeries == .armorOfGod
+                 ? "Four weeks through Ephesians 6 — each piece of God's armor examined, applied, and worn into battle. Each day unlocks the next."
+                 : "Four weeks of deep, sequential truth — from watchful rootedness to purposeful love. Each day unlocks the next.")
                 .font(.system(size: 15))
                 .foregroundColor(Color("TextSecondary"))
                 .lineSpacing(4)
@@ -235,21 +265,112 @@ struct JourneyView: View {
         }
     }
 
+    // MARK: - Series Picker
+    private var seriesPickerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Choose Your Journey")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(Color("TextPrimary"))
+
+            ForEach(JourneySeries.allCases) { series in
+                let completed = (userStore.appUser?.completedJourneys ?? []).contains(series.rawValue)
+                let isAvailable = userStore.isPremium || series == .standFirm
+
+                Button {
+                    if isAvailable {
+                        selectedSeries = series
+                        journeyDays = PromptLibrary.journeyDays(for: series)
+                    }
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: series.icon)
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(selectedSeries == series
+                                             ? Color("BrandArrow") : Color("TextSecondary"))
+                            .frame(width: 40)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack {
+                                Text(series.displayName)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(isAvailable ? Color("TextPrimary") : Color("TextSecondary").opacity(0.5))
+                                if completed {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.green)
+                                }
+                                if !isAvailable {
+                                    Text("PREMIUM")
+                                        .font(.system(size: 9, weight: .heavy))
+                                        .foregroundColor(Color("BrandGold"))
+                                        .padding(.horizontal, 6).padding(.vertical, 2)
+                                        .background(Color("BrandGold").opacity(0.15))
+                                        .cornerRadius(4)
+                                }
+                            }
+                            Text(series.subtitle)
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("TextSecondary"))
+                        }
+                        Spacer()
+
+                        if selectedSeries == series {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(Color("BrandArrow"))
+                        }
+                    }
+                    .padding(14)
+                    .background(selectedSeries == series
+                                ? Color("BrandArrow").opacity(0.07) : Color("CardBackground"))
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(selectedSeries == series
+                                    ? Color("BrandArrow").opacity(0.3) : Color.clear, lineWidth: 1.5)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(!isAvailable)
+            }
+        }
+        .padding(16)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
+    private var activeSeries: JourneySeries {
+        if userStore.appUser?.journeyActive ?? false {
+            return userStore.currentJourneySeries
+        }
+        return selectedSeries
+    }
+
     // MARK: - Actions
     private func startJourney() async {
         isStarting = true
-        await userStore.startJourney()
+        await userStore.startJourney(series: selectedSeries)
+        journeyDays = PromptLibrary.journeyDays(for: selectedSeries)
         isStarting = false
     }
 
     // MARK: - Week themes
     private var weekThemes: [(week: Int, title: String, color: Color)] {
-        [
-            (1, "Be Watchful", Color("BrandAnchor")),
-            (2, "Stand Firm", Color.blue),
-            (3, "Act Like Men", Color("BrandArrow")),
-            (4, "In Love", Color.red)
-        ]
+        switch activeSeries {
+        case .armorOfGod:
+            return [
+                (1, "Truth & Righteousness", Color("BrandAnchor")),
+                (2, "Gospel & Faith", Color.blue),
+                (3, "Salvation & Word", Color("BrandArrow")),
+                (4, "Prayer & Stand", Color.red)
+            ]
+        case .standFirm:
+            return [
+                (1, "Be Watchful", Color("BrandAnchor")),
+                (2, "Stand Firm", Color.blue),
+                (3, "Act Like Men", Color("BrandArrow")),
+                (4, "In Love", Color.red)
+            ]
+        }
     }
 }
 
@@ -348,7 +469,7 @@ struct JourneyDayRow: View {
 // MARK: - JourneyDayDetailView
 struct JourneyDayDetailView: View {
     let day: JourneyDay
-    let onComplete: () -> Void
+    let onComplete: (_ anchorReflection: String, _ arrowReflection: String) -> Void
 
     @State private var anchorReflection = ""
     @State private var arrowReflection = ""
@@ -425,7 +546,7 @@ struct JourneyDayDetailView: View {
 
                     // Complete button
                     Button {
-                        onComplete()
+                        onComplete(anchorReflection, arrowReflection)
                     } label: {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
@@ -520,4 +641,158 @@ struct JourneyDayDetailView: View {
         .background(Color("CardBackground"))
         .cornerRadius(16)
     }
+}
+
+// MARK: - Journey Completion Celebration
+struct JourneyCompletionView: View {
+    let series: JourneySeries
+    let onStartNext: (JourneySeries) -> Void
+    let onDismiss: () -> Void
+
+    @State private var appeared = false
+    @State private var confettiParticles: [ConfettiParticle] = []
+
+    var body: some View {
+        ZStack {
+            Color("BackgroundPrimary").ignoresSafeArea()
+
+            // Confetti layer
+            ForEach(confettiParticles) { particle in
+                SwiftUI.Circle()
+                    .fill(particle.color)
+                    .frame(width: particle.size, height: particle.size)
+                    .position(particle.position)
+                    .opacity(appeared ? 0 : 1)
+                    .animation(
+                        .easeOut(duration: particle.duration).delay(particle.delay),
+                        value: appeared
+                    )
+            }
+
+            VStack(spacing: 28) {
+                Spacer()
+
+                // Trophy icon
+                ZStack {
+                    SwiftUI.Circle()
+                        .fill(Color("BrandGold").opacity(0.15))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(appeared ? 1.0 : 0.3)
+
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 56))
+                        .foregroundColor(Color("BrandGold"))
+                        .scaleEffect(appeared ? 1.0 : 0.1)
+                }
+                .animation(.spring(response: 0.6, dampingFraction: 0.5).delay(0.2), value: appeared)
+
+                VStack(spacing: 12) {
+                    Text("Journey Complete")
+                        .font(.system(size: 32, weight: .heavy, design: .rounded))
+                        .foregroundColor(Color("TextPrimary"))
+
+                    Text("You finished the \(series.displayName) journey.")
+                        .font(.system(size: 17))
+                        .foregroundColor(Color("TextSecondary"))
+
+                    Text("30 days of anchoring in truth, standing firm, and sharpening your faith. That's not nothing — that's war won.")
+                        .font(.system(size: 15))
+                        .foregroundColor(Color("TextSecondary"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 4)
+                }
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 20)
+                .animation(.easeOut(duration: 0.6).delay(0.4), value: appeared)
+
+                Spacer()
+
+                VStack(spacing: 14) {
+                    // Offer next series
+                    if let next = nextSeries {
+                        Button {
+                            onStartNext(next)
+                        } label: {
+                            HStack {
+                                Image(systemName: next.icon)
+                                Text("Start \(next.displayName)")
+                                    .font(.system(size: 17, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(Color("BrandArrow"))
+                            .cornerRadius(16)
+                        }
+                    }
+
+                    // Restart same
+                    Button {
+                        onStartNext(series)
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("Restart \(series.displayName)")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(Color("BrandAnchor"))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color("BrandAnchor").opacity(0.1))
+                        .cornerRadius(14)
+                    }
+
+                    Button("Done") { onDismiss() }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(Color("TextSecondary"))
+                        .padding(.top, 4)
+                }
+                .padding(.horizontal, 32)
+                .opacity(appeared ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.8), value: appeared)
+
+                Spacer().frame(height: 40)
+            }
+        }
+        .onAppear {
+            generateConfetti()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            withAnimation { appeared = true }
+        }
+    }
+
+    private var nextSeries: JourneySeries? {
+        JourneySeries.allCases.first { $0 != series }
+    }
+
+    private func generateConfetti() {
+        let colors: [Color] = [
+            Color("BrandGold"), Color("BrandAnchor"), Color("BrandArrow"),
+            .orange, .yellow, .green, .blue
+        ]
+        let screenWidth = UIScreen.main.bounds.width
+        confettiParticles = (0..<60).map { _ in
+            ConfettiParticle(
+                color: colors.randomElement()!,
+                size: CGFloat.random(in: 4...10),
+                position: CGPoint(
+                    x: CGFloat.random(in: 0...screenWidth),
+                    y: CGFloat.random(in: -50...UIScreen.main.bounds.height * 0.6)
+                ),
+                duration: Double.random(in: 2.0...4.0),
+                delay: Double.random(in: 0...1.5)
+            )
+        }
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    let color: Color
+    let size: CGFloat
+    let position: CGPoint
+    let duration: Double
+    let delay: Double
 }

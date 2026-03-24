@@ -2,6 +2,7 @@
 // Home screen — tree/arrow visual, streak, today's status, badges
 
 import SwiftUI
+import FirebaseAuth
 
 struct DashboardView: View {
     @EnvironmentObject var userStore: UserStore
@@ -47,6 +48,10 @@ struct DashboardView: View {
                 }
                 .padding(.top, 8)
             }
+            .refreshable {
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                await userStore.loadUserData(uid: uid)
+            }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Anchor & Arrow")
             .navigationBarTitleDisplayMode(.inline)
@@ -68,7 +73,7 @@ struct DashboardView: View {
             JourneyView()
         }
         .sheet(isPresented: $showPremiumUpsell) {
-            PremiumUpsellView(reason: "Start your Stand Firm Journey")
+            PremiumUpsellView(reason: "Unlock all guided journeys")
         }
         .onAppear {
             updateGreeting()
@@ -206,7 +211,7 @@ struct DashboardView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Stand Firm Journey")
+                    Text("\(userStore.currentJourneySeries.displayName) Journey")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Color("TextPrimary"))
                     Text(userStore.appUser?.journeyActive == true

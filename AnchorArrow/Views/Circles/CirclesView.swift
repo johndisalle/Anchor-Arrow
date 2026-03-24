@@ -14,6 +14,7 @@ struct CirclesView: View {
     @State private var showPremiumUpsell = false
     @State private var isLoading = false
     @State private var selectedCircle: Circle?
+    @State private var circleActivity: [String: Int] = [:]  // circleId -> active this week count
 
     private let firestoreService = FirestoreService.shared
 
@@ -21,8 +22,7 @@ struct CirclesView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    SwiftUI.ProgressView("Loading circles...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    SkeletonCirclesList()
                 } else if circles.isEmpty {
                     emptyState
                 } else {
@@ -145,7 +145,7 @@ struct CirclesView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
                             .foregroundColor(Color("BrandGold"))
-                        Text("Free plan: read-only. Upgrade to post and comment.")
+                        Text("Free plan: react only. Upgrade to post and comment.")
                             .font(.system(size: 13))
                             .foregroundColor(Color("TextSecondary"))
                         Spacer()
@@ -159,7 +159,8 @@ struct CirclesView: View {
                     .padding(.horizontal, 20)
                 }
                 ForEach(circles) { circle in
-                    CircleCard(circle: circle) {
+                    CircleCard(circle: circle,
+                               activeThisWeek: circleActivity[circle.id ?? ""]) {
                         selectedCircle = circle
                     }
                     .padding(.horizontal, 20)
@@ -175,12 +176,22 @@ struct CirclesView: View {
         isLoading = true
         circles = (try? await firestoreService.fetchUserCircles(uid: uid)) ?? []
         isLoading = false
+
+        // Load weekly activity counts for health badge
+        for circle in circles {
+            guard let cid = circle.id else { continue }
+            if let profiles = try? await firestoreService.fetchMemberProfiles(memberIds: circle.memberIds) {
+                let activeCount = profiles.values.filter { $0.daysSinceActive <= 7 }.count
+                circleActivity[cid] = activeCount
+            }
+        }
     }
 }
 
 // MARK: - CircleCard
 struct CircleCard: View {
     let circle: Circle
+    var activeThisWeek: Int? = nil  // number of members active in last 7 days
     let onTap: () -> Void
     @State private var showCopiedToast = false
 
@@ -199,9 +210,25 @@ struct CircleCard: View {
                     Text(circle.name)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(Color("TextPrimary"))
-                    Label("\(circle.memberCount) brothers", systemImage: "person.2.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(Color("TextSecondary"))
+
+                    HStack(spacing: 10) {
+                        Label("\(circle.memberCount) brothers", systemImage: "person.2.fill")
+                            .font(.system(size: 12))
+                            .foregroundColor(Color("TextSecondary"))
+
+                        // Weekly health badge
+                        if let active = activeThisWeek {
+                            HStack(spacing: 3) {
+                                SwiftUI.Circle()
+                                    .fill(active == circle.memberCount ? Color("BrandArrow") : Color("BrandWarning"))
+                                    .frame(width: 6, height: 6)
+                                Text("\(active)/\(circle.memberCount) active")
+                                    .font(.system(size: 11, weight: .semibold))
+                                    .foregroundColor(active == circle.memberCount
+                                                     ? Color("BrandArrow") : Color("BrandWarning"))
+                            }
+                        }
+                    }
                 }
                 Spacer()
                 // Copy invite code chip
@@ -264,8 +291,7 @@ struct CircleDetailView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    SkeletonPostFeed()
                 } else {
                     ZStack(alignment: .bottom) {
                         ScrollView(showsIndicators: false) {
@@ -293,12 +319,17 @@ struct CircleDetailView: View {
 
                                 // Regular post feed (excludes prayer — shown above)
                                 let feedPosts = posts.filter { $0.type != .prayer }
+                                let pinnedPosts = feedPosts.filter { $0.isPinned }
+                                let unpinnedPosts = feedPosts.filter { !$0.isPinned }
+                                let orderedFeed = pinnedPosts + unpinnedPosts
+
                                 if feedPosts.isEmpty && prayerPosts.isEmpty {
                                     emptyPostsState
                                 } else {
-                                    ForEach(feedPosts) { post in
+                                    ForEach(orderedFeed) { post in
                                         CirclePostRow(
                                             post: post,
+                                            isLeader: isCircleLeader,
                                             onReact: { emoji in
                                                 Task { await react(to: post, emoji: emoji) }
                                             },
@@ -308,6 +339,9 @@ struct CircleDetailView: View {
                                                 } else {
                                                     showPremiumUpsell = true
                                                 }
+                                            },
+                                            onPin: {
+                                                Task { await togglePin(post: post) }
                                             }
                                         )
                                         .padding(.horizontal, 20)
@@ -376,8 +410,10 @@ struct CircleDetailView: View {
                             .foregroundColor(Color("BrandAnchor"))
                     }
                     Menu {
-                        Button(role: .destructive) { showLeaveAlert = true } label: {
-                            Label("Leave Circle", systemImage: "arrow.right.circle")
+                        if circle.creatorId != Auth.auth().currentUser?.uid {
+                            Button(role: .destructive) { showLeaveAlert = true } label: {
+                                Label("Leave Circle", systemImage: "arrow.right.circle")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis")
@@ -465,6 +501,11 @@ struct CircleDetailView: View {
         }
     }
 
+    private var isCircleLeader: Bool {
+        guard let uid = Auth.auth().currentUser?.uid else { return false }
+        return circle.creatorId == uid && userStore.isPremium
+    }
+
     // MARK: - Actions
     private func loadData() async {
         guard let circleId = circle.id else { return }
@@ -496,6 +537,23 @@ struct CircleDetailView: View {
         if let index = posts.firstIndex(where: { $0.id == post.id }) {
             let current = posts[index].reactions[emoji] ?? 0
             posts[index].reactions[emoji] = current + 1
+        }
+    }
+
+    private func togglePin(post: CirclePost) async {
+        guard let circleId = circle.id, let postId = post.id else { return }
+        if post.isPinned {
+            try? await service.unpinPost(circleId: circleId, postId: postId)
+            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                posts[idx].isPinned = false
+            }
+        } else {
+            try? await service.pinPost(circleId: circleId, postId: postId)
+            // Unpin all others locally
+            for i in posts.indices { posts[i].isPinned = false }
+            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                posts[idx].isPinned = true
+            }
         }
     }
 
@@ -811,14 +869,30 @@ struct PrayerCard: View {
 // MARK: - CirclePostRow
 struct CirclePostRow: View {
     let post: CirclePost
+    var isLeader: Bool = false
     let onReact: (String) -> Void
     let onComment: () -> Void
+    var onPin: (() -> Void)? = nil
 
     private let reactionEmojis = ["🔥", "🙏", "🙌", "💪"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            // Type badge + time
+            // Pinned banner
+            if post.isPinned {
+                HStack(spacing: 4) {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 10, weight: .semibold))
+                    Text("Pinned")
+                        .font(.system(size: 10, weight: .bold))
+                }
+                .foregroundColor(Color("BrandGold"))
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(Color("BrandGold").opacity(0.12))
+                .cornerRadius(6)
+            }
+
+            // Type badge + time + leader menu
             HStack {
                 HStack(spacing: 6) {
                     Image(systemName: post.type.icon)
@@ -835,6 +909,23 @@ struct CirclePostRow: View {
                 Text(post.timestamp.timeAgo)
                     .font(.system(size: 11))
                     .foregroundColor(Color("TextSecondary"))
+
+                // Leader tools menu
+                if isLeader, let onPin {
+                    Menu {
+                        Button {
+                            onPin()
+                        } label: {
+                            Label(post.isPinned ? "Unpin Post" : "Pin to Top",
+                                  systemImage: post.isPinned ? "pin.slash" : "pin.fill")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color("TextSecondary"))
+                            .padding(.leading, 4)
+                    }
+                }
             }
             // Author
             Text(post.isAnonymous ? "A brother shared:" : post.authorName)

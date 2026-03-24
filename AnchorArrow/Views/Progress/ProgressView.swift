@@ -2,6 +2,7 @@
 // Stats — streak calendar, badge gallery, weekly/monthly summary
 
 import SwiftUI
+import FirebaseAuth
 
 struct ProgressView: View {
     @EnvironmentObject var userStore: UserStore
@@ -22,6 +23,11 @@ struct ProgressView: View {
                     // Stats Grid
                     statsGridSection
 
+                    // Drift Insights (Premium)
+                    if userStore.isPremium {
+                        driftInsightsSection
+                    }
+
                     // Streak Calendar
                     calendarSection
 
@@ -31,10 +37,20 @@ struct ProgressView: View {
                     // Weekly Summary
                     weeklySummarySection
 
+                    // Drift History
+                    if !userStore.driftLogs.isEmpty {
+                        driftHistorySection
+                    }
+
                     Spacer(minLength: 100)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+            }
+            .refreshable {
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                await userStore.loadUserData(uid: uid)
+                loadCalendarEntries()
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Progress")
@@ -72,6 +88,22 @@ struct ProgressView: View {
                                 .foregroundColor(.orange)
                             Text("Longest: \(userStore.appUser?.longestStreak ?? 0) days")
                                 .font(.system(size: 13))
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
+
+                    // Grace day status (premium only)
+                    if userStore.isPremium {
+                        HStack(spacing: 4) {
+                            Image(systemName: userStore.appUser?.hasGraceDayAvailable == true
+                                  ? "heart.fill" : "heart.slash")
+                                .font(.system(size: 11))
+                                .foregroundColor(userStore.appUser?.hasGraceDayAvailable == true
+                                                 ? .green : .white.opacity(0.4))
+                            Text(userStore.appUser?.hasGraceDayAvailable == true
+                                 ? "Grace day available"
+                                 : "Grace day used")
+                                .font(.system(size: 12, weight: .medium))
                                 .foregroundColor(.white.opacity(0.7))
                         }
                     }
@@ -136,6 +168,125 @@ struct ProgressView: View {
                 color: "BrandGold"
             )
         }
+    }
+
+    // MARK: - Drift Insights (Premium)
+    private var driftInsightsSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color("BrandWarning"))
+                Text("Drift Insights")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Spacer()
+                Text("PREMIUM")
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundColor(Color("BrandGold"))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color("BrandGold").opacity(0.15))
+                    .cornerRadius(6)
+            }
+
+            // Empty state
+            if userStore.driftLogs.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandArrow"))
+                    Text("No drift data yet. Insights will appear as you log drift moments.")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color("TextSecondary"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandArrow").opacity(0.06))
+                .cornerRadius(12)
+            }
+
+            // Top drift categories bar chart
+            let topCategories = userStore.topDriftCategoriesThisMonth
+            if !topCategories.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Top Categories This Month")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color("TextSecondary"))
+
+                    let maxCount = topCategories.first?.count ?? 1
+                    ForEach(topCategories.prefix(5), id: \.tag) { item in
+                        HStack(spacing: 10) {
+                            Text(item.tag.displayName)
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundColor(Color("TextPrimary"))
+                                .frame(width: 90, alignment: .leading)
+
+                            GeometryReader { geo in
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(Color("BrandWarning").opacity(0.7))
+                                    .frame(width: geo.size.width * CGFloat(item.count) / CGFloat(maxCount))
+                            }
+                            .frame(height: 16)
+
+                            Text("\(item.count)")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Color("TextSecondary"))
+                                .frame(width: 24, alignment: .trailing)
+                        }
+                    }
+                }
+            }
+
+            // Weakest day
+            if let weakestDay = userStore.weakestDayOfWeek {
+                HStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandWarning"))
+                    Text("You drift most on \(weakestDay)s")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color("TextPrimary"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandWarning").opacity(0.08))
+                .cornerRadius(12)
+            }
+
+            // 90-day trend (only show with data)
+            if !userStore.driftLogs.isEmpty {
+                let trend = userStore.driftTrending
+                HStack(spacing: 8) {
+                    Image(systemName: trend.icon)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(trend.color))
+                    Text("90-day drift trend: \(trend.label.lowercased())")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color("TextPrimary"))
+                }
+            }
+
+            // Positive reinforcement — accountability streaks
+            let streaks = userStore.accountabilityStreaks
+            if let best = streaks.first {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandArrow"))
+                    Text("Accountable on \(best.tag.displayName) for \(best.weeks) weeks")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(Color("BrandArrow"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandArrow").opacity(0.08))
+                .cornerRadius(12)
+            }
+        }
+        .padding(20)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
     }
 
     // MARK: - Calendar
@@ -245,6 +396,68 @@ struct ProgressView: View {
                     label: "Full Days",
                     color: "BrandGold"
                 )
+            }
+        }
+        .padding(20)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
+    // MARK: - Drift History
+    private var driftHistorySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("Drift Timeline")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Spacer()
+                Text("\(userStore.driftLogs.count) total")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color("TextSecondary"))
+            }
+
+            ForEach(userStore.driftLogs.prefix(10)) { log in
+                HStack(spacing: 12) {
+                    // Timeline dot + line
+                    VStack(spacing: 0) {
+                        SwiftUI.Circle()
+                            .fill(Color("BrandWarning"))
+                            .frame(width: 10, height: 10)
+                        Rectangle()
+                            .fill(Color("BrandWarning").opacity(0.2))
+                            .frame(width: 2)
+                    }
+                    .frame(width: 10)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: log.category.icon)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("BrandWarning"))
+                            Text(log.category.displayName)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Color("TextPrimary"))
+                            Spacer()
+                            Text(log.timestamp.timeAgo)
+                                .font(.system(size: 11))
+                                .foregroundColor(Color("TextSecondary"))
+                        }
+                        if !log.note.isEmpty {
+                            Text(log.note)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color("TextSecondary"))
+                                .lineLimit(2)
+                        }
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+
+            if userStore.driftLogs.count > 10 {
+                Text("\(userStore.driftLogs.count - 10) more entries")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Color("TextSecondary"))
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .padding(20)
