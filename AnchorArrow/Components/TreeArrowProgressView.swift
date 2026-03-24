@@ -80,14 +80,14 @@ struct CrossedArrowsView: View {
                 &context,
                 from: CGPoint(x: size.width * 0.10, y: size.height * 0.90),
                 to:   CGPoint(x: size.width * 0.90, y: size.height * 0.10),
-                color: color
+                color: color, frameWidth: size.width
             )
             // Arrow 2: bottom-right → top-left (↖)
             CrossedArrowsView.drawArrow(
                 &context,
                 from: CGPoint(x: size.width * 0.90, y: size.height * 0.90),
                 to:   CGPoint(x: size.width * 0.10, y: size.height * 0.10),
-                color: color
+                color: color, frameWidth: size.width
             )
         }
     }
@@ -96,40 +96,41 @@ struct CrossedArrowsView: View {
         _ context: inout GraphicsContext,
         from tail: CGPoint,
         to tip: CGPoint,
-        color: Color
+        color: Color,
+        frameWidth: CGFloat
     ) {
         let dx = tip.x - tail.x
         let dy = tip.y - tail.y
         let len = sqrt(dx * dx + dy * dy)
-        let ux = dx / len, uy = dy / len   // unit vector toward tip
-        let px = -uy,      py =  ux        // perpendicular (left-normal)
-        let shading = GraphicsContext.Shading.color(color)
+        let ux = dx / len, uy = dy / len
+        let px = -uy,      py =  ux
+        // Proportional stroke — matches AnchorSymbolView weight at same display size
+        let lw        = max(frameWidth * 0.014, 1.5)
+        let headLen   = frameWidth * 0.068
+        let fletchLen = frameWidth * 0.040
+        let shading   = GraphicsContext.Shading.color(color)
 
         // Shaft
         var shaft = Path()
         shaft.move(to: tail)
         shaft.addLine(to: tip)
         context.stroke(shaft, with: shading,
-                       style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                       style: StrokeStyle(lineWidth: lw, lineCap: .round))
 
-        // Arrowhead (V at tip)
-        let angle     = atan2(dy, dx)
-        let headLen:  CGFloat = 13
-        let spread:   CGFloat = .pi / 5
+        // Arrowhead
+        let angle   = atan2(dy, dx)
+        let spread: CGFloat = .pi / 5
         var head = Path()
         head.move(to: tip)
-        head.addLine(to: CGPoint(
-            x: tip.x - headLen * cos(angle - spread),
-            y: tip.y - headLen * sin(angle - spread)))
+        head.addLine(to: CGPoint(x: tip.x - headLen * cos(angle - spread),
+                                 y: tip.y - headLen * sin(angle - spread)))
         head.move(to: tip)
-        head.addLine(to: CGPoint(
-            x: tip.x - headLen * cos(angle + spread),
-            y: tip.y - headLen * sin(angle + spread)))
+        head.addLine(to: CGPoint(x: tip.x - headLen * cos(angle + spread),
+                                 y: tip.y - headLen * sin(angle + spread)))
         context.stroke(head, with: shading,
-                       style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                       style: StrokeStyle(lineWidth: lw, lineCap: .round))
 
-        // Fletching chevrons near tail
-        let fletchLen: CGFloat = 7
+        // Fletching chevrons
         for t: CGFloat in [0.08, 0.16] {
             let base = CGPoint(x: tail.x + ux * len * t,
                                y: tail.y + uy * len * t)
@@ -140,7 +141,8 @@ struct CrossedArrowsView: View {
             fletch.addLine(to: CGPoint(x: base.x - px * fletchLen,
                                        y: base.y - py * fletchLen))
             context.stroke(fletch, with: .color(color.opacity(0.55)),
-                           style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                           style: StrokeStyle(lineWidth: max(lw * 0.85, 1.2),
+                                             lineCap: .round, lineJoin: .round))
         }
     }
 }
@@ -230,8 +232,6 @@ struct UpwardArcheryArrowView: View {
 }
 
 // MARK: - Canvas-drawn Anchor Symbol
-// Replaces Image(systemName: "anchor") which fails to render reliably
-// at large sizes inside ZStack hero compositions.
 struct AnchorSymbolView: View {
     var color: Color = Color("BrandAnchor")
 
@@ -240,13 +240,14 @@ struct AnchorSymbolView: View {
             let w = size.width
             let h = size.height
             let cx = w / 2
-            let lw = max(w * 0.032, 1.5)
+            // Thin stroke that matches CrossedArrowsView weight at comparable sizes
+            let lw = max(w * 0.020, 1.5)
             let shading = GraphicsContext.Shading.color(color)
             let style = StrokeStyle(lineWidth: lw, lineCap: .round, lineJoin: .round)
 
             // Ring at top
-            let ringR = w * 0.105
-            let ringCY = h * 0.108
+            let ringR = w * 0.088
+            let ringCY = h * 0.093
             var ring = Path()
             ring.addArc(center: CGPoint(x: cx, y: ringCY),
                         radius: ringR,
@@ -258,32 +259,32 @@ struct AnchorSymbolView: View {
             // Shaft (ring bottom → crown)
             var shaft = Path()
             shaft.move(to: CGPoint(x: cx, y: ringCY + ringR))
-            shaft.addLine(to: CGPoint(x: cx, y: h * 0.81))
+            shaft.addLine(to: CGPoint(x: cx, y: h * 0.810))
             context.stroke(shaft, with: shading, style: style)
 
             // Stock / crossbar
             var stock = Path()
-            stock.move(to: CGPoint(x: cx - w * 0.44, y: h * 0.26))
-            stock.addLine(to: CGPoint(x: cx + w * 0.44, y: h * 0.26))
+            stock.move(to: CGPoint(x: cx - w * 0.410, y: h * 0.252))
+            stock.addLine(to: CGPoint(x: cx + w * 0.410, y: h * 0.252))
             context.stroke(stock, with: shading, style: style)
 
-            // Left arm + fluke (sweeps down-and-out then curves up)
+            // Left arm + fluke — sweeps outward then tips upward
             var leftArm = Path()
-            leftArm.move(to: CGPoint(x: cx, y: h * 0.81))
+            leftArm.move(to: CGPoint(x: cx, y: h * 0.810))
             leftArm.addCurve(
-                to:       CGPoint(x: cx - w * 0.44, y: h * 0.63),
-                control1: CGPoint(x: cx - w * 0.04, y: h * 0.94),
-                control2: CGPoint(x: cx - w * 0.44, y: h * 0.94)
+                to:       CGPoint(x: cx - w * 0.430, y: h * 0.665),
+                control1: CGPoint(x: cx - w * 0.230, y: h * 0.840),
+                control2: CGPoint(x: cx - w * 0.430, y: h * 0.805)
             )
             context.stroke(leftArm, with: shading, style: style)
 
             // Right arm + fluke (mirror)
             var rightArm = Path()
-            rightArm.move(to: CGPoint(x: cx, y: h * 0.81))
+            rightArm.move(to: CGPoint(x: cx, y: h * 0.810))
             rightArm.addCurve(
-                to:       CGPoint(x: cx + w * 0.44, y: h * 0.63),
-                control1: CGPoint(x: cx + w * 0.04, y: h * 0.94),
-                control2: CGPoint(x: cx + w * 0.44, y: h * 0.94)
+                to:       CGPoint(x: cx + w * 0.430, y: h * 0.665),
+                control1: CGPoint(x: cx + w * 0.230, y: h * 0.840),
+                control2: CGPoint(x: cx + w * 0.430, y: h * 0.805)
             )
             context.stroke(rightArm, with: shading, style: style)
         }

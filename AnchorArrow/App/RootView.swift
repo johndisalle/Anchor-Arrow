@@ -63,35 +63,35 @@ struct SplashView: View {
                 Spacer()
 
                 // Hero composition
-                ZStack(alignment: .bottom) {
-                    // Radial glow halo behind the mark
+                // Arrows sit above anchor ring with ~30pt overlap so they
+                // cross ABOVE the ring, not through the anchor body.
+                ZStack {
+                    // Subtle atmospheric glow
                     SwiftUI.Circle()
                         .fill(
                             RadialGradient(
-                                colors: [Color("BrandAnchor").opacity(0.18), Color.clear],
+                                colors: [Color("BrandAnchor").opacity(0.11), Color.clear],
                                 center: .center,
-                                startRadius: 20,
-                                endRadius: 170
+                                startRadius: 10,
+                                endRadius: 148
                             )
                         )
-                        .frame(width: 340, height: 340)
+                        .frame(width: 296, height: 296)
                         .opacity(glowOpacity)
 
-                    // Crossed archery arrows float above the anchor
-                    CrossedArrowsView()
-                        .frame(width: 210, height: 130)
-                        .scaleEffect(arrowsShown ? 1.0 : 0.1)
-                        .opacity(arrowsShown ? 1.0 : 0)
-                        .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: arrowsShown)
-                        .offset(y: -90)
+                    VStack(spacing: -30) {
+                        CrossedArrowsView()
+                            .frame(width: 200, height: 124)
+                            .scaleEffect(arrowsShown ? 1.0 : 0.1)
+                            .opacity(arrowsShown ? 1.0 : 0)
+                            .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: arrowsShown)
 
-                    // Anchor — Canvas-drawn for reliable rendering
-                    AnchorSymbolView()
-                        .frame(width: 178, height: 222)
-                        .opacity(anchorShown ? 1.0 : 0)
-                        .animation(.easeOut(duration: 0.7).delay(0.15), value: anchorShown)
+                        AnchorSymbolView()
+                            .frame(width: 164, height: 205)
+                            .opacity(anchorShown ? 1.0 : 0)
+                            .animation(.easeOut(duration: 0.7).delay(0.15), value: anchorShown)
+                    }
                 }
-                .frame(width: 340, height: 340)
 
                 Spacer().frame(height: 52)
 

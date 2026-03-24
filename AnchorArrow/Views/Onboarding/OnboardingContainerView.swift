@@ -92,56 +92,35 @@ struct OnboardingPage1: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Brand mark hero — anchor + crossed arrows (matches splash screen)
+            // Brand mark hero — same composition as splash screen
             ZStack {
-                // Radial glow background
+                // Subtle atmospheric glow (no ring border — it clipped the arrows)
                 SwiftUI.Circle()
                     .fill(
                         RadialGradient(
-                            colors: [
-                                Color("BrandAnchor").opacity(0.16),
-                                Color("BrandAnchor").opacity(0.04),
-                                Color.clear
-                            ],
+                            colors: [Color("BrandAnchor").opacity(0.11), Color.clear],
                             center: .center,
-                            startRadius: 20,
-                            endRadius: 152
+                            startRadius: 10,
+                            endRadius: 148
                         )
                     )
-                    .frame(width: 304, height: 304)
+                    .frame(width: 296, height: 296)
                     .opacity(appeared ? 1.0 : 0)
-                    .animation(.easeOut(duration: 1.2).delay(0.2), value: appeared)
+                    .animation(.easeOut(duration: 1.0).delay(0.2), value: appeared)
 
-                // Gradient ring
-                SwiftUI.Circle()
-                    .strokeBorder(
-                        LinearGradient(
-                            colors: [Color("BrandAnchor").opacity(0.45), Color("BrandAnchor").opacity(0.08)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1.2
-                    )
-                    .frame(width: 280, height: 280)
-                    .opacity(appeared ? 1.0 : 0)
-                    .animation(.easeOut(duration: 1.0).delay(0.3), value: appeared)
+                VStack(spacing: -30) {
+                    CrossedArrowsView()
+                        .frame(width: 196, height: 122)
+                        .scaleEffect(appeared ? 1.0 : 0.1)
+                        .opacity(appeared ? 1.0 : 0)
+                        .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: appeared)
 
-                // Anchor — Canvas-drawn for reliable rendering
-                AnchorSymbolView()
-                    .frame(width: 158, height: 198)
-                    .offset(y: 14)
-                    .opacity(appeared ? 1.0 : 0)
-                    .animation(.easeOut(duration: 0.7).delay(0.15), value: appeared)
-
-                // Crossed archery arrows above anchor
-                CrossedArrowsView()
-                    .frame(width: 180, height: 108)
-                    .scaleEffect(appeared ? 1.0 : 0.1)
-                    .opacity(appeared ? 1.0 : 0)
-                    .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: appeared)
-                    .offset(y: -92)
+                    AnchorSymbolView()
+                        .frame(width: 158, height: 198)
+                        .opacity(appeared ? 1.0 : 0)
+                        .animation(.easeOut(duration: 0.7).delay(0.15), value: appeared)
+                }
             }
-            .frame(width: 304, height: 304)
 
             Spacer().frame(height: 44)
 
