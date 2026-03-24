@@ -56,6 +56,8 @@ struct TreeArrowProgressView: View {
         .frame(maxWidth: .infinity)
         .onAppear { triggerAnimation() }
         .onChange(of: animate) { if animate { triggerAnimation() } }
+        // The hero is purely decorative; progress is conveyed elsewhere in the UI
+        .accessibilityHidden(true)
     }
 
     private func triggerAnimation() {
@@ -90,6 +92,7 @@ struct CrossedArrowsView: View {
                 color: color, frameWidth: size.width
             )
         }
+        .accessibilityLabel("Crossed arrows")
     }
 
     private static func drawArrow(
@@ -288,6 +291,7 @@ struct AnchorSymbolView: View {
             )
             context.stroke(rightArm, with: shading, style: style)
         }
+        .accessibilityLabel("Anchor")
     }
 }
 
@@ -341,6 +345,7 @@ struct SingleArcheryArrowView: View {
                                                  lineCap: .round, lineJoin: .round))
             }
         }
+        .accessibilityLabel("Arrow")
     }
 }
 

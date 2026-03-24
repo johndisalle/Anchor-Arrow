@@ -399,8 +399,16 @@ struct CalendarDayCell: View {
         return Color("CardBackground")
     }
 
+    private var accessibilityDescription: String {
+        if isFuture { return "Day \(day)" }
+        if anchorDone && arrowDone { return "Day \(day), anchor and arrow complete" }
+        if anchorDone { return "Day \(day), anchor complete" }
+        if arrowDone  { return "Day \(day), arrow complete" }
+        return "Day \(day), incomplete"
+    }
+
     var body: some View {
-        ZStack {
+        ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: 6)
                 .fill(bgColor)
                 .overlay(
@@ -411,8 +419,20 @@ struct CalendarDayCell: View {
             Text("\(day)")
                 .font(.system(size: 12, weight: isToday ? .heavy : .medium))
                 .foregroundColor(isFuture ? Color("TextSecondary").opacity(0.3) : .white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            // Small symbol in corner — gives colorblind users a non-color cue
+            if !isFuture && (anchorDone || arrowDone) {
+                Image(systemName: anchorDone && arrowDone ? "checkmark"
+                                  : anchorDone            ? "anchor"
+                                                          : "arrow.up.right")
+                    .font(.system(size: 6, weight: .bold))
+                    .foregroundColor(.white.opacity(0.85))
+                    .padding(2)
+            }
         }
         .frame(height: 32)
+        .accessibilityLabel(accessibilityDescription)
     }
 }
 

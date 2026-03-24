@@ -297,6 +297,39 @@ class FirestoreService {
         ])
     }
 
+    // MARK: - Account Deletion (cascade)
+
+    /// Deletes all user data from Firestore before the Auth account is removed.
+    /// Order: leave circles → delete entries → delete drift logs → delete user doc.
+    func deleteUserData(uid: String) async throws {
+        // 1. Remove from every circle the user belongs to
+        let circles = (try? await fetchUserCircles(uid: uid)) ?? []
+        for circle in circles {
+            if let circleId = circle.id {
+                try? await leaveCircle(circleId: circleId, uid: uid)
+            }
+        }
+
+        // 2. Delete entries subcollection in batches (Firestore max 500/batch)
+        let entryDocs = try await entriesRef(uid).getDocuments()
+        if !entryDocs.documents.isEmpty {
+            let batch = db.batch()
+            entryDocs.documents.forEach { batch.deleteDocument($0.reference) }
+            try await batch.commit()
+        }
+
+        // 3. Delete driftLogs subcollection
+        let driftDocs = try await driftRef(uid).getDocuments()
+        if !driftDocs.documents.isEmpty {
+            let batch = db.batch()
+            driftDocs.documents.forEach { batch.deleteDocument($0.reference) }
+            try await batch.commit()
+        }
+
+        // 4. Delete user document last
+        try await userRef(uid).delete()
+    }
+
     // MARK: - Premium flag
     func setPremium(uid: String, isPremium: Bool, expiry: Date?) async throws {
         var updates: [String: Any] = ["isPremium": isPremium]

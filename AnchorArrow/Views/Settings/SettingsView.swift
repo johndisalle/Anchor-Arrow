@@ -281,11 +281,17 @@ struct SettingsView: View {
         Picker("App Theme", selection: .init(
             get: { userStore.appUser?.theme ?? .system },
             set: { theme in
-                // Update local state immediately so .preferredColorScheme reacts now
+                let previous = userStore.appUser?.theme ?? .system
+                // Apply immediately so the color scheme reacts without a round-trip
                 userStore.appUser?.theme = theme
                 Task {
                     if let uid = Auth.auth().currentUser?.uid {
-                        try? await FirestoreService.shared.updateUser(uid: uid, fields: ["theme": theme.rawValue])
+                        do {
+                            try await FirestoreService.shared.updateUser(uid: uid, fields: ["theme": theme.rawValue])
+                        } catch {
+                            // Revert local change so the UI stays consistent with persisted state
+                            await MainActor.run { userStore.appUser?.theme = previous }
+                        }
                     }
                 }
             }

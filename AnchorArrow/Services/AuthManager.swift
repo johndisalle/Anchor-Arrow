@@ -124,6 +124,9 @@ class AuthManager: NSObject, ObservableObject {
     // MARK: - Delete Account
     func deleteAccount() async throws {
         guard let user = Auth.auth().currentUser else { throw AuthError.notSignedIn }
+        // Delete all Firestore data first (entries, drift logs, circle memberships, user doc)
+        // so no orphaned data remains if the Auth deletion succeeds.
+        try await FirestoreService.shared.deleteUserData(uid: user.uid)
         try await user.delete()
     }
 
