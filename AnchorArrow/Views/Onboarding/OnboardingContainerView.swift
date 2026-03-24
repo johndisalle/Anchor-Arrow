@@ -126,14 +126,16 @@ struct OnboardingPage1: View {
                     .opacity(appeared ? 1.0 : 0)
                     .animation(.easeOut(duration: 1.0).delay(0.3), value: appeared)
 
-                // Anchor — dominant centerpiece
+                // Anchor — explicit resizable frame so it always renders
                 Image(systemName: "anchor")
-                    .renderingMode(.template)
-                    .font(.system(size: 140, weight: .thin))
+                    .resizable()
+                    .fontWeight(.thin)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 158)
                     .foregroundStyle(Color("BrandAnchor"))
-                    .scaleEffect(appeared ? 1.0 : 0.05)
+                    .offset(y: 12)
                     .opacity(appeared ? 1.0 : 0)
-                    .animation(.spring(response: 0.9, dampingFraction: 0.62).delay(0.15), value: appeared)
+                    .animation(.easeOut(duration: 0.7).delay(0.15), value: appeared)
 
                 // Crossed archery arrows above anchor
                 CrossedArrowsView()
