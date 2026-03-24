@@ -57,7 +57,8 @@ struct MemberProfile {
     }
 }
 
-
+// MARK: - CirclePost
+struct CirclePost: Codable, Identifiable {
     @DocumentID var id: String?
     var circleId: String
     var authorId: String
