@@ -144,27 +144,31 @@ struct AppUser: Codable, Identifiable {
 enum JourneySeries: String, Codable, CaseIterable, Identifiable {
     case standFirm = "stand_firm"
     case armorOfGod = "armor_of_god"
+    case surrenderFirst = "surrender_first"
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .standFirm:  return "Stand Firm"
-        case .armorOfGod: return "Armor of God"
+        case .standFirm:      return "Stand Firm"
+        case .armorOfGod:     return "Armor of God"
+        case .surrenderFirst: return "Surrender First"
         }
     }
 
     var subtitle: String {
         switch self {
-        case .standFirm:  return "30 Days in 1 Corinthians 16:13"
-        case .armorOfGod: return "30 Days in Ephesians 6"
+        case .standFirm:      return "30 Days in 1 Corinthians 16:13"
+        case .armorOfGod:     return "30 Days in Ephesians 6"
+        case .surrenderFirst: return "30 Days in Galatians 2:20"
         }
     }
 
     var icon: String {
         switch self {
-        case .standFirm:  return "figure.stand.line.dotted.figure.stand"
-        case .armorOfGod: return "shield.checkered"
+        case .standFirm:      return "figure.stand.line.dotted.figure.stand"
+        case .armorOfGod:     return "shield.checkered"
+        case .surrenderFirst: return "arrow.down.to.line"
         }
     }
 }

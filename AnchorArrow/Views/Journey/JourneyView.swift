@@ -370,6 +370,13 @@ struct JourneyView: View {
                 (3, "Act Like Men", Color("BrandArrow")),
                 (4, "In Love", Color.red)
             ]
+        case .surrenderFirst:
+            return [
+                (1, "Bow the Knee", Color("BrandAnchor")),
+                (2, "Die to Self", Color.blue),
+                (3, "Receive Your Identity", Color("BrandArrow")),
+                (4, "Rise to Serve", Color.red)
+            ]
         }
     }
 }
