@@ -31,6 +31,17 @@
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.ellasid.anchorarrow</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>anchorarrow</string>
+			</array>
+		</dict>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>

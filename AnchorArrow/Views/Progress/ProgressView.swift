@@ -15,6 +15,9 @@ struct ProgressView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
+                if userStore.isLoading && userStore.appUser == nil {
+                    progressSkeleton
+                } else {
                 VStack(spacing: 24) {
 
                     // Streak header
@@ -46,6 +49,7 @@ struct ProgressView: View {
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+                }
             }
             .refreshable {
                 guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -63,6 +67,34 @@ struct ProgressView: View {
     }
 
     // MARK: - Streak Hero
+    // MARK: - Skeleton
+    private var progressSkeleton: some View {
+        VStack(spacing: 24) {
+            // Streak hero placeholder
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color("CardBackground"))
+                .frame(height: 160)
+
+            // Stats grid
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+                ForEach(0..<4, id: \.self) { _ in
+                    SkeletonCard(height: 80)
+                }
+            }
+
+            // Calendar placeholder
+            SkeletonCard(height: 260)
+
+            // Badge gallery placeholder
+            SkeletonCard(height: 120)
+
+            Spacer(minLength: 100)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+        .shimmer()
+    }
+
     private var streakHeroSection: some View {
         ZStack {
             LinearGradient(

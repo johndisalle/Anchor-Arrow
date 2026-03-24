@@ -423,14 +423,14 @@ struct CircleDetailView: View {
                     Button("Done") { dismiss() }.foregroundColor(Color("BrandAnchor"))
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        UIPasteboard.general.string = circle.inviteCode
-                        codeCopied = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { codeCopied = false }
-                    } label: {
-                        Image(systemName: codeCopied ? "checkmark" : "link")
+                    ShareLink(
+                        item: URL(string: "anchorarrow://join?code=\(circle.inviteCode)")!,
+                        subject: Text("Join \(circle.name) on Anchor & Arrow"),
+                        message: Text("Join my circle \"\(circle.name)\" on Anchor & Arrow! Use code \(circle.inviteCode) or tap this link.")
+                    ) {
+                        Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16))
-                            .foregroundColor(codeCopied ? Color("BrandArrow") : Color("BrandAnchor"))
+                            .foregroundColor(Color("BrandAnchor"))
                     }
                     Button { showMemberList = true } label: {
                         Image(systemName: "person.2")

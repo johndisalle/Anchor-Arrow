@@ -15,6 +15,9 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
+                if userStore.isLoading && userStore.appUser == nil {
+                    dashboardSkeleton
+                } else {
                 VStack(spacing: 24) {
 
                     // Greeting Header
@@ -47,6 +50,7 @@ struct DashboardView: View {
                     Spacer(minLength: 100) // tab bar clearance
                 }
                 .padding(.top, 8)
+                }
             }
             .refreshable {
                 guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -243,6 +247,57 @@ struct DashboardView: View {
             ? "\(userStore.currentJourneySeries.displayName) Journey, Day \(userStore.appUser?.journeyDay ?? 0) of 30"
             : "\(userStore.currentJourneySeries.displayName) Journey, 30-day guided plan")
         .accessibilityHint("Double tap to open")
+    }
+
+    // MARK: - Skeleton
+    private var dashboardSkeleton: some View {
+        VStack(spacing: 24) {
+            // Header placeholder
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(width: 100, height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(width: 160, height: 24)
+                }
+                Spacer()
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color("CardBackground"))
+                    .frame(width: 52, height: 60)
+            }
+            .padding(.horizontal, 24)
+
+            // Tree placeholder
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color("CardBackground"))
+                .frame(height: 280)
+                .padding(.horizontal, 24)
+
+            // Status cards
+            HStack(spacing: 14) {
+                SkeletonCard(height: 130)
+                SkeletonCard(height: 130)
+            }
+            .padding(.horizontal, 24)
+
+            // Stats row
+            HStack(spacing: 14) {
+                SkeletonCard(height: 80)
+                SkeletonCard(height: 80)
+                SkeletonCard(height: 80)
+            }
+            .padding(.horizontal, 24)
+
+            // Journey CTA
+            SkeletonCard(height: 80)
+                .padding(.horizontal, 24)
+
+            Spacer(minLength: 100)
+        }
+        .padding(.top, 8)
+        .shimmer()
     }
 
     // MARK: - Helpers
