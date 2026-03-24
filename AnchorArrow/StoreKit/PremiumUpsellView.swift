@@ -147,11 +147,21 @@ struct PremiumUpsellView: View {
                         .foregroundColor(Color("TextSecondary"))
 
                         // Legal
-                        Text("Free trial for 3 days, then subscription renews automatically. Cancel anytime in App Store settings. You won't be charged if you cancel before the trial ends. Terms & Privacy Policy apply.")
-                            .font(.system(size: 10))
-                            .foregroundColor(Color("TextSecondary").opacity(0.6))
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 32)
+                        VStack(spacing: 4) {
+                            Text("Free trial for 3 days, then subscription renews automatically. Cancel anytime in App Store settings. You won't be charged if you cancel before the trial ends.")
+                                .font(.system(size: 10))
+                                .foregroundColor(Color("TextSecondary").opacity(0.6))
+                                .multilineTextAlignment(.center)
+
+                            HStack(spacing: 4) {
+                                Link("Terms of Use", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!)
+                                Text("&")
+                                    .foregroundColor(Color("TextSecondary").opacity(0.6))
+                                Link("Privacy Policy", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!)
+                            }
+                            .font(.system(size: 10, weight: .medium))
+                        }
+                        .padding(.horizontal, 32)
                     }
 
                     Spacer(minLength: 20)

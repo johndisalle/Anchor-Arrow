@@ -100,6 +100,20 @@ struct SettingsView: View {
                     Text("Account")
                 }
 
+                // Legal Section
+                Section {
+                    Link(destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!) {
+                        Label("Terms of Use", systemImage: "doc.text")
+                            .foregroundColor(Color("TextPrimary"))
+                    }
+                    Link(destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!) {
+                        Label("Privacy Policy", systemImage: "hand.raised")
+                            .foregroundColor(Color("TextPrimary"))
+                    }
+                } header: {
+                    Text("Legal")
+                }
+
                 // About Section
                 Section {
                     LabeledContent("Version", value: "1.0.0 (MVP)")
