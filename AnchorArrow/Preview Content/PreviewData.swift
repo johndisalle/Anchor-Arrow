@@ -105,16 +105,19 @@ enum PreviewData {
         DriftLog(
             timestamp: Calendar.current.date(byAdding: .hour, value: -2, to: Date())!,
             category: .temptation,
+            customCategory: nil,
             note: "Scroll spiral on phone, late night."
         ),
         DriftLog(
             timestamp: Calendar.current.date(byAdding: .day, value: -1, to: Date())!,
             category: .pride,
+            customCategory: nil,
             note: "Dismissed my wife's suggestion without really listening."
         ),
         DriftLog(
             timestamp: Calendar.current.date(byAdding: .day, value: -3, to: Date())!,
             category: .anger,
+            customCategory: nil,
             note: "Lost it over something small. Spoke too harshly."
         )
     ]
