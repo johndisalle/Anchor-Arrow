@@ -89,8 +89,12 @@ service cloud.firestore {
           allow create: if isCircleMember(circleId) &&
             request.resource.data.authorId == request.auth.uid;
 
-          allow update, delete: if isCircleMember(circleId) &&
+          // Author can update/delete own comments; circle creator can also delete any comment
+          allow update: if isCircleMember(circleId) &&
             resource.data.authorId == request.auth.uid;
+          allow delete: if isCircleMember(circleId) &&
+            (resource.data.authorId == request.auth.uid ||
+             get(/databases/$(database)/documents/circles/$(circleId)).data.creatorId == request.auth.uid);
         }
       }
     }
