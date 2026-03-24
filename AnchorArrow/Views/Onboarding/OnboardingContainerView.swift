@@ -247,11 +247,11 @@ struct ConceptCard: View {
             ZStack {
                 SwiftUI.Circle()
                     .fill(Color(color).opacity(0.15))
-                    .frame(width: 44, height: 44)
+                    .frame(width: 48, height: 48)
                 Image(systemName: icon)
                     .renderingMode(.template)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Color(color))
+                    .font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(Color(color))
             }
 
             Text(title)
