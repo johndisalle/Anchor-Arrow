@@ -175,7 +175,7 @@ struct ProgressView: View {
                 title: "Total Anchors",
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 subtitle: "Morning completions",
-                icon: "anchor",
+                icon: "anchor.circle.fill",
                 color: "BrandAnchor"
             )
             StatsCard(
