@@ -76,26 +76,74 @@ struct CrossedArrowsView: View {
     var color: Color = Color("BrandArrow")
 
     var body: some View {
-        ZStack {
-            // Subtle background circle to frame the visual
-            SwiftUI.Circle()
-                .fill(color.opacity(0.07))
-                .frame(width: 108, height: 108)
-
-            // ↗ arrow — bottom-left origin, pointing up-right
-            Image(systemName: "arrow.up.right")
-                .font(.system(size: 46, weight: .thin))
-                .foregroundColor(color)
-                .offset(x: -16, y: 8)
-
-            // ↖ arrow — bottom-right origin, pointing up-left (mirrored)
-            Image(systemName: "arrow.up.right")
-                .font(.system(size: 46, weight: .thin))
-                .foregroundColor(color)
-                .scaleEffect(x: -1, y: 1)
-                .offset(x: 16, y: 8)
+        Canvas { context, size in
+            // Arrow 1: bottom-left → top-right (↗)
+            CrossedArrowsView.drawArrow(
+                &context,
+                from: CGPoint(x: size.width * 0.10, y: size.height * 0.90),
+                to:   CGPoint(x: size.width * 0.90, y: size.height * 0.10),
+                color: color
+            )
+            // Arrow 2: bottom-right → top-left (↖)
+            CrossedArrowsView.drawArrow(
+                &context,
+                from: CGPoint(x: size.width * 0.90, y: size.height * 0.90),
+                to:   CGPoint(x: size.width * 0.10, y: size.height * 0.10),
+                color: color
+            )
         }
-        .frame(width: 140, height: 88)
+    }
+
+    private static func drawArrow(
+        _ context: inout GraphicsContext,
+        from tail: CGPoint,
+        to tip: CGPoint,
+        color: Color
+    ) {
+        let dx = tip.x - tail.x
+        let dy = tip.y - tail.y
+        let len = sqrt(dx * dx + dy * dy)
+        let ux = dx / len, uy = dy / len   // unit vector toward tip
+        let px = -uy,      py =  ux        // perpendicular (left-normal)
+        let shading = GraphicsContext.Shading.color(color)
+
+        // Shaft
+        var shaft = Path()
+        shaft.move(to: tail)
+        shaft.addLine(to: tip)
+        context.stroke(shaft, with: shading,
+                       style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+        // Arrowhead (V at tip)
+        let angle     = atan2(dy, dx)
+        let headLen:  CGFloat = 13
+        let spread:   CGFloat = .pi / 5
+        var head = Path()
+        head.move(to: tip)
+        head.addLine(to: CGPoint(
+            x: tip.x - headLen * cos(angle - spread),
+            y: tip.y - headLen * sin(angle - spread)))
+        head.move(to: tip)
+        head.addLine(to: CGPoint(
+            x: tip.x - headLen * cos(angle + spread),
+            y: tip.y - headLen * sin(angle + spread)))
+        context.stroke(head, with: shading,
+                       style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+        // Fletching chevrons near tail
+        let fletchLen: CGFloat = 7
+        for t: CGFloat in [0.08, 0.16] {
+            let base = CGPoint(x: tail.x + ux * len * t,
+                               y: tail.y + uy * len * t)
+            var fletch = Path()
+            fletch.move(to: CGPoint(x: base.x + px * fletchLen,
+                                    y: base.y + py * fletchLen))
+            fletch.addLine(to: base)
+            fletch.addLine(to: CGPoint(x: base.x - px * fletchLen,
+                                       y: base.y - py * fletchLen))
+            context.stroke(fletch, with: .color(color.opacity(0.55)),
+                           style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+        }
     }
 }
 

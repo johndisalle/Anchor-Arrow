@@ -51,53 +51,88 @@ struct RootView: View {
 struct SplashView: View {
     @State private var anchorShown = false
     @State private var arrowsShown = false
-    @State private var textOpacity = 0.0
+    @State private var glowOpacity = 0.0
+    @State private var titleOpacity = 0.0
+    @State private var subtitleOpacity = 0.0
 
     var body: some View {
         ZStack {
             Color("BackgroundPrimary").ignoresSafeArea()
 
-            VStack(spacing: 28) {
-                // Hero: anchor centered with crossed arrows above it
+            VStack(spacing: 0) {
+                Spacer()
+
+                // Hero composition
                 ZStack(alignment: .bottom) {
-                    // Crossed arrows sit above, overlapping top of anchor
+                    // Radial glow halo behind the mark
+                    SwiftUI.Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [Color("BrandAnchor").opacity(0.18), Color.clear],
+                                center: .center,
+                                startRadius: 20,
+                                endRadius: 170
+                            )
+                        )
+                        .frame(width: 340, height: 340)
+                        .opacity(glowOpacity)
+
+                    // Crossed archery arrows float above the anchor
                     CrossedArrowsView()
-                        .frame(width: 160, height: 100)
+                        .frame(width: 210, height: 130)
                         .scaleEffect(arrowsShown ? 1.0 : 0.1)
                         .opacity(arrowsShown ? 1.0 : 0)
-                        .animation(.spring(response: 0.7, dampingFraction: 0.65).delay(0.9), value: arrowsShown)
-                        .offset(y: -52)
+                        .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: arrowsShown)
+                        .offset(y: -90)
 
-                    // Anchor as the grounded base
+                    // Anchor — large, bold, grounded
                     Image(systemName: "anchor")
                         .renderingMode(.template)
-                        .font(.system(size: 72, weight: .thin))
+                        .font(.system(size: 160, weight: .thin))
                         .foregroundStyle(Color("BrandAnchor"))
                         .scaleEffect(anchorShown ? 1.0 : 0.05)
                         .opacity(anchorShown ? 1.0 : 0)
                         .animation(.spring(response: 0.9, dampingFraction: 0.62).delay(0.15), value: anchorShown)
                 }
-                .frame(width: 180, height: 160)
+                .frame(width: 340, height: 340)
 
-                VStack(spacing: 6) {
+                Spacer().frame(height: 52)
+
+                // Wordmark
+                VStack(spacing: 12) {
                     Text("ANCHOR & ARROW")
-                        .font(.system(size: 26, weight: .heavy, design: .rounded))
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
                         .tracking(3)
                         .foregroundColor(Color("TextPrimary"))
+                        .opacity(titleOpacity)
+
+                    Rectangle()
+                        .fill(Color("BrandAnchor").opacity(0.3))
+                        .frame(width: 40, height: 1.5)
+                        .opacity(titleOpacity)
 
                     Text("Stand Firm Edition")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .tracking(1.5)
                         .foregroundColor(Color("TextSecondary"))
+                        .opacity(subtitleOpacity)
                 }
-                .opacity(textOpacity)
+
+                Spacer()
+                Spacer()
             }
         }
         .onAppear {
             anchorShown = true
             arrowsShown = true
-            withAnimation(.easeIn(duration: 0.6).delay(0.3)) {
-                textOpacity = 1.0
+            withAnimation(.easeOut(duration: 1.8).delay(0.15)) {
+                glowOpacity = 1.0
+            }
+            withAnimation(.easeIn(duration: 0.6).delay(0.35)) {
+                titleOpacity = 1.0
+            }
+            withAnimation(.easeIn(duration: 0.5).delay(1.0)) {
+                subtitleOpacity = 1.0
             }
         }
     }
