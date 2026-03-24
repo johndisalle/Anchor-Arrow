@@ -175,7 +175,7 @@ struct ProgressView: View {
                 title: "Total Anchors",
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 subtitle: "Morning completions",
-                icon: "anchor.circle.fill",
+                icon: "sunrise.circle.fill",
                 color: "BrandAnchor"
             )
             StatsCard(
@@ -673,7 +673,7 @@ struct CalendarDayCell: View {
             // Small symbol in corner — gives colorblind users a non-color cue
             if !isFuture && (anchorDone || arrowDone) {
                 Image(systemName: anchorDone && arrowDone ? "checkmark"
-                                  : anchorDone            ? "anchor"
+                                  : anchorDone            ? "sunrise.fill"
                                                           : "arrow.up.right")
                     .font(.system(size: 6, weight: .bold))
                     .foregroundColor(.white.opacity(0.85))
@@ -716,7 +716,7 @@ struct WeekDayDot: View {
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
                     } else if anchorDone {
-                        Image(systemName: "anchor")
+                        Image(systemName: "sunrise.fill")
                             .font(.system(size: 11, weight: .bold))
                             .foregroundColor(.white)
                     } else {
