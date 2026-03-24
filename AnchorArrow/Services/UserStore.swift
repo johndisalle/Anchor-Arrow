@@ -57,7 +57,8 @@ class UserStore: ObservableObject {
         do {
             appUser = try await firestoreService.fetchUser(uid: uid)
             todayEntry = try await firestoreService.fetchTodayEntry(uid: uid)
-            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: 60)
+            let entryLimit = (appUser?.isPremium ?? false) ? 365 : 60
+            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: entryLimit)
             driftLogs = try await firestoreService.fetchDriftLogs(uid: uid)
 
             // Sync theme from server on first load
@@ -161,15 +162,41 @@ class UserStore: ObservableObject {
         }
     }
 
-    func logDrift(category: AnchorTag, note: String) async {
+    func logDrift(category: AnchorTag, note: String, customCategory: String? = nil) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
-        let log = DriftLog.new(category: category, note: note)
+        let log = DriftLog.new(category: category, note: note, customCategory: customCategory)
         do {
             try await firestoreService.saveDriftLog(uid: uid, log: log)
             driftLogs.insert(log, at: 0)
             try await firestoreService.evaluateAndAwardBadges(uid: uid)
             haptic(.medium)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func addCustomDriftCategory(_ name: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        var categories = appUser?.customDriftCategories ?? []
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !categories.contains(trimmed) else { return }
+        categories.append(trimmed)
+        do {
+            try await firestoreService.saveCustomDriftCategories(uid: uid, categories: categories)
+            appUser?.customDriftCategories = categories
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func removeCustomDriftCategory(_ name: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        var categories = appUser?.customDriftCategories ?? []
+        categories.removeAll { $0 == name }
+        do {
+            try await firestoreService.saveCustomDriftCategories(uid: uid, categories: categories)
+            appUser?.customDriftCategories = categories
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -337,7 +364,8 @@ class UserStore: ObservableObject {
 
     private func refreshRecent(uid: String) async {
         do {
-            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: 60)
+            let entryLimit = isPremium ? 365 : 60
+            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: entryLimit)
         } catch {
             #if DEBUG
             print("[UserStore] Failed to refresh recent entries: \(error.localizedDescription)")

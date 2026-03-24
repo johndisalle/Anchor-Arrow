@@ -8,10 +8,17 @@ struct DriftLogView: View {
     @Environment(\.dismiss) var dismiss
 
     @State private var selectedCategory: AnchorTag?
+    @State private var selectedCustomCategory: String?
     @State private var note = ""
     @State private var showSuccess = false
     @State private var isLogging = false
+    @State private var showAddCustom = false
+    @State private var newCustomName = ""
     @FocusState private var noteFocused: Bool
+
+    private var hasSelection: Bool {
+        selectedCategory != nil || selectedCustomCategory != nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -24,20 +31,25 @@ struct DriftLogView: View {
                     // Category Grid
                     categorySection
 
+                    // Custom categories (Premium)
+                    if userStore.isPremium {
+                        customCategorySection
+                    }
+
                     // Note Field
-                    if selectedCategory != nil {
+                    if hasSelection {
                         noteSection
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
 
                     // Quick anchor prayer
-                    if let category = selectedCategory {
+                    if let category = selectedCategory, selectedCustomCategory == nil {
                         anchorPrayerSection(for: category)
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
 
                     // Log button
-                    if selectedCategory != nil {
+                    if hasSelection {
                         logButton
                             .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -47,6 +59,7 @@ struct DriftLogView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCategory)
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCustomCategory)
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Drift Log")
@@ -130,10 +143,15 @@ struct DriftLogView: View {
                 ForEach(AnchorTag.allCases) { tag in
                     DriftCategoryButton(
                         tag: tag,
-                        isSelected: selectedCategory == tag
+                        isSelected: selectedCategory == tag && selectedCustomCategory == nil
                     ) {
                         withAnimation(.spring(response: 0.3)) {
-                            selectedCategory = selectedCategory == tag ? nil : tag
+                            if selectedCategory == tag && selectedCustomCategory == nil {
+                                selectedCategory = nil
+                            } else {
+                                selectedCategory = tag
+                                selectedCustomCategory = nil
+                            }
                         }
                     }
                 }
@@ -219,11 +237,105 @@ struct DriftLogView: View {
         .disabled(isLogging)
     }
 
+    // MARK: - Custom Categories (Premium)
+    private var customCategorySection: some View {
+        let customs = userStore.appUser?.customDriftCategories ?? []
+        return Group {
+            if !customs.isEmpty || true {  // always show for premium
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("My Categories")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(Color("TextPrimary"))
+                        Spacer()
+                        Text("PREMIUM")
+                            .font(.system(size: 9, weight: .heavy))
+                            .foregroundColor(Color("BrandGold"))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color("BrandGold").opacity(0.15))
+                            .cornerRadius(6)
+                    }
+
+                    FlowLayout(spacing: 8) {
+                        ForEach(customs, id: \.self) { name in
+                            Button {
+                                withAnimation(.spring(response: 0.3)) {
+                                    if selectedCustomCategory == name {
+                                        selectedCustomCategory = nil
+                                    } else {
+                                        selectedCustomCategory = name
+                                        selectedCategory = .distraction // fallback tag for storage
+                                    }
+                                }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "tag.fill")
+                                        .font(.system(size: 11))
+                                    Text(name)
+                                        .font(.system(size: 13, weight: .semibold))
+                                }
+                                .foregroundColor(selectedCustomCategory == name ? .white : Color("TextSecondary"))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(selectedCustomCategory == name ? Color("BrandWarning") : Color("CardBackground"))
+                                .cornerRadius(20)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 20)
+                                        .stroke(selectedCustomCategory == name ? Color("BrandWarning") : Color("TextSecondary").opacity(0.2), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    Task { await userStore.removeCustomDriftCategory(name) }
+                                } label: {
+                                    Label("Remove", systemImage: "trash")
+                                }
+                            }
+                        }
+
+                        // Add button
+                        Button {
+                            showAddCustom = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 11, weight: .bold))
+                                Text("Add")
+                                    .font(.system(size: 13, weight: .semibold))
+                            }
+                            .foregroundColor(Color("BrandAnchor"))
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color("BrandAnchor").opacity(0.1))
+                            .cornerRadius(20)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .alert("Add Drift Category", isPresented: $showAddCustom) {
+                    TextField("e.g. Social Media", text: $newCustomName)
+                    Button("Add") {
+                        Task {
+                            await userStore.addCustomDriftCategory(newCustomName)
+                            newCustomName = ""
+                        }
+                    }
+                    Button("Cancel", role: .cancel) { newCustomName = "" }
+                } message: {
+                    Text("Name a specific struggle to track. You can remove it anytime.")
+                }
+            }
+        }
+    }
+
     // MARK: - Actions
     private func logDrift() async {
-        guard let category = selectedCategory else { return }
+        let category = selectedCategory ?? .distraction
+        guard hasSelection else { return }
         isLogging = true
-        await userStore.logDrift(category: category, note: note)
+        await userStore.logDrift(category: category, note: note, customCategory: selectedCustomCategory)
         isLogging = false
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {

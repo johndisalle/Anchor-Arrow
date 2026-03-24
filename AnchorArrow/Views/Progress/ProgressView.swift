@@ -26,6 +26,11 @@ struct ProgressView: View {
                     // Stats Grid
                     statsGridSection
 
+                    // Journal History (Premium)
+                    if userStore.isPremium {
+                        journalHistoryLink
+                    }
+
                     // Drift Insights (Premium)
                     if userStore.isPremium {
                         driftInsightsSection
@@ -36,6 +41,11 @@ struct ProgressView: View {
 
                     // Badge Gallery
                     badgeGallerySection
+
+                    // Weekly Accountability Report (Premium)
+                    if userStore.isPremium {
+                        weeklyAccountabilityReport
+                    }
 
                     // Weekly Summary
                     weeklySummarySection
@@ -200,6 +210,184 @@ struct ProgressView: View {
                 color: "BrandGold"
             )
         }
+    }
+
+    // MARK: - Journal History (Premium)
+    private var journalHistoryLink: some View {
+        NavigationLink {
+            JournalHistoryView()
+        } label: {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color("BrandAnchor").opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "book.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(Color("BrandAnchor"))
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Journal History")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(Color("TextPrimary"))
+                    Text("Browse and search past reflections")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("TextSecondary"))
+                }
+
+                Spacer()
+
+                HStack(spacing: 4) {
+                    Text("PREMIUM")
+                        .font(.system(size: 9, weight: .heavy))
+                        .foregroundColor(Color("BrandGold"))
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color("TextSecondary"))
+                }
+            }
+            .padding(16)
+            .background(Color("CardBackground"))
+            .cornerRadius(16)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Weekly Accountability Report (Premium)
+    private var weeklyAccountabilityReport: some View {
+        let weekEntries = lastSevenDays
+        let anchors = weekEntries.filter { $0.1?.anchorCompleted ?? false }.count
+        let arrows = weekEntries.filter { $0.1?.arrowCompleted ?? false }.count
+        let fullDays = weekEntries.filter { $0.1?.bothCompleted ?? false }.count
+
+        // Drift summary for the week
+        let weekStart = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let weekDrifts = userStore.driftLogs.filter { $0.timestamp >= weekStart }
+        let driftCount = weekDrifts.count
+
+        // Top drift category this week
+        var driftCounts: [String: Int] = [:]
+        for log in weekDrifts {
+            driftCounts[log.displayName, default: 0] += 1
+        }
+        let topDrift = driftCounts.max(by: { $0.value < $1.value })
+
+        // Most common Arrow role this week
+        let arrowEntries = weekEntries.compactMap { $0.1 }.filter { $0.arrowCompleted }
+        var roleCounts: [ArrowRole: Int] = [:]
+        for entry in arrowEntries { roleCounts[entry.arrowRole, default: 0] += 1 }
+        let topRole = roleCounts.max(by: { $0.value < $1.value })
+
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color("BrandAnchor"))
+                Text("Weekly Report")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Spacer()
+                Text("PREMIUM")
+                    .font(.system(size: 9, weight: .heavy))
+                    .foregroundColor(Color("BrandGold"))
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(Color("BrandGold").opacity(0.15))
+                    .cornerRadius(6)
+            }
+
+            // Summary sentence
+            VStack(alignment: .leading, spacing: 8) {
+                Text(weeklySummaryText(anchors: anchors, arrows: arrows, fullDays: fullDays, driftCount: driftCount, topDrift: topDrift, topRole: topRole))
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(Color("TextPrimary"))
+                    .lineSpacing(4)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color("BrandAnchor").opacity(0.06))
+            .cornerRadius(12)
+
+            // Quick stats row
+            HStack(spacing: 0) {
+                WeeklyReportStat(value: "\(anchors)/7", label: "Anchors", icon: "sunrise.fill", color: "BrandAnchor")
+                Divider().frame(height: 36)
+                WeeklyReportStat(value: "\(arrows)/7", label: "Arrows", icon: "arrow.up.right", color: "BrandArrow")
+                Divider().frame(height: 36)
+                WeeklyReportStat(value: "\(fullDays)/7", label: "Full Days", icon: "checkmark.circle.fill", color: "BrandGold")
+                Divider().frame(height: 36)
+                WeeklyReportStat(value: "\(driftCount)", label: "Drifts", icon: "exclamationmark.shield.fill", color: "BrandWarning")
+            }
+
+            // Encouragement
+            if fullDays == 7 {
+                HStack(spacing: 8) {
+                    Image(systemName: "crown.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandGold"))
+                    Text("Perfect week. Every day anchored and aimed. Stand firm, brother.")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color("BrandGold"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandGold").opacity(0.08))
+                .cornerRadius(12)
+            } else if fullDays >= 5 {
+                HStack(spacing: 8) {
+                    Image(systemName: "hand.thumbsup.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandArrow"))
+                    Text("Strong week. \(7 - fullDays) day\(fullDays == 6 ? "" : "s") to sharpen. Keep pressing.")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color("BrandArrow"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandArrow").opacity(0.08))
+                .cornerRadius(12)
+            } else if fullDays > 0 {
+                HStack(spacing: 8) {
+                    Image(systemName: "figure.stand")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandAnchor"))
+                    Text("You showed up \(fullDays) day\(fullDays == 1 ? "" : "s"). That's \(fullDays) more than quitting. Build on it.")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color("BrandAnchor"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandAnchor").opacity(0.08))
+                .cornerRadius(12)
+            }
+        }
+        .padding(20)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
+    private func weeklySummaryText(anchors: Int, arrows: Int, fullDays: Int, driftCount: Int, topDrift: (key: String, value: Int)?, topRole: (key: ArrowRole, value: Int)?) -> String {
+        var parts: [String] = []
+        parts.append("This week you anchored \(anchors)/7 days and aimed \(arrows)/7 evenings.")
+
+        if driftCount > 0, let top = topDrift {
+            if driftCount == 1 {
+                parts.append("You logged 1 drift (\(top.key)).")
+            } else if top.value == driftCount {
+                parts.append("You drifted \(driftCount) times — all \(top.key).")
+            } else {
+                parts.append("You drifted \(driftCount) times, mostly \(top.key).")
+            }
+        } else if driftCount == 0 {
+            parts.append("Zero drifts logged — clean week.")
+        }
+
+        if let role = topRole {
+            parts.append("Your Arrow focus was \(role.key.displayName).")
+        }
+
+        return parts.joined(separator: " ")
     }
 
     // MARK: - Drift Insights (Premium)
@@ -467,10 +655,10 @@ struct ProgressView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Image(systemName: log.category.icon)
+                            Image(systemName: log.displayIcon)
                                 .font(.system(size: 12, weight: .semibold))
                                 .foregroundColor(Color("BrandWarning"))
-                            Text(log.category.displayName)
+                            Text(log.displayName)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(Color("TextPrimary"))
                             Spacer()
@@ -848,5 +1036,28 @@ struct BadgeDetailSheet: View {
         .background(Color("BackgroundPrimary"))
         .presentationDetents([.medium])
         .presentationDragIndicator(.hidden)
+    }
+}
+
+// MARK: - WeeklyReportStat
+struct WeeklyReportStat: View {
+    let value: String
+    let label: String
+    let icon: String
+    let color: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(color))
+            Text(value)
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundColor(Color("TextPrimary"))
+            Text(label)
+                .font(.system(size: 10))
+                .foregroundColor(Color("TextSecondary"))
+        }
+        .frame(maxWidth: .infinity)
     }
 }

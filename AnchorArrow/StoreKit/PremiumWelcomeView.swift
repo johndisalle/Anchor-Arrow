@@ -80,11 +80,27 @@ struct PremiumWelcomeView: View {
                         )
 
                         PremiumWelcomeCard(
+                            icon: "book.fill",
+                            iconColor: "BrandAnchor",
+                            title: "Journal History",
+                            description: "Browse and search your full reflection history. Revisit past entries and see how God has moved.",
+                            delay: 0.35
+                        )
+
+                        PremiumWelcomeCard(
                             icon: "chart.bar.fill",
                             iconColor: "BrandWarning",
-                            title: "Drift Insights",
-                            description: "See your patterns — top drift categories, weekly trends, and accountability streaks.",
-                            delay: 0.35
+                            title: "Drift Insights & Weekly Report",
+                            description: "See your drift patterns, weakest days, accountability streaks, and a weekly accountability summary.",
+                            delay: 0.45
+                        )
+
+                        PremiumWelcomeCard(
+                            icon: "tag.fill",
+                            iconColor: "BrandWarning",
+                            title: "Custom Drift Categories",
+                            description: "Add your own drift categories beyond the defaults. Name your specific struggles for sharper accountability.",
+                            delay: 0.55
                         )
 
                         PremiumWelcomeCard(
@@ -92,7 +108,7 @@ struct PremiumWelcomeView: View {
                             iconColor: "BrandGold",
                             title: "Grace Day",
                             description: "Life happens. Save your streak once per month when you miss a day.",
-                            delay: 0.45
+                            delay: 0.65
                         )
 
                         PremiumWelcomeCard(
@@ -100,7 +116,7 @@ struct PremiumWelcomeView: View {
                             iconColor: "BrandDanger",
                             title: "Kingdom Funded",
                             description: "All profits go to missions and service. Your subscription makes a difference beyond this app.",
-                            delay: 0.55
+                            delay: 0.75
                         )
                     }
                     .padding(.horizontal, 20)

@@ -144,10 +144,21 @@ struct DriftLog: Codable, Identifiable {
     @DocumentID var id: String?
     var timestamp: Date
     var category: AnchorTag
+    var customCategory: String?   // non-nil when user picked a custom drift category
     var note: String
 
-    static func new(category: AnchorTag, note: String) -> DriftLog {
-        DriftLog(timestamp: Date(), category: category, note: note)
+    /// Display name — uses custom name if present, otherwise the built-in tag name
+    var displayName: String {
+        customCategory ?? category.displayName
+    }
+
+    /// Icon — custom categories use a generic icon; built-in tags use their own
+    var displayIcon: String {
+        customCategory != nil ? "tag.fill" : category.icon
+    }
+
+    static func new(category: AnchorTag, note: String, customCategory: String? = nil) -> DriftLog {
+        DriftLog(timestamp: Date(), category: category, note: note, customCategory: customCategory)
     }
 }
 

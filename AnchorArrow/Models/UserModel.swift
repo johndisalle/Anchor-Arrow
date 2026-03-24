@@ -35,6 +35,9 @@ struct AppUser: Codable, Identifiable {
     var journeySeries: String = JourneySeries.standFirm.rawValue
     var completedJourneys: [String] = []  // series rawValues the user finished
 
+    // Custom drift categories (premium)
+    var customDriftCategories: [String] = []
+
     // Moderation
     var isAdmin: Bool = false
 
@@ -65,6 +68,7 @@ struct AppUser: Codable, Identifiable {
         graceDayPeriodStart  = try c.decodeIfPresent(Date.self, forKey: .graceDayPeriodStart)
         journeySeries        = try c.decodeIfPresent(String.self, forKey: .journeySeries) ?? JourneySeries.standFirm.rawValue
         completedJourneys    = try c.decodeIfPresent([String].self, forKey: .completedJourneys) ?? []
+        customDriftCategories = try c.decodeIfPresent([String].self, forKey: .customDriftCategories) ?? []
         isAdmin              = try c.decodeIfPresent(Bool.self, forKey: .isAdmin) ?? false
     }
 
@@ -80,6 +84,7 @@ struct AppUser: Codable, Identifiable {
          graceDayUsedDate: Date? = nil, graceDayPeriodStart: Date? = nil,
          journeySeries: String = JourneySeries.standFirm.rawValue,
          completedJourneys: [String] = [],
+         customDriftCategories: [String] = [],
          isAdmin: Bool = false) {
         self.uid = uid
         self.email = email
@@ -104,6 +109,7 @@ struct AppUser: Codable, Identifiable {
         self.graceDayPeriodStart = graceDayPeriodStart
         self.journeySeries = journeySeries
         self.completedJourneys = completedJourneys
+        self.customDriftCategories = customDriftCategories
         self.isAdmin = isAdmin
     }
 

@@ -542,6 +542,11 @@ class FirestoreService {
         try await userRef(uid).delete()
     }
 
+    // MARK: - Custom Drift Categories (Premium)
+    func saveCustomDriftCategories(uid: String, categories: [String]) async throws {
+        try await updateUser(uid: uid, fields: ["customDriftCategories": categories])
+    }
+
     // MARK: - Premium flag
     func setPremium(uid: String, isPremium: Bool, expiry: Date?) async throws {
         var updates: [String: Any] = ["isPremium": isPremium]
