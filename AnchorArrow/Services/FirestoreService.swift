@@ -578,6 +578,14 @@ class FirestoreService {
         try await updateUser(uid: uid, fields: updates)
     }
 
+    /// Abandon a journey in progress without marking it complete
+    func abandonJourney(uid: String) async throws {
+        try await updateUser(uid: uid, fields: [
+            "journeyActive": false,
+            "journeyDay": 0
+        ])
+    }
+
     /// Mark a journey series as completed and deactivate
     func completeJourney(uid: String, series: JourneySeries) async throws {
         try await updateUser(uid: uid, fields: [

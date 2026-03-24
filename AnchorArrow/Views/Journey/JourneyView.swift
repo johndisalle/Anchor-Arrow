@@ -12,6 +12,7 @@ struct JourneyView: View {
     @State private var isStarting = false
     @State private var selectedSeries: JourneySeries = .standFirm
     @State private var showSeriesPicker = false
+    @State private var showAbandonAlert = false
 
     var body: some View {
         NavigationStack {
@@ -49,6 +50,32 @@ struct JourneyView: View {
                     Button("Done") { dismiss() }
                         .foregroundColor(Color("BrandAnchor"))
                 }
+                if userStore.isPremium && (userStore.appUser?.journeyActive ?? false) {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            Button(role: .destructive) {
+                                showAbandonAlert = true
+                            } label: {
+                                Label("Abandon Journey", systemImage: "xmark.circle")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.system(size: 16))
+                                .foregroundColor(Color("TextSecondary"))
+                        }
+                    }
+                }
+            }
+            .alert("Abandon Journey?", isPresented: $showAbandonAlert) {
+                Button("Abandon", role: .destructive) {
+                    Task {
+                        await userStore.abandonJourney()
+                        journeyDays = PromptLibrary.journeyDays(for: selectedSeries)
+                    }
+                }
+                Button("Keep Going", role: .cancel) {}
+            } message: {
+                Text("Your progress on \(activeSeries.displayName) will be lost. You can start any journey again anytime.")
             }
             .sheet(item: $showDayDetail) { day in
                 JourneyDayDetailView(day: day) { anchorText, arrowText in

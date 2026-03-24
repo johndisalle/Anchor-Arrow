@@ -214,6 +214,17 @@ class UserStore: ObservableObject {
         }
     }
 
+    func abandonJourney() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        do {
+            try await firestoreService.abandonJourney(uid: uid)
+            appUser?.journeyActive = false
+            appUser?.journeyDay = 0
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     func completeJourneyDay(anchorReflection: String, arrowReflection: String) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         // Save journey reflections as today's entry
