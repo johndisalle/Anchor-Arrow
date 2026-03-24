@@ -78,7 +78,7 @@ struct CrossedArrowsView: View {
     var body: some View {
         ZStack {
             // Subtle background circle to frame the visual
-            Circle()
+            SwiftUI.Circle()
                 .fill(color.opacity(0.07))
                 .frame(width: 108, height: 108)
 
