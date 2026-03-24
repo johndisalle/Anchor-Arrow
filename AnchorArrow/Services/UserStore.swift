@@ -296,9 +296,9 @@ class UserStore: ObservableObject {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         // Build 12 week buckets by actual date ranges (avoids year boundary issues)
-        return (0..<12).reversed().map { offset in
-            let weekEnd = cal.date(byAdding: .weekOfYear, value: -offset, to: today)!
-            let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd)!
+        return (0..<12).reversed().compactMap { offset in
+            guard let weekEnd = cal.date(byAdding: .weekOfYear, value: -offset, to: today),
+                  let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd) else { return nil }
             return driftLogs.filter { $0.timestamp >= weekStart && $0.timestamp < weekEnd }.count
         }
     }

@@ -285,6 +285,7 @@ struct CircleCard: View {
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(showCopiedToast ? "Invite code copied" : "Copy invite code \(circle.inviteCode)")
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
@@ -553,9 +554,13 @@ struct CircleDetailView: View {
 
     private func markAnswered(post: CirclePost) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        try? await service.markPrayerAnswered(circleId: circleId, postId: postId)
-        if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-            posts[idx].isAnswered = true
+        do {
+            try await service.markPrayerAnswered(circleId: circleId, postId: postId)
+            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                posts[idx].isAnswered = true
+            }
+        } catch {
+            userStore.errorMessage = "Couldn't mark prayer as answered. Try again."
         }
     }
 
@@ -566,28 +571,35 @@ struct CircleDetailView: View {
 
     private func react(to post: CirclePost, emoji: String) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        try? await service.reactToPost(circleId: circleId, postId: postId, emoji: emoji)
-        // Optimistic local update
-        if let index = posts.firstIndex(where: { $0.id == post.id }) {
-            let current = posts[index].reactions[emoji] ?? 0
-            posts[index].reactions[emoji] = current + 1
+        do {
+            try await service.reactToPost(circleId: circleId, postId: postId, emoji: emoji)
+            // Optimistic local update only on success
+            if let index = posts.firstIndex(where: { $0.id == post.id }) {
+                let current = posts[index].reactions[emoji] ?? 0
+                posts[index].reactions[emoji] = current + 1
+            }
+        } catch {
+            userStore.errorMessage = "Couldn't send reaction. Check your connection."
         }
     }
 
     private func togglePin(post: CirclePost) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        if post.isPinned {
-            try? await service.unpinPost(circleId: circleId, postId: postId)
-            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-                posts[idx].isPinned = false
+        do {
+            if post.isPinned {
+                try await service.unpinPost(circleId: circleId, postId: postId)
+                if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                    posts[idx].isPinned = false
+                }
+            } else {
+                try await service.pinPost(circleId: circleId, postId: postId)
+                for i in posts.indices { posts[i].isPinned = false }
+                if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                    posts[idx].isPinned = true
+                }
             }
-        } else {
-            try? await service.pinPost(circleId: circleId, postId: postId)
-            // Unpin all others locally
-            for i in posts.indices { posts[i].isPinned = false }
-            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-                posts[idx].isPinned = true
-            }
+        } catch {
+            userStore.errorMessage = "Couldn't update pin. Try again."
         }
     }
 
@@ -598,7 +610,9 @@ struct CircleDetailView: View {
             try await service.leaveCircle(circleId: circleId, uid: uid)
             onLeave()
             dismiss()
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't leave circle. Try again."
+        }
     }
 }
 
@@ -1144,7 +1158,9 @@ struct CommentsSheet: View {
             try await service.postComment(comment: comment)
             comments.append(comment)
             newComment = ""
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't post comment. Check your connection."
+        }
         isPosting = false
     }
 }
@@ -1507,7 +1523,9 @@ struct NewCirclePostView: View {
             try await FirestoreService.shared.postToCircle(post: post)
             onPost(post)
             dismiss()
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't share post. Check your connection."
+        }
         isPosting = false
     }
 }

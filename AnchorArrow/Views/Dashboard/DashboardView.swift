@@ -65,6 +65,7 @@ struct DashboardView: View {
                         Image(systemName: "person.circle.fill")
                             .font(.system(size: 22))
                             .foregroundColor(Color("BrandAnchor"))
+                            .accessibilityLabel("Profile and Settings")
                     }
                 }
             }
@@ -113,6 +114,8 @@ struct DashboardView: View {
                 .padding(.vertical, 10)
                 .background(Color("CardBackground"))
                 .cornerRadius(12)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Today is \(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))")
             }
         }
         .padding(.horizontal, 24)
@@ -194,7 +197,8 @@ struct DashboardView: View {
 
     private var journeyCTASection: some View {
         Button {
-            if userStore.isPremium || !(userStore.appUser?.journeyActive ?? false) {
+            // Always let the user view their active journey; only gate starting NEW journeys
+            if userStore.appUser?.journeyActive == true || userStore.isPremium || !userStore.availableJourneys.isEmpty {
                 showJourney = true
             } else {
                 showPremiumUpsell = true
@@ -324,6 +328,9 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title) \(subtitle), \(isComplete ? "completed" : "not yet completed")")
+        .accessibilityHint(isComplete ? "Tap to review" : "Tap to begin your \(title.lowercased())")
     }
 }
 
@@ -348,6 +355,8 @@ struct StatPill<Icon: View>: View {
         .padding(.vertical, 14)
         .background(Color("CardBackground"))
         .cornerRadius(14)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(value) \(label)")
     }
 }
 
@@ -372,5 +381,7 @@ struct BadgePill: View {
                 .multilineTextAlignment(.center)
                 .frame(width: 60)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Badge: \(badge.name)")
     }
 }

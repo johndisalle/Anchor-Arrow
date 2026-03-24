@@ -283,6 +283,9 @@ private struct CustomTabBar: View {
                         .padding(.top, 10)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(tab.label) tab")
+                    .accessibilityHint(selectedTab == tab.tag ? "Currently selected" : "Double tap to switch")
+                    .accessibilityAddTraits(selectedTab == tab.tag ? .isSelected : [])
                 }
             }
             .padding(.bottom, 8)
