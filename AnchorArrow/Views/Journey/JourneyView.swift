@@ -384,6 +384,13 @@ struct JourneyView: View {
                 (3, "King", Color("BrandArrow")),
                 (4, "The Whole Man", Color.red)
             ]
+        case .strengthInLove:
+            return [
+                (1, "Redefine Strength", Color("BrandAnchor")),
+                (2, "Strength to Serve", Color.blue),
+                (3, "Strength to Endure", Color("BrandArrow")),
+                (4, "All in Love", Color.red)
+            ]
         }
     }
 }
