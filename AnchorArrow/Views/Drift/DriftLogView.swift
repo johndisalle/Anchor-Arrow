@@ -68,7 +68,10 @@ struct DriftLogView: View {
             if showSuccess {
                 DriftSuccessOverlay {
                     withAnimation { showSuccess = false }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { dismiss() }
+                    Task {
+                        try? await Task.sleep(nanoseconds: 300_000_000)
+                        dismiss()
+                    }
                 }
             }
         }
@@ -108,9 +111,17 @@ struct DriftLogView: View {
 
     private var categorySection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("What pulled at you?")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+            HStack {
+                Text("What pulled at you?")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Spacer()
+                if selectedCategory == nil {
+                    Text("Select one to continue")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color("BrandWarning").opacity(0.8))
+                }
+            }
 
             LazyVGrid(
                 columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
@@ -285,15 +296,15 @@ struct DriftCategoryButton: View {
 struct DriftSuccessOverlay: View {
     let onDismiss: () -> Void
     @State private var appeared = false
+    @State private var dismissTask: Task<Void, Never>?
 
     var body: some View {
         ZStack {
             Color.black.opacity(0.7).ignoresSafeArea()
 
             VStack(spacing: 20) {
-                Image(systemName: "anchor.circle.fill")
-                    .font(.system(size: 64))
-                    .foregroundColor(Color("BrandAnchor"))
+                AnchorSymbolView(color: Color("BrandAnchor"))
+                    .frame(width: 64, height: 80)
                     .scaleEffect(appeared ? 1.0 : 0.3)
 
                 Text("Anchored.")
@@ -323,8 +334,12 @@ struct DriftSuccessOverlay: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
                 appeared = true
             }
-            // Auto-dismiss after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0, execute: onDismiss)
+            dismissTask = Task {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                guard !Task.isCancelled else { return }
+                await MainActor.run { onDismiss() }
+            }
         }
+        .onDisappear { dismissTask?.cancel() }
     }
 }

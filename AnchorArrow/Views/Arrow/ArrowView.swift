@@ -8,6 +8,7 @@ struct ArrowView: View {
     @State private var selectedRole: ArrowRole = .servantLeader
     @State private var reflection = ""
     @State private var showCompletionAnimation = false
+    @State private var dismissTask: Task<Void, Never>?
     @State private var isSubmitting = false
     @FocusState private var reflectionFocused: Bool
 
@@ -253,29 +254,35 @@ struct ArrowView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .background(
-                    reflection.isEmpty
+                    reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting
                     ? Color("TextSecondary").opacity(0.3)
                     : Color("BrandArrow")
                 )
                 .cornerRadius(16)
             }
-            .disabled(reflection.isEmpty || isSubmitting)
+            .disabled(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting)
         }
     }
 
     // MARK: - Submit Action
     private func submit() async {
-        guard !reflection.isEmpty else { return }
+        let trimmed = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         isSubmitting = true
-        await userStore.completeArrow(reflection: reflection, role: selectedRole)
+        await userStore.completeArrow(reflection: trimmed, role: selectedRole)
         isSubmitting = false
         reflectionFocused = false
 
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             showCompletionAnimation = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            withAnimation { showCompletionAnimation = false }
+        dismissTask?.cancel()
+        dismissTask = Task {
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                withAnimation { showCompletionAnimation = false }
+            }
         }
     }
 }

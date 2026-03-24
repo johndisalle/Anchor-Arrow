@@ -8,6 +8,7 @@ struct AnchorView: View {
     @State private var reflection = ""
     @State private var selectedTags: Set<AnchorTag> = []
     @State private var showCompletionAnimation = false
+    @State private var dismissTask: Task<Void, Never>?
     @State private var isSubmitting = false
     @FocusState private var reflectionFocused: Bool
     @Environment(\.dismiss) var dismiss
@@ -211,7 +212,8 @@ struct AnchorView: View {
 
     // MARK: - Submit Button
     private var submitButton: some View {
-        Button {
+        let trimmed = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        return Button {
             Task { await submit() }
         } label: {
             ZStack {
@@ -228,17 +230,21 @@ struct AnchorView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background(Color("BrandAnchor"))
+            .background(trimmed.isEmpty || isSubmitting
+                ? Color("TextSecondary").opacity(0.3)
+                : Color("BrandAnchor"))
             .cornerRadius(16)
         }
-        .disabled(isSubmitting)
+        .disabled(trimmed.isEmpty || isSubmitting)
     }
 
     // MARK: - Submit Action
     private func submit() async {
+        let trimmed = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
         isSubmitting = true
         await userStore.completeAnchor(
-            reflection: reflection,
+            reflection: trimmed,
             tags: Array(selectedTags)
         )
         isSubmitting = false
@@ -248,9 +254,13 @@ struct AnchorView: View {
             showCompletionAnimation = true
         }
 
-        // Auto-dismiss overlay after 2.5s
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-            withAnimation { showCompletionAnimation = false }
+        dismissTask?.cancel()
+        dismissTask = Task {
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                withAnimation { showCompletionAnimation = false }
+            }
         }
     }
 }

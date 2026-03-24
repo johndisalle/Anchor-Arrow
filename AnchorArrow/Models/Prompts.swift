@@ -334,15 +334,17 @@ struct PromptLibrary {
 
     // MARK: - Today's Prompt
     static func anchorPromptForToday() -> AnchorPrompt {
-        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
-        let index = dayOfYear % anchorPrompts.count
-        return anchorPrompts[index]
+        let count = anchorPrompts.count
+        precondition(count > 0, "anchorPrompts must not be empty")
+        let dayOfYear = max(1, Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1)
+        return anchorPrompts[(dayOfYear - 1) % count]
     }
 
     static func arrowPromptForToday() -> ArrowPrompt {
-        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
-        let index = dayOfYear % arrowPrompts.count
-        return arrowPrompts[index]
+        let count = arrowPrompts.count
+        precondition(count > 0, "arrowPrompts must not be empty")
+        let dayOfYear = max(1, Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1)
+        return arrowPrompts[(dayOfYear - 1) % count]
     }
 
     // MARK: - Circle Daily Prompts
