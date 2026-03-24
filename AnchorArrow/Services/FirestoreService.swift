@@ -274,23 +274,31 @@ class FirestoreService {
 
     /// Delete a circle and all its posts/comments. Only the creator should call this.
     func deleteCircle(circleId: String) async throws {
-        // 1. Delete all comments inside every post
-        let posts = try await circlePostsRef(circleId).getDocuments()
-        for postDoc in posts.documents {
-            let comments = try await commentsRef(circleId: circleId, postId: postDoc.documentID).getDocuments()
-            if !comments.documents.isEmpty {
+        // 1. Best-effort cleanup of subcollections (comments, then posts)
+        //    These may fail due to rules — that's OK, orphaned subcollection
+        //    docs are harmless and can be cleaned up later via Cloud Functions.
+        do {
+            let posts = try await circlePostsRef(circleId).getDocuments()
+            for postDoc in posts.documents {
+                let comments = try await commentsRef(circleId: circleId, postId: postDoc.documentID).getDocuments()
+                if !comments.documents.isEmpty {
+                    let batch = db.batch()
+                    comments.documents.forEach { batch.deleteDocument($0.reference) }
+                    try await batch.commit()
+                }
+            }
+            if !posts.documents.isEmpty {
                 let batch = db.batch()
-                comments.documents.forEach { batch.deleteDocument($0.reference) }
+                posts.documents.forEach { batch.deleteDocument($0.reference) }
                 try await batch.commit()
             }
+        } catch {
+            #if DEBUG
+            print("[Firestore] Subcollection cleanup failed (non-fatal): \(error.localizedDescription)")
+            #endif
         }
-        // 2. Delete all posts
-        if !posts.documents.isEmpty {
-            let batch = db.batch()
-            posts.documents.forEach { batch.deleteDocument($0.reference) }
-            try await batch.commit()
-        }
-        // 3. Delete the circle document
+
+        // 2. Delete the circle document — this is the critical operation
         try await circlesRef().document(circleId).delete()
     }
 

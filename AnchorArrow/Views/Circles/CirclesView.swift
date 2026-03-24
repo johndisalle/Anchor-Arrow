@@ -695,6 +695,9 @@ struct CircleDetailView: View {
             onLeave()
             dismiss()
         } catch {
+            #if DEBUG
+            print("[Circles] Delete failed: \(error)")
+            #endif
             userStore.errorMessage = "Couldn't delete circle. Try again."
         }
         isDeleting = false
