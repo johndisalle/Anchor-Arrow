@@ -156,10 +156,8 @@ struct AuthView: View {
                         Task {
                             do {
                                 try await authManager.handleAppleSignIn(result: result)
-                                if isSignUp {
-                                    await userStore.loadUserData(uid: authManager.currentUID ?? "")
-                                    userStore.completeOnboarding()
-                                }
+                                await userStore.loadUserData(uid: authManager.currentUID ?? "")
+                                userStore.completeOnboarding()
                             } catch {
                                 showAuthError(authManager.friendlyError(error))
                             }
