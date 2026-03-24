@@ -261,6 +261,8 @@ struct ArrowView: View {
                 .cornerRadius(16)
             }
             .disabled(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting)
+            .accessibilityLabel("Loose the Arrow")
+            .accessibilityHint(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Write a reflection first" : "Double tap to submit your evening arrow")
         }
     }
 
@@ -312,6 +314,9 @@ struct RoleChip: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(role.displayName) role")
+        .accessibilityHint(isSelected ? "Currently selected" : "Double tap to select")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 
@@ -337,5 +342,7 @@ struct QuickWinButton: View {
             .cornerRadius(12)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Quick win: \(label)")
+        .accessibilityHint("Double tap to add \(label.lowercased()) to your reflection")
     }
 }

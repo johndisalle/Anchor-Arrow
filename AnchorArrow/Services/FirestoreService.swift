@@ -109,7 +109,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: DailyEntry.self) }
-            catch { print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 
@@ -122,7 +127,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: DailyEntry.self) }
-            catch { print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 
@@ -207,7 +217,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: DriftLog.self) }
-            catch { print("[Firestore] Failed to decode drift log \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode drift log \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 
@@ -307,7 +322,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: CircleComment.self) }
-            catch { print("[Firestore] Failed to decode comment \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode comment \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 
@@ -321,7 +341,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: Circle.self) }
-            catch { print("[Firestore] Failed to decode circle \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode circle \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 
@@ -335,7 +360,12 @@ class FirestoreService {
         return snapshot.documents
             .compactMap { doc in
                 do { return try doc.data(as: Circle.self) }
-                catch { print("[Firestore] Failed to decode public circle \(doc.documentID): \(error.localizedDescription)"); return nil }
+                catch {
+                    #if DEBUG
+                    print("[Firestore] Failed to decode public circle \(doc.documentID): \(error.localizedDescription)")
+                    #endif
+                    return nil
+                }
             }
             .filter { !$0.memberIds.contains(uid) }
     }
@@ -388,7 +418,12 @@ class FirestoreService {
             .getDocuments()
         return snapshot.documents.compactMap { doc in
             do { return try doc.data(as: CirclePost.self) }
-            catch { print("[Firestore] Failed to decode circle post \(doc.documentID): \(error.localizedDescription)"); return nil }
+            catch {
+                #if DEBUG
+                print("[Firestore] Failed to decode circle post \(doc.documentID): \(error.localizedDescription)")
+                #endif
+                return nil
+            }
         }
     }
 

@@ -76,7 +76,9 @@ class NotificationManager: ObservableObject {
         do {
             try await notificationCenter.add(request)
         } catch {
+            #if DEBUG
             print("[Notifications] Failed to schedule morning anchor: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -110,7 +112,9 @@ class NotificationManager: ObservableObject {
         do {
             try await notificationCenter.add(request)
         } catch {
+            #if DEBUG
             print("[Notifications] Failed to schedule evening arrow: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -134,7 +138,9 @@ class NotificationManager: ObservableObject {
         do {
             try await notificationCenter.add(request)
         } catch {
+            #if DEBUG
             print("[Notifications] Failed to schedule streak warning: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -156,7 +162,9 @@ class NotificationManager: ObservableObject {
         do {
             try await notificationCenter.add(request)
         } catch {
+            #if DEBUG
             print("[Notifications] Failed to schedule grace day notification: \(error.localizedDescription)")
+            #endif
         }
     }
 
@@ -168,7 +176,9 @@ class NotificationManager: ObservableObject {
             do {
                 try await notificationCenter.setBadgeCount(0)
             } catch {
+                #if DEBUG
                 print("[Notifications] Failed to reset badge count: \(error.localizedDescription)")
+                #endif
             }
         }
     }

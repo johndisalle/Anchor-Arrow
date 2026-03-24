@@ -102,13 +102,17 @@ struct SettingsView: View {
 
                 // Legal Section
                 Section {
-                    Link(destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!) {
-                        Label("Terms of Use", systemImage: "doc.text")
-                            .foregroundColor(Color("TextPrimary"))
+                    if let url = URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html") {
+                        Link(destination: url) {
+                            Label("Terms of Use", systemImage: "doc.text")
+                                .foregroundColor(Color("TextPrimary"))
+                        }
                     }
-                    Link(destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!) {
-                        Label("Privacy Policy", systemImage: "hand.raised")
-                            .foregroundColor(Color("TextPrimary"))
+                    if let url = URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html") {
+                        Link(destination: url) {
+                            Label("Privacy Policy", systemImage: "hand.raised")
+                                .foregroundColor(Color("TextPrimary"))
+                        }
                     }
                 } header: {
                     Text("Legal")
@@ -329,7 +333,7 @@ struct SettingsView: View {
     private var journeyRow: some View {
         LabeledContent(
             "Current Day",
-            value: "Day \(userStore.appUser?.journeyDay ?? 0) of 30"
+            value: "Day \(userStore.appUser?.journeyDay ?? 0) of \(kJourneyDays)"
         )
     }
 

@@ -59,7 +59,7 @@ struct JourneyView: View {
                 }
             }
             .confirmationDialog(
-                "Start the 30-day \(selectedSeries.displayName) Journey?",
+                "Start the \(kJourneyDays)-day \(selectedSeries.displayName) Journey?",
                 isPresented: $showStartConfirm,
                 titleVisibility: .visible
             ) {
@@ -68,7 +68,7 @@ struct JourneyView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("Commit to 30 days of guided Scripture, daily anchoring, and purposeful action. One day at a time.")
+                Text("Commit to \(kJourneyDays) days of guided Scripture, daily anchoring, and purposeful action. One day at a time.")
             }
             .onAppear {
                 let series = userStore.currentJourneySeries
@@ -150,7 +150,7 @@ struct JourneyView: View {
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(Color("TextPrimary"))
 
-                Text("This journey is free to start. 30 days, one day at a time. No skipping ahead — each day builds on the last.")
+                Text("This journey is free to start. \(kJourneyDays) days, one day at a time. No skipping ahead — each day builds on the last.")
                     .font(.system(size: 15))
                     .foregroundColor(Color("TextSecondary"))
                     .multilineTextAlignment(.center)
@@ -186,11 +186,11 @@ struct JourneyView: View {
 
     private var journeyProgressBar: some View {
         let currentDay = userStore.appUser?.journeyDay ?? 0
-        let progress = Double(currentDay) / 30.0
+        let progress = Double(currentDay) / Double(kJourneyDays)
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Day \(currentDay) of 30")
+                Text("Day \(currentDay) of \(kJourneyDays)")
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(Color("TextPrimary"))
                 Spacer()
@@ -486,7 +486,7 @@ struct JourneyDayDetailView: View {
 
                     // Day chip
                     HStack {
-                        Label("Day \(day.id) of 30 — Week \(day.week)", systemImage: "map")
+                        Label("Day \(day.id) of \(kJourneyDays) — Week \(day.week)", systemImage: "map")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(Color("BrandArrow"))
                         Spacer()
@@ -695,7 +695,7 @@ struct JourneyCompletionView: View {
                         .font(.system(size: 17))
                         .foregroundColor(Color("TextSecondary"))
 
-                    Text("30 days of anchoring in truth, standing firm, and sharpening your faith. That's not nothing — that's war won.")
+                    Text("\(kJourneyDays) days of anchoring in truth, standing firm, and sharpening your faith. That's not nothing — that's war won.")
                         .font(.system(size: 15))
                         .foregroundColor(Color("TextSecondary"))
                         .multilineTextAlignment(.center)

@@ -236,6 +236,8 @@ struct AnchorView: View {
             .cornerRadius(16)
         }
         .disabled(trimmed.isEmpty || isSubmitting)
+        .accessibilityLabel("Mark Anchor Complete")
+        .accessibilityHint(trimmed.isEmpty ? "Write a reflection first" : "Double tap to submit your morning anchor")
     }
 
     // MARK: - Submit Action
@@ -292,6 +294,9 @@ struct TagChip: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(tag.displayName) drift tag")
+        .accessibilityHint(isSelected ? "Selected. Double tap to remove." : "Double tap to select.")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

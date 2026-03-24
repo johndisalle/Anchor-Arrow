@@ -9,6 +9,9 @@ import FirebaseFirestore
 import UIKit
 import StoreKit
 
+/// Total number of days in a guided journey
+let kJourneyDays = 30
+
 @MainActor
 class UserStore: ObservableObject {
 
@@ -213,12 +216,12 @@ class UserStore: ObservableObject {
               let user = appUser,
               user.journeyActive else { return }
         let nextDay = user.journeyDay + 1
-        guard nextDay <= 30 else { return }
+        guard nextDay <= kJourneyDays else { return }
         let series = JourneySeries(rawValue: user.journeySeries) ?? .standFirm
         do {
             try await firestoreService.updateJourney(uid: uid, day: nextDay, startDate: nil)
             if nextDay >= 7  { try await firestoreService.awardBadge(uid: uid, badgeType: .journeyWeek1) }
-            if nextDay >= 30 {
+            if nextDay >= kJourneyDays {
                 try await firestoreService.awardBadge(uid: uid, badgeType: .journeyComplete)
                 try await firestoreService.completeJourney(uid: uid, series: series)
                 completedJourneySeries = series
@@ -335,7 +338,9 @@ class UserStore: ObservableObject {
         do {
             recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: 60)
         } catch {
+            #if DEBUG
             print("[UserStore] Failed to refresh recent entries: \(error.localizedDescription)")
+            #endif
         }
     }
 

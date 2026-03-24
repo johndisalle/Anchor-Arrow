@@ -50,7 +50,7 @@ struct Circle: Codable, Identifiable {
 
     private static func generateCode() -> String {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+        return String((0..<6).map { _ in chars.randomElement() ?? "A" })
     }
 }
 

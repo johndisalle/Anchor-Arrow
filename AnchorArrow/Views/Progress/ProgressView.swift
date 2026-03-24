@@ -503,7 +503,7 @@ struct ProgressView: View {
 
     // MARK: - Helpers
     private var streakProgress: Double {
-        let target = 30.0
+        let target = Double(kJourneyDays)
         return min(1.0, Double(userStore.currentStreak) / target)
     }
 

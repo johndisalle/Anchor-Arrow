@@ -126,7 +126,9 @@ class StoreKitManager: ObservableObject {
                     }
                 }
             } catch {
+                #if DEBUG
                 print("[StoreKit] Failed to verify entitlement: \(error.localizedDescription)")
+                #endif
             }
         }
 
@@ -144,7 +146,9 @@ class StoreKitManager: ObservableObject {
                     await self.updatePremiumStatus(expiryDate: transaction.expirationDate)
                     await transaction.finish()
                 } catch {
+                    #if DEBUG
                     print("[StoreKit] Transaction listener verification failed: \(error.localizedDescription)")
+                    #endif
                 }
             }
         }
@@ -157,7 +161,9 @@ class StoreKitManager: ObservableObject {
         do {
             try await FirestoreService.shared.setPremium(uid: uid, isPremium: isPremium, expiry: expiryDate)
         } catch {
+            #if DEBUG
             print("[StoreKit] Failed to sync premium status to Firestore: \(error.localizedDescription)")
+            #endif
         }
         hasActiveSubscription = isPremium
         activeSubscriptionExpiry = expiryDate

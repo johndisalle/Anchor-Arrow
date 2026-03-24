@@ -224,8 +224,8 @@ struct DashboardView: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Color("TextPrimary"))
                     Text(userStore.appUser?.journeyActive == true
-                         ? "Day \(userStore.appUser?.journeyDay ?? 0) of 30"
-                         : "30-day guided plan — start today")
+                         ? "Day \(userStore.appUser?.journeyDay ?? 0) of \(kJourneyDays)"
+                         : "\(kJourneyDays)-day guided plan — start today")
                         .font(.system(size: 13))
                         .foregroundColor(Color("TextSecondary"))
                 }
@@ -244,8 +244,8 @@ struct DashboardView: View {
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(userStore.appUser?.journeyActive == true
-            ? "\(userStore.currentJourneySeries.displayName) Journey, Day \(userStore.appUser?.journeyDay ?? 0) of 30"
-            : "\(userStore.currentJourneySeries.displayName) Journey, 30-day guided plan")
+            ? "\(userStore.currentJourneySeries.displayName) Journey, Day \(userStore.appUser?.journeyDay ?? 0) of \(kJourneyDays)"
+            : "\(userStore.currentJourneySeries.displayName) Journey, \(kJourneyDays)-day guided plan")
         .accessibilityHint("Double tap to open")
     }
 

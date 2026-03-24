@@ -431,7 +431,7 @@ struct CircleDetailView: View {
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     ShareLink(
-                        item: URL(string: "anchorarrow://join?code=\(circle.inviteCode)")!,
+                        item: URL(string: "anchorarrow://join?code=\(circle.inviteCode)") ?? URL(string: "https://johndisalle.github.io/Anchor-Arrow/")!,
                         subject: Text("Join \(circle.name) on Anchor & Arrow"),
                         message: Text("Join my circle \"\(circle.name)\" on Anchor & Arrow! Use code \(circle.inviteCode) or tap this link.")
                     ) {
@@ -1276,6 +1276,13 @@ struct CreateCircleView: View {
                 }
                 .padding(.horizontal, 24)
 
+                if let nameError = circleNameError {
+                    Text(nameError)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color("BrandWarning"))
+                        .padding(.horizontal, 24)
+                }
+
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
                         .font(.system(size: 14))
@@ -1294,11 +1301,11 @@ struct CreateCircleView: View {
                         }
                     }
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(circleName.isEmpty ? Color("TextSecondary").opacity(0.3) : Color("BrandAnchor"))
+                    .background(!isCircleNameValid ? Color("TextSecondary").opacity(0.3) : Color("BrandAnchor"))
                     .cornerRadius(14)
                     .padding(.horizontal, 24)
                 }
-                .disabled(circleName.isEmpty || isCreating)
+                .disabled(!isCircleNameValid || isCreating)
 
                 Spacer()
             }
@@ -1314,10 +1321,26 @@ struct CreateCircleView: View {
         }
     }
 
+    private var trimmedCircleName: String { circleName.trimmingCharacters(in: .whitespacesAndNewlines) }
+
+    private var circleNameError: String? {
+        let name = trimmedCircleName
+        if name.isEmpty { return nil } // don't show error until they type
+        if name.count < 3 { return "Name must be at least 3 characters" }
+        if name.count > 40 { return "Name must be under 40 characters" }
+        return nil
+    }
+
+    private var isCircleNameValid: Bool {
+        let name = trimmedCircleName
+        return name.count >= 3 && name.count <= 40
+    }
+
     private func createCircle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
+        guard isCircleNameValid else { return }
         isCreating = true
-        let newCircle = Circle.new(name: circleName, creatorId: uid, isPublic: isPublic)
+        let newCircle = Circle.new(name: trimmedCircleName, creatorId: uid, isPublic: isPublic)
         do {
             let id = try await FirestoreService.shared.createCircle(circle: newCircle)
             let saved = try await FirestoreService.shared.fetchCircle(circleId: id)
