@@ -9,6 +9,7 @@ struct PremiumUpsellView: View {
     @EnvironmentObject var storeKitManager: StoreKitManager
     @Environment(\.dismiss) var dismiss
     @State private var selectedProduct: SubscriptionProduct = .annual
+    @State private var showWelcome = false
 
     var body: some View {
         NavigationStack {
@@ -100,7 +101,7 @@ struct PremiumUpsellView: View {
                                 if let product = storeKitManager.product(for: selectedProduct) {
                                     await storeKitManager.purchase(product)
                                     if storeKitManager.hasActiveSubscription {
-                                        dismiss()
+                                        showWelcome = true
                                     }
                                 }
                             }
@@ -141,7 +142,12 @@ struct PremiumUpsellView: View {
                         }
 
                         Button("Restore Purchases") {
-                            Task { await storeKitManager.restorePurchases() }
+                            Task {
+                                await storeKitManager.restorePurchases()
+                                if storeKitManager.hasActiveSubscription {
+                                    showWelcome = true
+                                }
+                            }
                         }
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(Color("TextSecondary"))
@@ -176,6 +182,11 @@ struct PremiumUpsellView: View {
                         .font(.system(size: 14))
                         .foregroundColor(Color("TextSecondary"))
                 }
+            }
+            .fullScreenCover(isPresented: $showWelcome) {
+                dismiss()
+            } content: {
+                PremiumWelcomeView()
             }
         }
     }
