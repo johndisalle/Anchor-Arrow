@@ -183,7 +183,7 @@ class UserStore: ObservableObject {
     var isPremium: Bool { appUser?.isPremium ?? false }
     var currentStreak: Int { appUser?.currentStreak ?? 0 }
     var displayName: String { appUser?.displayName ?? Auth.auth().currentUser?.displayName ?? "Warrior" }
-    var colorScheme: ColorScheme? { appUser?.theme.swiftUIColorScheme }
+    var colorScheme: SwiftUI.ColorScheme? { appUser?.theme.swiftUIColorScheme }
 
     var isAnchorDoneToday: Bool { todayEntry?.anchorCompleted ?? false }
     var isArrowDoneToday: Bool { todayEntry?.arrowCompleted ?? false }
