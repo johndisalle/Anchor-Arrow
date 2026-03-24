@@ -332,7 +332,11 @@ class UserStore: ObservableObject {
     }
 
     private func refreshRecent(uid: String) async {
-        recentEntries = (try? await firestoreService.fetchRecentEntries(uid: uid, limit: 60)) ?? []
+        do {
+            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: 60)
+        } catch {
+            print("[UserStore] Failed to refresh recent entries: \(error.localizedDescription)")
+        }
     }
 
     private func clearData() {

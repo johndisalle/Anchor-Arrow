@@ -22,9 +22,7 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>Used for profile photos</string>
-	<key>NSUserNotificationsUsageDescription</key>
+<key>NSUserNotificationsUsageDescription</key>
 	<string>Anchor &amp; Arrow sends daily reminders to help you stay anchored and on mission.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

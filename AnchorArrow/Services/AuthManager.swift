@@ -105,8 +105,8 @@ class AuthManager: NSObject, ObservableObject {
     }
 
     // MARK: - Nonce for Apple Sign-In
-    func prepareAppleSignIn() -> String {
-        let nonce = randomNonceString()
+    func prepareAppleSignIn() throws -> String {
+        let nonce = try randomNonceString()
         currentNonce = nonce
         return sha256(nonce)
     }
@@ -157,12 +157,12 @@ class AuthManager: NSObject, ObservableObject {
     }
 
     // MARK: - Cryptographic helpers for Apple Sign-In
-    private func randomNonceString(length: Int = 32) -> String {
+    private func randomNonceString(length: Int = 32) throws -> String {
         precondition(length > 0)
         var randomBytes = [UInt8](repeating: 0, count: length)
         let errorCode = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
         if errorCode != errSecSuccess {
-            fatalError("Unable to generate nonce. SecRandomCopyBytes failed with OSStatus \(errorCode)")
+            throw AuthError.nonceGenerationFailed
         }
         let charset: [Character] = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         let nonce = randomBytes.map { byte in
@@ -182,13 +182,15 @@ class AuthManager: NSObject, ObservableObject {
 enum AuthError: LocalizedError {
     case appleSignInFailed
     case notSignedIn
+    case nonceGenerationFailed
     case unknown
 
     var errorDescription: String? {
         switch self {
-        case .appleSignInFailed: return "Apple Sign-In failed. Please try again."
-        case .notSignedIn:       return "You must be signed in to do that."
-        case .unknown:           return "An unexpected error occurred."
+        case .appleSignInFailed:      return "Apple Sign-In failed. Please try again."
+        case .notSignedIn:            return "You must be signed in to do that."
+        case .nonceGenerationFailed:  return "Unable to generate a secure token. Please try again."
+        case .unknown:                return "An unexpected error occurred."
         }
     }
 }

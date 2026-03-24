@@ -73,7 +73,11 @@ class NotificationManager: ObservableObject {
             trigger: trigger
         )
 
-        try? await notificationCenter.add(request)
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            print("[Notifications] Failed to schedule morning anchor: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Evening Arrow (8PM default)
@@ -103,7 +107,11 @@ class NotificationManager: ObservableObject {
             trigger: trigger
         )
 
-        try? await notificationCenter.add(request)
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            print("[Notifications] Failed to schedule evening arrow: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Streak Danger (missed yesterday)
@@ -123,7 +131,11 @@ class NotificationManager: ObservableObject {
             trigger: trigger
         )
 
-        try? await notificationCenter.add(request)
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            print("[Notifications] Failed to schedule streak warning: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Grace Day Used
@@ -141,14 +153,24 @@ class NotificationManager: ObservableObject {
             content: content,
             trigger: trigger
         )
-        try? await notificationCenter.add(request)
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            print("[Notifications] Failed to schedule grace day notification: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Cancel
     func cancelAll() {
         notificationCenter.removeAllPendingNotificationRequests()
         notificationCenter.removeAllDeliveredNotifications()
-        Task { try? await notificationCenter.setBadgeCount(0) }
+        Task {
+            do {
+                try await notificationCenter.setBadgeCount(0)
+            } catch {
+                print("[Notifications] Failed to reset badge count: \(error.localizedDescription)")
+            }
+        }
     }
 
     func cancelStreakWarning() {

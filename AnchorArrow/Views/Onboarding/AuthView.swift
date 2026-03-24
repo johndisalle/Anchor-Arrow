@@ -144,9 +144,13 @@ struct AuthView: View {
                 SignInWithAppleButton(
                     isSignUp ? .signUp : .signIn,
                     onRequest: { request in
-                        let nonce = authManager.prepareAppleSignIn()
-                        request.requestedScopes = [.fullName, .email]
-                        request.nonce = nonce
+                        do {
+                            let nonce = try authManager.prepareAppleSignIn()
+                            request.requestedScopes = [.fullName, .email]
+                            request.nonce = nonce
+                        } catch {
+                            showAuthError(authManager.friendlyError(error))
+                        }
                     },
                     onCompletion: { result in
                         Task {

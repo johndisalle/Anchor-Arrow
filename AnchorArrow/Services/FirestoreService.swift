@@ -107,7 +107,10 @@ class FirestoreService {
             .order(by: "date", descending: true)
             .limit(to: limit)
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: DailyEntry.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: DailyEntry.self) }
+            catch { print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     /// Fetch entries for streak calendar
@@ -117,7 +120,10 @@ class FirestoreService {
             .whereField("date", isLessThanOrEqualTo: to)
             .order(by: "date")
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: DailyEntry.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: DailyEntry.self) }
+            catch { print("[Firestore] Failed to decode entry \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     // MARK: - Streak Management
@@ -199,7 +205,10 @@ class FirestoreService {
             .order(by: "timestamp", descending: true)
             .limit(to: limit)
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: DriftLog.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: DriftLog.self) }
+            catch { print("[Firestore] Failed to decode drift log \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     func driftLogCount(uid: String) async throws -> Int {
@@ -296,7 +305,10 @@ class FirestoreService {
         let snapshot = try await commentsRef(circleId: circleId, postId: postId)
             .order(by: "timestamp", descending: false)
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: CircleComment.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: CircleComment.self) }
+            catch { print("[Firestore] Failed to decode comment \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     func postComment(comment: CircleComment) async throws {
@@ -307,7 +319,10 @@ class FirestoreService {
         let snapshot = try await circlesRef()
             .whereField("memberIds", arrayContains: uid)
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: Circle.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: Circle.self) }
+            catch { print("[Firestore] Failed to decode circle \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     /// Fetch public circles that the user hasn't already joined
@@ -318,7 +333,10 @@ class FirestoreService {
             .limit(to: 30)
             .getDocuments()
         return snapshot.documents
-            .compactMap { try? $0.data(as: Circle.self) }
+            .compactMap { doc in
+                do { return try doc.data(as: Circle.self) }
+                catch { print("[Firestore] Failed to decode public circle \(doc.documentID): \(error.localizedDescription)"); return nil }
+            }
             .filter { !$0.memberIds.contains(uid) }
     }
 
@@ -368,7 +386,10 @@ class FirestoreService {
             .order(by: "timestamp", descending: true)
             .limit(to: limit)
             .getDocuments()
-        return snapshot.documents.compactMap { try? $0.data(as: CirclePost.self) }
+        return snapshot.documents.compactMap { doc in
+            do { return try doc.data(as: CirclePost.self) }
+            catch { print("[Firestore] Failed to decode circle post \(doc.documentID): \(error.localizedDescription)"); return nil }
+        }
     }
 
     func postToCircle(post: CirclePost) async throws {
