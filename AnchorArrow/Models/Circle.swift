@@ -30,8 +30,34 @@ struct Circle: Codable, Identifiable {
     }
 }
 
-// MARK: - CirclePost
-struct CirclePost: Codable, Identifiable {
+// MARK: - MemberProfile
+/// Lightweight snapshot of a brother's accountability status — read from his user doc.
+struct MemberProfile {
+    let uid: String
+    let displayName: String
+    let currentStreak: Int
+    let lastEntryDate: Date?
+
+    var isActiveToday: Bool {
+        guard let last = lastEntryDate else { return false }
+        return Calendar.current.isDateInToday(last)
+    }
+
+    var isStreakAlive: Bool {
+        guard let last = lastEntryDate else { return false }
+        return Calendar.current.isDateInToday(last) || Calendar.current.isDateInYesterday(last)
+    }
+
+    /// Days since the brother last logged any entry (0 = today, 1 = yesterday, …)
+    var daysSinceActive: Int {
+        guard let last = lastEntryDate else { return 999 }
+        let days = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: last),
+                                                   to: Calendar.current.startOfDay(for: Date())).day ?? 999
+        return max(days, 0)
+    }
+}
+
+
     @DocumentID var id: String?
     var circleId: String
     var authorId: String
@@ -41,6 +67,7 @@ struct CirclePost: Codable, Identifiable {
     var isAnonymous: Bool
     var timestamp: Date
     var reactions: [String: Int] = [:]  // emoji: count
+    var isAnswered: Bool = false         // prayer posts only — marks as answered praise
 
     var totalReactions: Int { reactions.values.reduce(0, +) }
 }
@@ -92,6 +119,22 @@ enum PostType: String, Codable, CaseIterable {
         case .drift:   return "BrandWarning"
         case .prayer:  return "BrandGold"
         case .general: return "TextSecondary"
+        }
+    }
+
+    /// Contextual nudge shown in the composer when this type is selected
+    var postHint: String {
+        switch self {
+        case .anchor:
+            return "Share what's holding you steady. Your anchor keeps the circle grounded."
+        case .arrow:
+            return "Your wins sharpen your brothers. Don't downplay the mission advancing."
+        case .drift:
+            return "The lion takes out the isolated. Let your brothers stand with you now."
+        case .prayer:
+            return "If you don't have men praying for you, build that today. Your circle will carry this."
+        case .general:
+            return "Your voice matters here. Don't be silent."
         }
     }
 }

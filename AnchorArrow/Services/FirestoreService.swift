@@ -237,6 +237,33 @@ class FirestoreService {
         return names
     }
 
+    /// Fetches accountability profiles for all circle members in parallel.
+    /// Returns streak, activity status, and display name — enough for the Battle Formation card.
+    func fetchMemberProfiles(memberIds: [String]) async throws -> [String: MemberProfile] {
+        var profiles: [String: MemberProfile] = [:]
+        try await withThrowingTaskGroup(of: (String, MemberProfile).self) { group in
+            for uid in memberIds {
+                group.addTask {
+                    let doc = try await self.db.collection("users").document(uid).getDocument()
+                    let data = doc.data() ?? [:]
+                    let name = (data["displayName"] as? String) ?? "A Brother"
+                    let streak = (data["currentStreak"] as? Int) ?? 0
+                    let lastEntry = (data["lastEntryDate"] as? Timestamp)?.dateValue()
+                    return (uid, MemberProfile(uid: uid, displayName: name,
+                                               currentStreak: streak, lastEntryDate: lastEntry))
+                }
+            }
+            for try await (uid, profile) in group {
+                profiles[uid] = profile
+            }
+        }
+        return profiles
+    }
+
+    func markPrayerAnswered(circleId: String, postId: String) async throws {
+        try await circlePostsRef(circleId).document(postId).updateData(["isAnswered": true])
+    }
+
     func fetchComments(circleId: String, postId: String) async throws -> [CircleComment] {
         let snapshot = try await commentsRef(circleId: circleId, postId: postId)
             .order(by: "timestamp", descending: false)

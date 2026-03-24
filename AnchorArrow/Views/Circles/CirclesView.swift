@@ -247,9 +247,10 @@ struct CircleDetailView: View {
     @State private var posts: [CirclePost] = []
     @State private var isLoading = false
     @State private var showNewPost = false
+    @State private var showQuickRally = false
     @State private var showPremiumUpsell = false
     @State private var showMemberList = false
-    @State private var memberNames: [String: String] = [:]
+    @State private var memberProfiles: [String: MemberProfile] = [:]
     @State private var showLeaveAlert = false
     @State private var selectedPostForComments: CirclePost?
     @State private var codeCopied = false
@@ -266,38 +267,82 @@ struct CircleDetailView: View {
                     ProgressView()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    ScrollView(showsIndicators: false) {
-                        VStack(spacing: 0) {
-                            dailyPromptBanner
-                                .padding(.horizontal, 20)
-                                .padding(.top, 16)
-                                .padding(.bottom, 8)
+                    ZStack(alignment: .bottom) {
+                        ScrollView(showsIndicators: false) {
+                            VStack(spacing: 12) {
+                                // Battle Formation — who's in the fight today
+                                BattleFormationCard(memberIds: circle.memberIds,
+                                                    profiles: memberProfiles)
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 16)
 
-                            if posts.isEmpty {
-                                emptyPostsState
-                            } else {
-                                ForEach(posts) { post in
-                                    CirclePostRow(
-                                        post: post,
-                                        onReact: { emoji in
-                                            Task { await react(to: post, emoji: emoji) }
-                                        },
-                                        onComment: {
-                                            if canPost {
-                                                selectedPostForComments = post
-                                            } else {
-                                                showPremiumUpsell = true
-                                            }
-                                        }
+                                // Daily prompt
+                                dailyPromptBanner
+                                    .padding(.horizontal, 20)
+
+                                // Prayer Wall — pinned above feed
+                                let prayerPosts = posts.filter { $0.type == .prayer }
+                                if !prayerPosts.isEmpty {
+                                    PrayerWallSection(
+                                        posts: prayerPosts,
+                                        onPray: { post in Task { await react(to: post, emoji: "🙏") } },
+                                        onMarkAnswered: { post in Task { await markAnswered(post: post) } }
                                     )
                                     .padding(.horizontal, 20)
-                                    .padding(.vertical, 6)
                                 }
+
+                                // Regular post feed (excludes prayer — shown above)
+                                let feedPosts = posts.filter { $0.type != .prayer }
+                                if feedPosts.isEmpty && prayerPosts.isEmpty {
+                                    emptyPostsState
+                                } else {
+                                    ForEach(feedPosts) { post in
+                                        CirclePostRow(
+                                            post: post,
+                                            onReact: { emoji in
+                                                Task { await react(to: post, emoji: emoji) }
+                                            },
+                                            onComment: {
+                                                if canPost {
+                                                    selectedPostForComments = post
+                                                } else {
+                                                    showPremiumUpsell = true
+                                                }
+                                            }
+                                        )
+                                        .padding(.horizontal, 20)
+                                    }
+                                }
+                                Spacer(minLength: 140)
                             }
-                            Spacer(minLength: 120)
                         }
+                        .refreshable { await loadPosts() }
+
+                        // Quick Rally — one tap to send a struggle to the circle
+                        Button {
+                            if canPost { showQuickRally = true }
+                            else { showPremiumUpsell = true }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "shield.lefthalf.filled")
+                                    .font(.system(size: 15, weight: .semibold))
+                                Text("I Need My Brothers")
+                                    .font(.system(size: 15, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 22).padding(.vertical, 13)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color("BrandWarning"), Color("BrandWarning").opacity(0.8)],
+                                    startPoint: .leading, endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(28)
+                            .shadow(color: Color("BrandWarning").opacity(0.4), radius: 10, y: 4)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.bottom, 20)
                     }
-                    .refreshable { await loadPosts() }
                 }
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
@@ -342,7 +387,12 @@ struct CircleDetailView: View {
                 }
             }
             .sheet(isPresented: $showNewPost) {
-                NewCirclePostView(circleId: circle.id ?? "") { newPost in
+                NewCirclePostView(circleId: circle.id ?? "", preselectedType: nil) { newPost in
+                    posts.insert(newPost, at: 0)
+                }
+            }
+            .sheet(isPresented: $showQuickRally) {
+                NewCirclePostView(circleId: circle.id ?? "", preselectedType: .drift) { newPost in
                     posts.insert(newPost, at: 0)
                 }
             }
@@ -350,7 +400,7 @@ struct CircleDetailView: View {
                 PremiumUpsellView(reason: "Post and comment in Iron Sharpeners circles")
             }
             .sheet(isPresented: $showMemberList) {
-                MemberListSheet(circle: circle, memberNames: memberNames)
+                MemberListSheet(circle: circle, memberProfiles: memberProfiles)
             }
             .sheet(item: $selectedPostForComments) { post in
                 CommentsSheet(post: post, circle: circle)
@@ -419,11 +469,19 @@ struct CircleDetailView: View {
     private func loadData() async {
         guard let circleId = circle.id else { return }
         isLoading = true
-        async let fetchedPosts = service.fetchCirclePosts(circleId: circleId)
-        async let fetchedNames = service.fetchMemberNames(memberIds: circle.memberIds)
-        posts = (try? await fetchedPosts) ?? []
-        memberNames = (try? await fetchedNames) ?? [:]
+        async let fetchedPosts    = service.fetchCirclePosts(circleId: circleId)
+        async let fetchedProfiles = service.fetchMemberProfiles(memberIds: circle.memberIds)
+        posts          = (try? await fetchedPosts) ?? []
+        memberProfiles = (try? await fetchedProfiles) ?? [:]
         isLoading = false
+    }
+
+    private func markAnswered(post: CirclePost) async {
+        guard let circleId = circle.id, let postId = post.id else { return }
+        try? await service.markPrayerAnswered(circleId: circleId, postId: postId)
+        if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+            posts[idx].isAnswered = true
+        }
     }
 
     private func loadPosts() async {
@@ -455,22 +513,30 @@ struct CircleDetailView: View {
 // MARK: - MemberListSheet
 struct MemberListSheet: View {
     let circle: Circle
-    let memberNames: [String: String]
+    let memberProfiles: [String: MemberProfile]
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
         NavigationStack {
             List {
                 ForEach(circle.memberIds as [String], id: \.self) { uid in
-                    let name = memberNames[uid] ?? "A Brother"
+                    let profile = memberProfiles[uid]
+                    let name = profile?.displayName ?? "A Brother"
                     HStack(spacing: 14) {
                         ZStack {
                             SwiftUI.Circle()
-                                .fill(Color("BrandAnchor").opacity(0.15))
+                                .fill(profile?.isActiveToday == true
+                                      ? Color("BrandAnchor")
+                                      : Color("BrandAnchor").opacity(0.15))
                                 .frame(width: 40, height: 40)
+                                .overlay(
+                                    SwiftUI.Circle()
+                                        .stroke(profile?.isActiveToday == true ? Color("BrandGold") : Color.clear,
+                                                lineWidth: 2)
+                                )
                             Text(String(name.prefix(1)).uppercased())
                                 .font(.system(size: 16, weight: .heavy))
-                                .foregroundColor(Color("BrandAnchor"))
+                                .foregroundColor(profile?.isActiveToday == true ? .white : Color("BrandAnchor"))
                         }
                         VStack(alignment: .leading, spacing: 2) {
                             Text(name)
@@ -480,9 +546,27 @@ struct MemberListSheet: View {
                                 Text("Circle Leader")
                                     .font(.system(size: 11, weight: .bold))
                                     .foregroundColor(Color("BrandGold"))
+                            } else if profile?.isActiveToday == true {
+                                Text("Active today")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color("BrandAnchor"))
+                            } else if let days = profile?.daysSinceActive, days >= 2 {
+                                Text("Last seen \(days) day\(days == 1 ? "" : "s") ago")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(Color("BrandWarning"))
                             }
                         }
                         Spacer()
+                        if let streak = profile?.currentStreak, streak > 0 {
+                            HStack(spacing: 3) {
+                                Image(systemName: "flame.fill")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                                Text("\(streak)")
+                                    .font(.system(size: 13, weight: .bold))
+                                    .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                            }
+                        }
                     }
                     .listRowBackground(Color("CardBackground"))
                 }
@@ -498,6 +582,229 @@ struct MemberListSheet: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - BattleFormationCard
+/// Shows every brother's accountability status at a glance.
+/// Active today = bright anchor color with gold ring.
+/// Streak alive but not today = muted.
+/// Gone dark 2+ days = warning — someone call that man.
+struct BattleFormationCard: View {
+    let memberIds: [String]
+    let profiles: [String: MemberProfile]
+
+    private var activeToday: Int {
+        memberIds.filter { profiles[$0]?.isActiveToday == true }.count
+    }
+
+    private var isolated: [MemberProfile] {
+        memberIds.compactMap { profiles[$0] }.filter { $0.daysSinceActive >= 2 }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 6) {
+                Image(systemName: "shield.fill")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(Color("BrandAnchor"))
+                Text("BATTLE FORMATION")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(Color("BrandAnchor"))
+                    .tracking(0.5)
+                Spacer()
+                Text("\(activeToday)/\(memberIds.count) active today")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundColor(activeToday == memberIds.count ? Color("BrandGold") : Color("TextSecondary"))
+            }
+
+            // Member dot row
+            HStack(spacing: 10) {
+                ForEach(memberIds, id: \.self) { uid in
+                    brotherDot(uid: uid, profile: profiles[uid])
+                }
+                Spacer()
+            }
+
+            // Alert if anyone has gone dark
+            if !isolated.isEmpty {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("BrandWarning"))
+                        .padding(.top, 1)
+                    Text(isolated.count == 1
+                         ? "\(isolated[0].displayName) hasn't checked in — your brother may need a call."
+                         : "\(isolated.count) brothers haven't checked in. The lion circles the isolated.")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color("BrandWarning"))
+                        .lineSpacing(3)
+                }
+                .padding(10)
+                .background(Color("BrandWarning").opacity(0.08))
+                .cornerRadius(8)
+            }
+        }
+        .padding(16)
+        .background(Color("CardBackground"))
+        .cornerRadius(16)
+    }
+
+    @ViewBuilder
+    private func brotherDot(uid: String, profile: MemberProfile?) -> some View {
+        VStack(spacing: 4) {
+            ZStack {
+                SwiftUI.Circle()
+                    .fill(dotFill(profile))
+                    .frame(width: 42, height: 42)
+                    .overlay(
+                        SwiftUI.Circle()
+                            .stroke(profile?.isActiveToday == true ? Color("BrandGold") : Color.clear,
+                                    lineWidth: 2.5)
+                    )
+                Text(String((profile?.displayName ?? "?").prefix(1)).uppercased())
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundColor(.white)
+            }
+            // Streak badge
+            if let p = profile, p.currentStreak > 0 {
+                HStack(spacing: 2) {
+                    Image(systemName: "flame.fill")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                    Text("\(p.currentStreak)")
+                        .font(.system(size: 9, weight: .heavy))
+                        .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                }
+            } else {
+                // Placeholder so all dots align
+                Text(" ")
+                    .font(.system(size: 9))
+            }
+        }
+    }
+
+    private func dotFill(_ profile: MemberProfile?) -> Color {
+        guard let p = profile else { return Color("TextSecondary").opacity(0.25) }
+        if p.isActiveToday   { return Color("BrandAnchor") }
+        if p.isStreakAlive   { return Color("BrandAnchor").opacity(0.45) }
+        if p.daysSinceActive < 7 { return Color("BrandWarning").opacity(0.55) }
+        return Color("TextSecondary").opacity(0.25)
+    }
+}
+
+// MARK: - PrayerWallSection
+struct PrayerWallSection: View {
+    let posts: [CirclePost]
+    let onPray: (CirclePost) -> Void
+    let onMarkAnswered: (CirclePost) -> Void
+
+    private var active: [CirclePost] { posts.filter { !$0.isAnswered } }
+    private var answered: [CirclePost] { posts.filter { $0.isAnswered } }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: "hands.sparkles.fill")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(Color("BrandGold"))
+                Text("PRAYER WALL")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(Color("BrandGold"))
+                    .tracking(0.5)
+                Spacer()
+                if !answered.isEmpty {
+                    Label("\(answered.count) answered", systemImage: "checkmark.circle.fill")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(Color("BrandArrow"))
+                }
+            }
+
+            ForEach(active) { post in
+                PrayerCard(
+                    post: post,
+                    onPray: { onPray(post) },
+                    onMarkAnswered: { onMarkAnswered(post) }
+                )
+            }
+
+            if !answered.isEmpty {
+                Divider().padding(.vertical, 2)
+                VStack(spacing: 8) {
+                    ForEach(answered) { post in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(Color("BrandArrow"))
+                            Text(post.content)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color("TextSecondary"))
+                                .lineLimit(2)
+                            Spacer()
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(Color("BrandGold").opacity(0.05))
+        .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color("BrandGold").opacity(0.2), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - PrayerCard
+struct PrayerCard: View {
+    let post: CirclePost
+    let onPray: () -> Void
+    let onMarkAnswered: () -> Void
+
+    private var prayingCount: Int { post.reactions["🙏"] ?? 0 }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(post.isAnonymous ? "A brother asks for prayer:" : "\(post.authorName) asks for prayer:")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(Color("TextSecondary"))
+
+            Text(post.content)
+                .font(.system(size: 14))
+                .foregroundColor(Color("TextPrimary"))
+                .lineSpacing(4)
+
+            HStack(spacing: 8) {
+                Button(action: onPray) {
+                    HStack(spacing: 6) {
+                        Text("🙏")
+                        Text(prayingCount > 0 ? "\(prayingCount) praying" : "I'm praying for this")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundColor(Color("BrandGold"))
+                    .padding(.horizontal, 14).padding(.vertical, 8)
+                    .background(Color("BrandGold").opacity(0.12))
+                    .cornerRadius(20)
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button(action: onMarkAnswered) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle")
+                        Text("Answered")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color("BrandArrow"))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(12)
+        .background(Color("CardBackground"))
+        .cornerRadius(12)
     }
 }
 
@@ -914,6 +1221,7 @@ struct JoinCircleView: View {
 // MARK: - NewCirclePostView
 struct NewCirclePostView: View {
     let circleId: String
+    let preselectedType: PostType?
     let onPost: (CirclePost) -> Void
 
     @EnvironmentObject var userStore: UserStore
@@ -923,6 +1231,13 @@ struct NewCirclePostView: View {
     @State private var isAnonymous = false
     @State private var isPosting = false
     @FocusState private var focused: Bool
+
+    init(circleId: String, preselectedType: PostType? = nil, onPost: @escaping (CirclePost) -> Void) {
+        self.circleId = circleId
+        self.preselectedType = preselectedType
+        self.onPost = onPost
+        _selectedType = State(initialValue: preselectedType ?? .general)
+    }
 
     var body: some View {
         NavigationStack {
@@ -946,6 +1261,20 @@ struct NewCirclePostView: View {
                     }
                     .padding(.horizontal, 20)
                 }
+
+                // Contextual nudge for the selected post type
+                HStack(spacing: 8) {
+                    Image(systemName: selectedType.icon)
+                        .font(.system(size: 12))
+                        .foregroundColor(Color(selectedType.color))
+                    Text(selectedType.postHint)
+                        .font(.system(size: 13))
+                        .foregroundColor(Color("TextSecondary"))
+                        .lineSpacing(2)
+                }
+                .padding(.horizontal, 20)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+                .animation(.easeInOut(duration: 0.2), value: selectedType)
 
                 ZStack(alignment: .topLeading) {
                     if content.isEmpty {
