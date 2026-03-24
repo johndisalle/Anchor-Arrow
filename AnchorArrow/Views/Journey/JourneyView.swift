@@ -377,6 +377,13 @@ struct JourneyView: View {
                 (3, "Receive Your Identity", Color("BrandArrow")),
                 (4, "Rise to Serve", Color.red)
             ]
+        case .prophetPriestKing:
+            return [
+                (1, "Prophet", Color("BrandAnchor")),
+                (2, "Priest", Color.blue),
+                (3, "King", Color("BrandArrow")),
+                (4, "The Whole Man", Color.red)
+            ]
         }
     }
 }
