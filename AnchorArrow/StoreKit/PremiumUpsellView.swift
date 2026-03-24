@@ -51,6 +51,32 @@ struct PremiumUpsellView: View {
                     }
                     .padding(.horizontal, 24)
 
+                    // Free trial banner
+                    HStack(spacing: 12) {
+                        Image(systemName: "gift.fill")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color("BrandGold"))
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Try Free for 3 Days")
+                                .font(.system(size: 16, weight: .heavy, design: .rounded))
+                                .foregroundColor(Color("TextPrimary"))
+                            Text("Full access to every feature. Cancel anytime before your trial ends and pay nothing.")
+                                .font(.system(size: 13))
+                                .foregroundColor(Color("TextSecondary"))
+                                .lineSpacing(2)
+                        }
+                    }
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color("BrandGold").opacity(0.08))
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color("BrandGold").opacity(0.25), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 24)
+
                     // Product selection
                     VStack(spacing: 12) {
                         ForEach(SubscriptionProduct.allCases, id: \.self) { subscription in
@@ -84,7 +110,7 @@ struct PremiumUpsellView: View {
                                     ProgressView().tint(.white)
                                 } else {
                                     VStack(spacing: 2) {
-                                        Text("Start Premium")
+                                        Text("Try Free for 3 Days")
                                             .font(.system(size: 18, weight: .heavy))
                                         Text(priceSubtext)
                                             .font(.system(size: 12))
@@ -121,7 +147,7 @@ struct PremiumUpsellView: View {
                         .foregroundColor(Color("TextSecondary"))
 
                         // Legal
-                        Text("Subscriptions renew automatically. Cancel anytime in App Store settings. Terms & Privacy Policy apply.")
+                        Text("Free trial for 3 days, then subscription renews automatically. Cancel anytime in App Store settings. You won't be charged if you cancel before the trial ends. Terms & Privacy Policy apply.")
                             .font(.system(size: 10))
                             .foregroundColor(Color("TextSecondary").opacity(0.6))
                             .multilineTextAlignment(.center)
@@ -146,8 +172,8 @@ struct PremiumUpsellView: View {
 
     private var priceSubtext: String {
         switch selectedProduct {
-        case .monthly: return "$6.99/month • Cancel anytime"
-        case .annual:  return "$59.99/year • That's ~$5/month"
+        case .monthly: return "Then $6.99/month • Cancel anytime"
+        case .annual:  return "Then $59.99/year • That's ~$5/month"
         }
     }
 }
