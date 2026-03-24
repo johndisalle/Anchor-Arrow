@@ -8,8 +8,8 @@ import FirebaseAuth
 
 // MARK: - Product IDs
 enum SubscriptionProduct: String, CaseIterable {
-    case monthly = "com.yourcompany.anchorarrow.premium.monthly"
-    case annual  = "com.yourcompany.anchorarrow.premium.annual"
+    case monthly = "com.ellasid.anchorarrow.premium.monthly"
+    case annual  = "com.ellasid.anchorarrow.premium.annual"
 
     var displayName: String {
         switch self {

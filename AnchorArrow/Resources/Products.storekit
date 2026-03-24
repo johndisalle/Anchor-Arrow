@@ -39,15 +39,20 @@
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "anchor_arrow_monthly_001",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "internalID" : "monthly_free_trial",
+            "paymentMode" : "free",
+            "numberOfPeriods" : 1,
+            "subscriptionPeriod" : "P3D"
+          },
           "localizations" : [
             {
-              "description" : "Full access to Anchor & Arrow Premium features: unlimited circles, voice prayers, teaching packs, and custom goals.",
+              "description" : "Post and rally in unlimited circles, Drift Insights, Grace Day streak save, and additional 30-day journeys. Try free for 3 days.",
               "displayName" : "Monthly Premium",
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.yourcompany.anchorarrow.premium.monthly",
+          "productID" : "com.ellasid.anchorarrow.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Premium",
           "subscriptionGroupID" : "anchor-arrow-premium",
@@ -59,15 +64,20 @@
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "anchor_arrow_annual_001",
-          "introductoryOffer" : null,
+          "introductoryOffer" : {
+            "internalID" : "annual_free_trial",
+            "paymentMode" : "free",
+            "numberOfPeriods" : 1,
+            "subscriptionPeriod" : "P3D"
+          },
           "localizations" : [
             {
-              "description" : "Full access to Anchor & Arrow Premium features: unlimited circles, voice prayers, teaching packs, and custom goals. Best value.",
+              "description" : "Post and rally in unlimited circles, Drift Insights, Grace Day streak save, and additional 30-day journeys. Best value — try free for 3 days.",
               "displayName" : "Annual Premium",
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.yourcompany.anchorarrow.premium.annual",
+          "productID" : "com.ellasid.anchorarrow.premium.annual",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Annual Premium",
           "subscriptionGroupID" : "anchor-arrow-premium",
