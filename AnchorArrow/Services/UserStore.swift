@@ -202,7 +202,7 @@ class UserStore: ObservableObject {
         let monthLogs = driftLogs.filter { cal.isDate($0.timestamp, equalTo: now, toGranularity: .month) }
         var counts: [AnchorTag: Int] = [:]
         for log in monthLogs { counts[log.category, default: 0] += 1 }
-        return counts.sorted { $0.value > $1.value }
+        return counts.sorted { $0.value > $1.value }.map { (tag: $0.key, count: $0.value) }
     }
 
     /// Weakest day of week — the day with the most drifts in the last 90 days
