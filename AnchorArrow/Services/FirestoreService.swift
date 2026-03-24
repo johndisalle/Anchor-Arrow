@@ -476,6 +476,39 @@ class FirestoreService {
         try await circlePostsRef(circleId).document(postId).updateData(["isPinned": false])
     }
 
+    // MARK: - Moderation
+
+    /// Delete a single post and all its comments
+    func deletePost(circleId: String, postId: String) async throws {
+        let comments = try await commentsRef(circleId: circleId, postId: postId).getDocuments()
+        if !comments.documents.isEmpty {
+            let batch = db.batch()
+            comments.documents.forEach { batch.deleteDocument($0.reference) }
+            try await batch.commit()
+        }
+        try await circlePostsRef(circleId).document(postId).delete()
+    }
+
+    /// Delete a single comment
+    func deleteComment(circleId: String, postId: String, commentId: String) async throws {
+        try await commentsRef(circleId: circleId, postId: postId).document(commentId).delete()
+    }
+
+    /// Report a post or comment for moderation review
+    func submitReport(reporterId: String, circleId: String, postId: String,
+                      commentId: String? = nil, reason: String) async throws {
+        let data: [String: Any] = [
+            "reporterId": reporterId,
+            "circleId": circleId,
+            "postId": postId,
+            "commentId": commentId as Any,
+            "reason": reason,
+            "status": "pending",
+            "timestamp": Timestamp(date: Date())
+        ]
+        try await db.collection("reports").addDocument(data: data)
+    }
+
     // MARK: - Account Deletion (cascade)
 
     /// Deletes all user data from Firestore before the Auth account is removed.

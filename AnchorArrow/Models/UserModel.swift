@@ -35,6 +35,9 @@ struct AppUser: Codable, Identifiable {
     var journeySeries: String = JourneySeries.standFirm.rawValue
     var completedJourneys: [String] = []  // series rawValues the user finished
 
+    // Moderation
+    var isAdmin: Bool = false
+
     // MARK: - Custom Decoder (handles missing keys for fields added after initial release)
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -62,6 +65,7 @@ struct AppUser: Codable, Identifiable {
         graceDayPeriodStart  = try c.decodeIfPresent(Date.self, forKey: .graceDayPeriodStart)
         journeySeries        = try c.decodeIfPresent(String.self, forKey: .journeySeries) ?? JourneySeries.standFirm.rawValue
         completedJourneys    = try c.decodeIfPresent([String].self, forKey: .completedJourneys) ?? []
+        isAdmin              = try c.decodeIfPresent(Bool.self, forKey: .isAdmin) ?? false
     }
 
     // Memberwise init for programmatic construction
@@ -75,7 +79,8 @@ struct AppUser: Codable, Identifiable {
          theme: AppTheme = .system, lastEntryDate: Date? = nil,
          graceDayUsedDate: Date? = nil, graceDayPeriodStart: Date? = nil,
          journeySeries: String = JourneySeries.standFirm.rawValue,
-         completedJourneys: [String] = []) {
+         completedJourneys: [String] = [],
+         isAdmin: Bool = false) {
         self.uid = uid
         self.email = email
         self.displayName = displayName
@@ -99,6 +104,7 @@ struct AppUser: Codable, Identifiable {
         self.graceDayPeriodStart = graceDayPeriodStart
         self.journeySeries = journeySeries
         self.completedJourneys = completedJourneys
+        self.isAdmin = isAdmin
     }
 
     // MARK: - Computed

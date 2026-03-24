@@ -251,6 +251,7 @@ class UserStore: ObservableObject {
 
     // MARK: - Helpers
     var isPremium: Bool { appUser?.isPremium ?? false }
+    var isAdmin: Bool { appUser?.isAdmin ?? false }
     var currentStreak: Int { appUser?.currentStreak ?? 0 }
     var displayName: String { appUser?.displayName ?? Auth.auth().currentUser?.displayName ?? "Warrior" }
     var colorScheme: SwiftUI.ColorScheme? {

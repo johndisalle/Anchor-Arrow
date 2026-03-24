@@ -324,6 +324,11 @@ struct CircleDetailView: View {
     @State private var showLeaveAlert = false
     @State private var showDeleteAlert = false
     @State private var isDeleting = false
+    @State private var postToDelete: CirclePost?
+    @State private var postToReport: CirclePost?
+    @State private var showReportSheet = false
+    @State private var reportReason = ""
+    @State private var showReportConfirm = false
     @State private var selectedPostForComments: CirclePost?
     @State private var codeCopied = false
 
@@ -375,6 +380,7 @@ struct CircleDetailView: View {
                                         CirclePostRow(
                                             post: post,
                                             isLeader: isCircleLeader,
+                                            canModerate: canModerate,
                                             onReact: { emoji in
                                                 Task { await react(to: post, emoji: emoji) }
                                             },
@@ -387,6 +393,14 @@ struct CircleDetailView: View {
                                             },
                                             onPin: {
                                                 Task { await togglePin(post: post) }
+                                            },
+                                            onDelete: canModerate ? {
+                                                postToDelete = post
+                                            } : nil,
+                                            onReport: {
+                                                postToReport = post
+                                                reportReason = ""
+                                                showReportSheet = true
                                             }
                                         )
                                         .padding(.horizontal, 20)
@@ -502,6 +516,28 @@ struct CircleDetailView: View {
             } message: {
                 Text("This will permanently delete \"\(circle.name)\" and all its posts. This cannot be undone.")
             }
+            .alert("Delete Post?", isPresented: .init(
+                get: { postToDelete != nil },
+                set: { if !$0 { postToDelete = nil } }
+            )) {
+                Button("Delete", role: .destructive) {
+                    if let post = postToDelete { Task { await deletePost(post) } }
+                }
+                Button("Cancel", role: .cancel) { postToDelete = nil }
+            } message: {
+                Text("This will permanently remove this post and all its replies.")
+            }
+            .sheet(isPresented: $showReportSheet) {
+                ReportSheet(
+                    onSubmit: { reason in
+                        if let post = postToReport {
+                            Task { await reportPost(post, reason: reason) }
+                        }
+                        showReportSheet = false
+                    },
+                    onCancel: { showReportSheet = false }
+                )
+            }
             .confirmationDialog(
                 "Rally Your Brothers?",
                 isPresented: $showRallyConfirm,
@@ -569,6 +605,11 @@ struct CircleDetailView: View {
     private var isCircleLeader: Bool {
         guard let uid = Auth.auth().currentUser?.uid else { return false }
         return circle.creatorId == uid && userStore.isPremium
+    }
+
+    /// Admin or circle creator can delete posts/comments
+    private var canModerate: Bool {
+        userStore.isAdmin || isCircleLeader
     }
 
     // MARK: - Actions
@@ -657,6 +698,28 @@ struct CircleDetailView: View {
             userStore.errorMessage = "Couldn't delete circle. Try again."
         }
         isDeleting = false
+    }
+
+    private func deletePost(_ post: CirclePost) async {
+        guard let circleId = circle.id, let postId = post.id else { return }
+        do {
+            try await service.deletePost(circleId: circleId, postId: postId)
+            posts.removeAll { $0.id == postId }
+        } catch {
+            userStore.errorMessage = "Couldn't delete post. Try again."
+        }
+    }
+
+    private func reportPost(_ post: CirclePost, reason: String) async {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let circleId = circle.id,
+              let postId = post.id else { return }
+        do {
+            try await service.submitReport(reporterId: uid, circleId: circleId, postId: postId, reason: reason)
+            userStore.errorMessage = nil
+        } catch {
+            userStore.errorMessage = "Couldn't submit report. Try again."
+        }
     }
 }
 
@@ -962,9 +1025,12 @@ struct PrayerCard: View {
 struct CirclePostRow: View {
     let post: CirclePost
     var isLeader: Bool = false
+    var canModerate: Bool = false
     let onReact: (String) -> Void
     let onComment: () -> Void
     var onPin: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
+    var onReport: (() -> Void)? = nil
 
     private let reactionEmojis = ["🔥", "🙏", "🙌", "💪"]
 
@@ -1002,14 +1068,26 @@ struct CirclePostRow: View {
                     .font(.system(size: 11))
                     .foregroundColor(Color("TextSecondary"))
 
-                // Leader tools menu
-                if isLeader, let onPin {
+                // Post actions menu
+                if isLeader || canModerate || onReport != nil {
                     Menu {
-                        Button {
-                            onPin()
-                        } label: {
-                            Label(post.isPinned ? "Unpin Post" : "Pin to Top",
-                                  systemImage: post.isPinned ? "pin.slash" : "pin.fill")
+                        if isLeader, let onPin {
+                            Button {
+                                onPin()
+                            } label: {
+                                Label(post.isPinned ? "Unpin Post" : "Pin to Top",
+                                      systemImage: post.isPinned ? "pin.slash" : "pin.fill")
+                            }
+                        }
+                        if canModerate, let onDelete {
+                            Button(role: .destructive) { onDelete() } label: {
+                                Label("Delete Post", systemImage: "trash")
+                            }
+                        }
+                        if let onReport {
+                            Button { onReport() } label: {
+                                Label("Report Post", systemImage: "flag")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis")
@@ -1081,9 +1159,16 @@ struct CommentsSheet: View {
     @State private var newComment = ""
     @State private var isPosting = false
     @State private var isAnonymous = false
+    @State private var commentToReport: CircleComment?
+    @State private var showReportSheet = false
     @FocusState private var focused: Bool
 
     private let service = FirestoreService.shared
+
+    private var canModerate: Bool {
+        let uid = Auth.auth().currentUser?.uid
+        return userStore.isAdmin || (circle.creatorId == uid && userStore.isPremium)
+    }
 
     var body: some View {
         NavigationStack {
@@ -1120,8 +1205,18 @@ struct CommentsSheet: View {
                                 .padding(.top, 24)
                         } else {
                             ForEach(comments) { comment in
-                                CommentRow(comment: comment)
-                                    .padding(.horizontal, 20)
+                                CommentRow(
+                                    comment: comment,
+                                    canModerate: canModerate,
+                                    onDelete: canModerate ? {
+                                        Task { await deleteComment(comment) }
+                                    } : nil,
+                                    onReport: {
+                                        commentToReport = comment
+                                        showReportSheet = true
+                                    }
+                                )
+                                .padding(.horizontal, 20)
                             }
                         }
                         Spacer(minLength: 80)
@@ -1173,6 +1268,38 @@ struct CommentsSheet: View {
             }
         }
         .task { await loadComments() }
+        .sheet(isPresented: $showReportSheet) {
+            ReportSheet(
+                onSubmit: { reason in
+                    if let comment = commentToReport {
+                        Task { await reportComment(comment, reason: reason) }
+                    }
+                    showReportSheet = false
+                },
+                onCancel: { showReportSheet = false }
+            )
+        }
+    }
+
+    private func deleteComment(_ comment: CircleComment) async {
+        guard let circleId = circle.id, let postId = post.id, let commentId = comment.id else { return }
+        do {
+            try await service.deleteComment(circleId: circleId, postId: postId, commentId: commentId)
+            comments.removeAll { $0.id == commentId }
+        } catch {
+            userStore.errorMessage = "Couldn't delete comment. Try again."
+        }
+    }
+
+    private func reportComment(_ comment: CircleComment, reason: String) async {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let circleId = circle.id,
+              let postId = post.id else { return }
+        do {
+            try await service.submitReport(reporterId: uid, circleId: circleId, postId: postId, commentId: comment.id, reason: reason)
+        } catch {
+            userStore.errorMessage = "Couldn't submit report. Try again."
+        }
     }
 
     private func loadComments() async {
@@ -1212,6 +1339,9 @@ struct CommentsSheet: View {
 // MARK: - CommentRow
 struct CommentRow: View {
     let comment: CircleComment
+    var canModerate: Bool = false
+    var onDelete: (() -> Void)? = nil
+    var onReport: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -1236,8 +1366,111 @@ struct CommentRow: View {
                     .foregroundColor(Color("TextSecondary").opacity(0.6))
             }
             Spacer()
+            if canModerate || onReport != nil {
+                Menu {
+                    if canModerate, let onDelete {
+                        Button(role: .destructive) { onDelete() } label: {
+                            Label("Delete Comment", systemImage: "trash")
+                        }
+                    }
+                    if let onReport {
+                        Button { onReport() } label: {
+                            Label("Report Comment", systemImage: "flag")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 11))
+                        .foregroundColor(Color("TextSecondary").opacity(0.4))
+                        .padding(6)
+                }
+            }
         }
         .padding(.vertical, 6)
+    }
+}
+
+// MARK: - ReportSheet
+struct ReportSheet: View {
+    let onSubmit: (String) -> Void
+    let onCancel: () -> Void
+
+    @State private var reason = ""
+    @FocusState private var focused: Bool
+
+    private let reasons = [
+        "Inappropriate or offensive content",
+        "Spam or self-promotion",
+        "Harassment or bullying",
+        "Threatening language",
+        "Other"
+    ]
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Why are you reporting this?")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                    .padding(.top, 8)
+
+                VStack(spacing: 10) {
+                    ForEach(reasons, id: \.self) { r in
+                        Button {
+                            reason = r
+                        } label: {
+                            HStack {
+                                Text(r)
+                                    .font(.system(size: 15))
+                                    .foregroundColor(Color("TextPrimary"))
+                                Spacer()
+                                if reason == r {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(Color("BrandAnchor"))
+                                }
+                            }
+                            .padding(14)
+                            .background(reason == r ? Color("BrandAnchor").opacity(0.08) : Color("CardBackground"))
+                            .cornerRadius(12)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal, 20)
+
+                Button {
+                    onSubmit(reason)
+                } label: {
+                    Text("Submit Report")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(reason.isEmpty ? Color("TextSecondary").opacity(0.3) : Color("BrandDanger"))
+                        .cornerRadius(14)
+                }
+                .disabled(reason.isEmpty)
+                .padding(.horizontal, 20)
+
+                Text("Reports are reviewed by our team. Thank you for helping keep this community safe.")
+                    .font(.system(size: 12))
+                    .foregroundColor(Color("TextSecondary"))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 32)
+
+                Spacer()
+            }
+            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .navigationTitle("Report")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") { onCancel() }
+                        .foregroundColor(Color("TextSecondary"))
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 
