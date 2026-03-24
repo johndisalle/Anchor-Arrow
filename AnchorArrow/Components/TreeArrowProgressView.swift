@@ -30,10 +30,8 @@ struct TreeArrowProgressView: View {
                 .padding(.vertical, 5)
 
             // Nautical anchor
-            Image(systemName: "anchor")
-                .renderingMode(.template)
-                .font(.system(size: 120, weight: .thin))
-                .foregroundStyle(Color("BrandAnchor"))
+            AnchorSymbolView()
+                .frame(width: 120, height: 150)
                 .scaleEffect(anchorRevealed ? 1.0 : 0.1)
                 .opacity(anchorRevealed ? 1.0 : 0)
 
@@ -227,6 +225,67 @@ struct UpwardArcheryArrowView: View {
                 context.stroke(fletch, with: .color(color.opacity(0.65)),
                                style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
             }
+        }
+    }
+}
+
+// MARK: - Canvas-drawn Anchor Symbol
+// Replaces Image(systemName: "anchor") which fails to render reliably
+// at large sizes inside ZStack hero compositions.
+struct AnchorSymbolView: View {
+    var color: Color = Color("BrandAnchor")
+
+    var body: some View {
+        Canvas { context, size in
+            let w = size.width
+            let h = size.height
+            let cx = w / 2
+            let lw = max(w * 0.032, 1.5)
+            let shading = GraphicsContext.Shading.color(color)
+            let style = StrokeStyle(lineWidth: lw, lineCap: .round, lineJoin: .round)
+
+            // Ring at top
+            let ringR = w * 0.105
+            let ringCY = h * 0.108
+            var ring = Path()
+            ring.addArc(center: CGPoint(x: cx, y: ringCY),
+                        radius: ringR,
+                        startAngle: .degrees(0),
+                        endAngle: .degrees(360),
+                        clockwise: false)
+            context.stroke(ring, with: shading, style: style)
+
+            // Shaft (ring bottom → crown)
+            var shaft = Path()
+            shaft.move(to: CGPoint(x: cx, y: ringCY + ringR))
+            shaft.addLine(to: CGPoint(x: cx, y: h * 0.81))
+            context.stroke(shaft, with: shading, style: style)
+
+            // Stock / crossbar
+            var stock = Path()
+            stock.move(to: CGPoint(x: cx - w * 0.44, y: h * 0.26))
+            stock.addLine(to: CGPoint(x: cx + w * 0.44, y: h * 0.26))
+            context.stroke(stock, with: shading, style: style)
+
+            // Left arm + fluke (sweeps down-and-out then curves up)
+            var leftArm = Path()
+            leftArm.move(to: CGPoint(x: cx, y: h * 0.81))
+            leftArm.addCurve(
+                to:       CGPoint(x: cx - w * 0.44, y: h * 0.63),
+                control1: CGPoint(x: cx - w * 0.04, y: h * 0.94),
+                control2: CGPoint(x: cx - w * 0.44, y: h * 0.94)
+            )
+            context.stroke(leftArm, with: shading, style: style)
+
+            // Right arm + fluke (mirror)
+            var rightArm = Path()
+            rightArm.move(to: CGPoint(x: cx, y: h * 0.81))
+            rightArm.addCurve(
+                to:       CGPoint(x: cx + w * 0.44, y: h * 0.63),
+                control1: CGPoint(x: cx + w * 0.04, y: h * 0.94),
+                control2: CGPoint(x: cx + w * 0.44, y: h * 0.94)
+            )
+            context.stroke(rightArm, with: shading, style: style)
         }
     }
 }

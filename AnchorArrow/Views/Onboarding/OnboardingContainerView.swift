@@ -126,14 +126,10 @@ struct OnboardingPage1: View {
                     .opacity(appeared ? 1.0 : 0)
                     .animation(.easeOut(duration: 1.0).delay(0.3), value: appeared)
 
-                // Anchor — explicit resizable frame so it always renders
-                Image(systemName: "anchor")
-                    .resizable()
-                    .fontWeight(.thin)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 158)
-                    .foregroundStyle(Color("BrandAnchor"))
-                    .offset(y: 12)
+                // Anchor — Canvas-drawn for reliable rendering
+                AnchorSymbolView()
+                    .frame(width: 158, height: 198)
+                    .offset(y: 14)
                     .opacity(appeared ? 1.0 : 0)
                     .animation(.easeOut(duration: 0.7).delay(0.15), value: appeared)
 

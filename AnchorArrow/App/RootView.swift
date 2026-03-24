@@ -85,13 +85,9 @@ struct SplashView: View {
                         .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: arrowsShown)
                         .offset(y: -90)
 
-                    // Anchor — explicit resizable frame so it always renders
-                    Image(systemName: "anchor")
-                        .resizable()
-                        .fontWeight(.thin)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 178)
-                        .foregroundStyle(Color("BrandAnchor"))
+                    // Anchor — Canvas-drawn for reliable rendering
+                    AnchorSymbolView()
+                        .frame(width: 178, height: 222)
                         .opacity(anchorShown ? 1.0 : 0)
                         .animation(.easeOut(duration: 0.7).delay(0.15), value: anchorShown)
                 }
