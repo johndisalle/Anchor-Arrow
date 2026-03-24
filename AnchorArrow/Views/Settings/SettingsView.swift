@@ -56,7 +56,7 @@ struct SettingsView: View {
                     Section {
                         journeyRow
                     } header: {
-                        Text("Stand Firm Journey")
+                        Text("\(userStore.currentJourneySeries.displayName) Journey")
                     }
                 }
 

@@ -68,7 +68,7 @@ struct DashboardView: View {
             JourneyView()
         }
         .sheet(isPresented: $showPremiumUpsell) {
-            PremiumUpsellView(reason: "Start your Stand Firm Journey")
+            PremiumUpsellView(reason: "Unlock all guided journeys")
         }
         .onAppear {
             updateGreeting()
@@ -206,7 +206,7 @@ struct DashboardView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Stand Firm Journey")
+                    Text("\(userStore.currentJourneySeries.displayName) Journey")
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(Color("TextPrimary"))
                     Text(userStore.appUser?.journeyActive == true

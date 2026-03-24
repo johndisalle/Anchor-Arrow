@@ -226,11 +226,10 @@ class UserStore: ObservableObject {
             dayCounts[weekday, default: 0] += 1
         }
         guard let weakest = dayCounts.max(by: { $0.value < $1.value }) else { return nil }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "EEEE"
-        // weekday 1 = Sunday
-        let refDate = Calendar.current.date(from: DateComponents(weekday: weakest.key))!
-        return formatter.string(from: refDate)
+        let dayNames = ["", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        let index = weakest.key
+        guard index >= 1, index <= 7 else { return nil }
+        return dayNames[index]
     }
 
     /// 90-day trend: drifts per week, returns recent 12 weeks

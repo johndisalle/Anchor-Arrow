@@ -35,6 +35,72 @@ struct AppUser: Codable, Identifiable {
     var journeySeries: String = JourneySeries.standFirm.rawValue
     var completedJourneys: [String] = []  // series rawValues the user finished
 
+    // MARK: - Custom Decoder (handles missing keys for fields added after initial release)
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        _id                  = try c.decode(DocumentID<String>.self, forKey: .id)
+        uid                  = try c.decode(String.self, forKey: .uid)
+        email                = try c.decode(String.self, forKey: .email)
+        displayName          = try c.decode(String.self, forKey: .displayName)
+        isPremium            = try c.decodeIfPresent(Bool.self, forKey: .isPremium) ?? false
+        premiumExpiry        = try c.decodeIfPresent(Date.self, forKey: .premiumExpiry)
+        joinDate             = try c.decode(Date.self, forKey: .joinDate)
+        currentStreak        = try c.decodeIfPresent(Int.self, forKey: .currentStreak) ?? 0
+        longestStreak        = try c.decodeIfPresent(Int.self, forKey: .longestStreak) ?? 0
+        totalAnchorDays      = try c.decodeIfPresent(Int.self, forKey: .totalAnchorDays) ?? 0
+        totalArrowDays       = try c.decodeIfPresent(Int.self, forKey: .totalArrowDays) ?? 0
+        badges               = try c.decodeIfPresent([String].self, forKey: .badges) ?? []
+        journeyActive        = try c.decodeIfPresent(Bool.self, forKey: .journeyActive) ?? false
+        journeyDay           = try c.decodeIfPresent(Int.self, forKey: .journeyDay) ?? 0
+        journeyStartDate     = try c.decodeIfPresent(Date.self, forKey: .journeyStartDate)
+        notificationsEnabled = try c.decodeIfPresent(Bool.self, forKey: .notificationsEnabled) ?? true
+        morningReminderHour  = try c.decodeIfPresent(Int.self, forKey: .morningReminderHour) ?? 7
+        eveningReminderHour  = try c.decodeIfPresent(Int.self, forKey: .eveningReminderHour) ?? 20
+        theme                = try c.decodeIfPresent(AppTheme.self, forKey: .theme) ?? .system
+        lastEntryDate        = try c.decodeIfPresent(Date.self, forKey: .lastEntryDate)
+        graceDayUsedDate     = try c.decodeIfPresent(Date.self, forKey: .graceDayUsedDate)
+        graceDayPeriodStart  = try c.decodeIfPresent(Date.self, forKey: .graceDayPeriodStart)
+        journeySeries        = try c.decodeIfPresent(String.self, forKey: .journeySeries) ?? JourneySeries.standFirm.rawValue
+        completedJourneys    = try c.decodeIfPresent([String].self, forKey: .completedJourneys) ?? []
+    }
+
+    // Memberwise init for programmatic construction
+    init(uid: String, email: String, displayName: String,
+         isPremium: Bool = false, premiumExpiry: Date? = nil,
+         joinDate: Date, currentStreak: Int = 0, longestStreak: Int = 0,
+         totalAnchorDays: Int = 0, totalArrowDays: Int = 0,
+         badges: [String] = [], journeyActive: Bool = false, journeyDay: Int = 0,
+         journeyStartDate: Date? = nil, notificationsEnabled: Bool = true,
+         morningReminderHour: Int = 7, eveningReminderHour: Int = 20,
+         theme: AppTheme = .system, lastEntryDate: Date? = nil,
+         graceDayUsedDate: Date? = nil, graceDayPeriodStart: Date? = nil,
+         journeySeries: String = JourneySeries.standFirm.rawValue,
+         completedJourneys: [String] = []) {
+        self.uid = uid
+        self.email = email
+        self.displayName = displayName
+        self.isPremium = isPremium
+        self.premiumExpiry = premiumExpiry
+        self.joinDate = joinDate
+        self.currentStreak = currentStreak
+        self.longestStreak = longestStreak
+        self.totalAnchorDays = totalAnchorDays
+        self.totalArrowDays = totalArrowDays
+        self.badges = badges
+        self.journeyActive = journeyActive
+        self.journeyDay = journeyDay
+        self.journeyStartDate = journeyStartDate
+        self.notificationsEnabled = notificationsEnabled
+        self.morningReminderHour = morningReminderHour
+        self.eveningReminderHour = eveningReminderHour
+        self.theme = theme
+        self.lastEntryDate = lastEntryDate
+        self.graceDayUsedDate = graceDayUsedDate
+        self.graceDayPeriodStart = graceDayPeriodStart
+        self.journeySeries = journeySeries
+        self.completedJourneys = completedJourneys
+    }
+
     // MARK: - Computed
 
     /// Whether a grace day is still available in the current 30-day period

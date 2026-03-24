@@ -62,16 +62,46 @@ struct CirclePost: Codable, Identifiable {
     @DocumentID var id: String?
     var circleId: String
     var authorId: String
-    var authorName: String     // anonymized display name within circle
+    var authorName: String
     var content: String
     var type: PostType
     var isAnonymous: Bool
     var timestamp: Date
-    var reactions: [String: Int] = [:]  // emoji: count
-    var isAnswered: Bool = false         // prayer posts only — marks as answered praise
-    var isPinned: Bool = false           // circle leader can pin one post to top
+    var reactions: [String: Int] = [:]
+    var isAnswered: Bool = false
+    var isPinned: Bool = false
 
     var totalReactions: Int { reactions.values.reduce(0, +) }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        _id         = try c.decode(DocumentID<String>.self, forKey: .id)
+        circleId    = try c.decode(String.self, forKey: .circleId)
+        authorId    = try c.decode(String.self, forKey: .authorId)
+        authorName  = try c.decode(String.self, forKey: .authorName)
+        content     = try c.decode(String.self, forKey: .content)
+        type        = try c.decode(PostType.self, forKey: .type)
+        isAnonymous = try c.decode(Bool.self, forKey: .isAnonymous)
+        timestamp   = try c.decode(Date.self, forKey: .timestamp)
+        reactions   = try c.decodeIfPresent([String: Int].self, forKey: .reactions) ?? [:]
+        isAnswered  = try c.decodeIfPresent(Bool.self, forKey: .isAnswered) ?? false
+        isPinned    = try c.decodeIfPresent(Bool.self, forKey: .isPinned) ?? false
+    }
+
+    init(circleId: String, authorId: String, authorName: String, content: String,
+         type: PostType, isAnonymous: Bool, timestamp: Date,
+         reactions: [String: Int] = [:], isAnswered: Bool = false, isPinned: Bool = false) {
+        self.circleId = circleId
+        self.authorId = authorId
+        self.authorName = authorName
+        self.content = content
+        self.type = type
+        self.isAnonymous = isAnonymous
+        self.timestamp = timestamp
+        self.reactions = reactions
+        self.isAnswered = isAnswered
+        self.isPinned = isPinned
+    }
 }
 
 // MARK: - CircleComment

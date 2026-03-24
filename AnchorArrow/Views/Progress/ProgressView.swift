@@ -179,6 +179,22 @@ struct ProgressView: View {
                     .cornerRadius(6)
             }
 
+            // Empty state
+            if userStore.driftLogs.isEmpty {
+                HStack(spacing: 8) {
+                    Image(systemName: "checkmark.shield.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(Color("BrandArrow"))
+                    Text("No drift data yet. Insights will appear as you log drift moments.")
+                        .font(.system(size: 13))
+                        .foregroundColor(Color("TextSecondary"))
+                }
+                .padding(12)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color("BrandArrow").opacity(0.06))
+                .cornerRadius(12)
+            }
+
             // Top drift categories bar chart
             let topCategories = userStore.topDriftCategoriesThisMonth
             if !topCategories.isEmpty {
@@ -227,15 +243,17 @@ struct ProgressView: View {
                 .cornerRadius(12)
             }
 
-            // 90-day trend
-            let trend = userStore.driftTrending
-            HStack(spacing: 8) {
-                Image(systemName: trend.icon)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color(trend.color))
-                Text("90-day drift trend: \(trend.label.lowercased())")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color("TextPrimary"))
+            // 90-day trend (only show with data)
+            if !userStore.driftLogs.isEmpty {
+                let trend = userStore.driftTrending
+                HStack(spacing: 8) {
+                    Image(systemName: trend.icon)
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundColor(Color(trend.color))
+                    Text("90-day drift trend: \(trend.label.lowercased())")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(Color("TextPrimary"))
+                }
             }
 
             // Positive reinforcement — accountability streaks
