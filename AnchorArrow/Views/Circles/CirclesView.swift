@@ -146,7 +146,7 @@ struct CirclesView: View {
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
                             .foregroundColor(Color("BrandGold"))
-                        Text("Free plan: read-only. Upgrade to post and comment.")
+                        Text("Free plan: react only. Upgrade to post and comment.")
                             .font(.system(size: 13))
                             .foregroundColor(Color("TextSecondary"))
                         Spacer()
@@ -412,8 +412,10 @@ struct CircleDetailView: View {
                             .foregroundColor(Color("BrandAnchor"))
                     }
                     Menu {
-                        Button(role: .destructive) { showLeaveAlert = true } label: {
-                            Label("Leave Circle", systemImage: "arrow.right.circle")
+                        if circle.creatorId != Auth.auth().currentUser?.uid {
+                            Button(role: .destructive) { showLeaveAlert = true } label: {
+                                Label("Leave Circle", systemImage: "arrow.right.circle")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis")

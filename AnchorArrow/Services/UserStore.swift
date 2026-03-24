@@ -58,6 +58,10 @@ class UserStore: ObservableObject {
                 savedTheme = theme.rawValue
             }
 
+            // Recalculate streak on app open (catches multi-day absences)
+            try await firestoreService.updateStreak(uid: uid)
+            appUser = try await firestoreService.fetchUser(uid: uid)
+
             // Set up real-time user listener
             setupUserListener(uid: uid)
         } catch {
@@ -155,10 +159,35 @@ class UserStore: ObservableObject {
         }
     }
 
+    func completeJourneyDay(anchorReflection: String, arrowReflection: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        // Save journey reflections as today's entry
+        var entry = todayEntry ?? DailyEntry.todayEmpty()
+        if !anchorReflection.isEmpty {
+            entry.anchorCompleted = true
+            entry.anchorReflection = anchorReflection
+            entry.anchorCompletedAt = Date()
+        }
+        if !arrowReflection.isEmpty {
+            entry.arrowCompleted = true
+            entry.arrowReflection = arrowReflection
+            entry.arrowCompletedAt = Date()
+        }
+        do {
+            try await firestoreService.saveEntry(uid: uid, entry: entry)
+            todayEntry = entry
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        await advanceJourneyDay()
+    }
+
     func advanceJourneyDay() async {
         guard let uid = Auth.auth().currentUser?.uid,
-              let user = appUser else { return }
+              let user = appUser,
+              user.journeyActive else { return }
         let nextDay = user.journeyDay + 1
+        guard nextDay <= 30 else { return }
         let series = JourneySeries(rawValue: user.journeySeries) ?? .standFirm
         do {
             try await firestoreService.updateJourney(uid: uid, day: nextDay, startDate: nil)
@@ -235,19 +264,12 @@ class UserStore: ObservableObject {
     /// 90-day trend: drifts per week, returns recent 12 weeks
     var driftWeeklyTrend: [Int] {
         let cal = Calendar.current
-        let cutoff = cal.date(byAdding: .day, value: -84, to: Date()) ?? Date() // 12 weeks
-        let recentDrifts = driftLogs.filter { $0.timestamp >= cutoff }
-        var weeks: [Int: Int] = [:]
-        for log in recentDrifts {
-            let weekOfYear = cal.component(.weekOfYear, from: log.timestamp)
-            weeks[weekOfYear, default: 0] += 1
-        }
-        // Return last 12 weeks in order
-        let currentWeek = cal.component(.weekOfYear, from: Date())
+        let today = cal.startOfDay(for: Date())
+        // Build 12 week buckets by actual date ranges (avoids year boundary issues)
         return (0..<12).reversed().map { offset in
-            var w = currentWeek - offset
-            if w <= 0 { w += 52 }
-            return weeks[w] ?? 0
+            let weekEnd = cal.date(byAdding: .weekOfYear, value: -offset, to: today)!
+            let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd)!
+            return driftLogs.filter { $0.timestamp >= weekStart && $0.timestamp < weekEnd }.count
         }
     }
 

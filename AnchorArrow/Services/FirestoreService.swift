@@ -60,8 +60,9 @@ class FirestoreService {
             // First-time sign-in via Apple may not have called createUser
             let email = Auth.auth().currentUser?.email ?? ""
             let name = Auth.auth().currentUser?.displayName ?? "Warrior"
-            try await createUser(uid: uid, email: email, displayName: name)
-            return try await fetchUser(uid: uid)
+            let user = AppUser(uid: uid, email: email, displayName: name, joinDate: Date())
+            try userRef(uid).setData(from: user, merge: false)
+            return user
         }
     }
 

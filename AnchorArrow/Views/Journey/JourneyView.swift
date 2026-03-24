@@ -51,9 +51,10 @@ struct JourneyView: View {
                 }
             }
             .sheet(item: $showDayDetail) { day in
-                JourneyDayDetailView(day: day) {
-                    // On complete
-                    Task { await userStore.advanceJourneyDay() }
+                JourneyDayDetailView(day: day) { anchorText, arrowText in
+                    Task {
+                        await userStore.completeJourneyDay(anchorReflection: anchorText, arrowReflection: arrowText)
+                    }
                     showDayDetail = nil
                 }
             }
@@ -452,7 +453,7 @@ struct JourneyDayRow: View {
 // MARK: - JourneyDayDetailView
 struct JourneyDayDetailView: View {
     let day: JourneyDay
-    let onComplete: () -> Void
+    let onComplete: (_ anchorReflection: String, _ arrowReflection: String) -> Void
 
     @State private var anchorReflection = ""
     @State private var arrowReflection = ""
@@ -529,7 +530,7 @@ struct JourneyDayDetailView: View {
 
                     // Complete button
                     Button {
-                        onComplete()
+                        onComplete(anchorReflection, arrowReflection)
                     } label: {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
