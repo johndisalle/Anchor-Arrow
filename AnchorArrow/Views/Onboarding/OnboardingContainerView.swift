@@ -89,51 +89,63 @@ struct OnboardingPage1: View {
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 0) {
             Spacer()
 
-            // Hero visual — "Stand Firm" composition
+            // Brand mark hero — anchor + crossed arrows (matches splash screen)
             ZStack {
-                // Outer glow circle
+                // Radial glow background
                 SwiftUI.Circle()
-                    .fill(Color("BrandAnchor").opacity(0.08))
-                    .frame(width: 240, height: 240)
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color("BrandAnchor").opacity(0.16),
+                                Color("BrandAnchor").opacity(0.04),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 152
+                        )
+                    )
+                    .frame(width: 304, height: 304)
+                    .opacity(appeared ? 1.0 : 0)
+                    .animation(.easeOut(duration: 1.2).delay(0.2), value: appeared)
 
-                // Subtle ring border
+                // Gradient ring
                 SwiftUI.Circle()
-                    .strokeBorder(Color("BrandAnchor").opacity(0.2), lineWidth: 1.5)
-                    .frame(width: 220, height: 220)
+                    .strokeBorder(
+                        LinearGradient(
+                            colors: [Color("BrandAnchor").opacity(0.45), Color("BrandAnchor").opacity(0.08)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.2
+                    )
+                    .frame(width: 280, height: 280)
+                    .opacity(appeared ? 1.0 : 0)
+                    .animation(.easeOut(duration: 1.0).delay(0.3), value: appeared)
 
-                // Large watermark anchor — the firm foundation in Christ
+                // Anchor — dominant centerpiece
                 Image(systemName: "anchor")
                     .renderingMode(.template)
-                    .font(.system(size: 115, weight: .ultraLight))
-                    .foregroundStyle(Color("BrandAnchor").opacity(0.18))
+                    .font(.system(size: 140, weight: .thin))
+                    .foregroundStyle(Color("BrandAnchor"))
+                    .scaleEffect(appeared ? 1.0 : 0.05)
+                    .opacity(appeared ? 1.0 : 0)
+                    .animation(.spring(response: 0.9, dampingFraction: 0.62).delay(0.15), value: appeared)
 
-                // Foreground: archery arrow ↑ → man standing → anchor base
-                VStack(spacing: 2) {
-                    // Archery arrow pointing up: aiming for God's calling
-                    UpwardArcheryArrowView()
-                        .frame(width: 22, height: 58)
-
-                    // Man standing firm
-                    Image(systemName: "figure.stand")
-                        .renderingMode(.template)
-                        .font(.system(size: 54, weight: .light))
-                        .foregroundStyle(Color("BrandAnchor"))
-
-                    // Anchor at his feet — grounded in Christ
-                    Image(systemName: "anchor")
-                        .renderingMode(.template)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(Color("BrandAnchor"))
-                }
-                .offset(y: 4)
+                // Crossed archery arrows above anchor
+                CrossedArrowsView()
+                    .frame(width: 180, height: 108)
+                    .scaleEffect(appeared ? 1.0 : 0.1)
+                    .opacity(appeared ? 1.0 : 0)
+                    .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: appeared)
+                    .offset(y: -92)
             }
-            .frame(width: 240, height: 240)
-            .scaleEffect(appeared ? 1.0 : 0.7)
-            .opacity(appeared ? 1.0 : 0.0)
-            .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2), value: appeared)
+            .frame(width: 304, height: 304)
+
+            Spacer().frame(height: 44)
 
             VStack(spacing: 16) {
                 Text("Welcome, Brother.")
