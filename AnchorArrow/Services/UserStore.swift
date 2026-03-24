@@ -18,6 +18,9 @@ class UserStore: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
+    /// Theme stored locally for instant switching — no Firestore round-trip needed
+    @AppStorage("appTheme") var savedTheme: String = AppTheme.system.rawValue
+
     private var userListener: ListenerRegistration?
     private var authListener: AuthStateDidChangeListenerHandle?
     private let firestoreService = FirestoreService.shared
@@ -49,6 +52,11 @@ class UserStore: ObservableObject {
             todayEntry = try await firestoreService.fetchTodayEntry(uid: uid)
             recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: 60)
             driftLogs = try await firestoreService.fetchDriftLogs(uid: uid)
+
+            // Sync theme from server on first load
+            if let theme = appUser?.theme {
+                savedTheme = theme.rawValue
+            }
 
             // Set up real-time user listener
             setupUserListener(uid: uid)
@@ -183,7 +191,9 @@ class UserStore: ObservableObject {
     var isPremium: Bool { appUser?.isPremium ?? false }
     var currentStreak: Int { appUser?.currentStreak ?? 0 }
     var displayName: String { appUser?.displayName ?? Auth.auth().currentUser?.displayName ?? "Warrior" }
-    var colorScheme: SwiftUI.ColorScheme? { appUser?.theme.swiftUIColorScheme }
+    var colorScheme: SwiftUI.ColorScheme? {
+        (AppTheme(rawValue: savedTheme) ?? .system).swiftUIColorScheme
+    }
 
     var isAnchorDoneToday: Bool { todayEntry?.anchorCompleted ?? false }
     var isArrowDoneToday: Bool { todayEntry?.arrowCompleted ?? false }

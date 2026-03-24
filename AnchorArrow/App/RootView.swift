@@ -38,7 +38,7 @@ struct RootView: View {
         .animation(.easeInOut(duration: 0.4), value: showSplash)
         .animation(.easeInOut(duration: 0.4), value: authManager.isAuthenticated)
         .animation(.easeInOut(duration: 0.4), value: userStore.hasCompletedOnboarding)
-        .preferredColorScheme(userStore.colorScheme)
+        .preferredColorScheme((AppTheme(rawValue: userStore.savedTheme) ?? .system).swiftUIColorScheme)
         .onAppear {
             // Show splash for 2 seconds
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
