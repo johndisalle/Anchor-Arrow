@@ -39,6 +39,8 @@ struct ProgressView: View {
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
         .onAppear { loadCalendarEntries() }
         .onChange(of: selectedMonth) { loadCalendarEntries() }

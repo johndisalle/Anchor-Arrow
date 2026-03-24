@@ -50,6 +50,8 @@ struct DashboardView: View {
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Anchor & Arrow")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink {

@@ -54,6 +54,8 @@ struct ArrowView: View {
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Evening Arrow")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {
                     HStack {
