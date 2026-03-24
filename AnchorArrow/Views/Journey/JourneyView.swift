@@ -418,6 +418,13 @@ struct JourneyView: View {
                 (3, "Strength to Endure", Color("BrandArrow")),
                 (4, "All in Love", Color.red)
             ]
+        case .guardTheGates:
+            return [
+                (1, "Guard Your Heart", Color("BrandAnchor")),
+                (2, "Guard Your Home", Color.blue),
+                (3, "Guard Your Brothers", Color("BrandArrow")),
+                (4, "Guard the Mission", Color.red)
+            ]
         }
     }
 }

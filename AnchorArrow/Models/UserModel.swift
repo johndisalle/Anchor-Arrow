@@ -153,6 +153,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
     case surrenderFirst = "surrender_first"
     case prophetPriestKing = "prophet_priest_king"
     case strengthInLove = "strength_in_love"
+    case guardTheGates = "guard_the_gates"
 
     var id: String { rawValue }
 
@@ -163,6 +164,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .surrenderFirst:    return "Surrender First"
         case .prophetPriestKing: return "Prophet, Priest, King"
         case .strengthInLove:    return "Strength in Love"
+        case .guardTheGates:     return "Guard the Gates"
         }
     }
 
@@ -173,6 +175,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .surrenderFirst:    return "30 Days in Galatians 2:20"
         case .prophetPriestKing: return "30 Days in the Offices of Christ"
         case .strengthInLove:    return "30 Days in 1 Corinthians 16:13-14"
+        case .guardTheGates:     return "30 Days in Nehemiah & 1 Peter 5"
         }
     }
 
@@ -183,6 +186,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .surrenderFirst:    return "arrow.down.to.line"
         case .prophetPriestKing: return "person.3.fill"
         case .strengthInLove:    return "heart.circle.fill"
+        case .guardTheGates:     return "eye.trianglebadge.exclamationmark"
         }
     }
 }
