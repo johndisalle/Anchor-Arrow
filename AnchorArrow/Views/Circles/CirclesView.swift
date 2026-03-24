@@ -235,11 +235,14 @@ struct CircleCard: View {
                     Text(circle.name)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(Color("TextPrimary"))
+                        .lineLimit(1)
 
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         Label("\(circle.memberCount) brothers", systemImage: "person.2.fill")
                             .font(.system(size: 12))
                             .foregroundColor(Color("TextSecondary"))
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
 
                         // Public/Private badge
                         HStack(spacing: 3) {
@@ -249,6 +252,7 @@ struct CircleCard: View {
                                 .font(.system(size: 11, weight: .semibold))
                         }
                         .foregroundColor(circle.isPublic ? Color("BrandArrow") : Color("TextSecondary"))
+                        .fixedSize(horizontal: true, vertical: false)
 
                         // Weekly health badge
                         if let active = activeThisWeek {
@@ -261,10 +265,12 @@ struct CircleCard: View {
                                     .foregroundColor(active == circle.memberCount
                                                      ? Color("BrandArrow") : Color("BrandWarning"))
                             }
+                            .fixedSize(horizontal: true, vertical: false)
                         }
                     }
                 }
-                Spacer()
+                .layoutPriority(1)
+                Spacer(minLength: 4)
                 // Copy invite code chip
                 Button {
                     UIPasteboard.general.string = circle.inviteCode
@@ -285,6 +291,7 @@ struct CircleCard: View {
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
+                .fixedSize(horizontal: true, vertical: false)
                 .accessibilityLabel(showCopiedToast ? "Invite code copied" : "Copy invite code \(circle.inviteCode)")
 
                 Image(systemName: "chevron.right")
