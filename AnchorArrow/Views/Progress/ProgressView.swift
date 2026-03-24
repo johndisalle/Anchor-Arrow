@@ -38,7 +38,7 @@ struct ProgressView: View {
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Progress")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }

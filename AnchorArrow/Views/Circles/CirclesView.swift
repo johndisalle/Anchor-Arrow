@@ -31,7 +31,7 @@ struct CirclesView: View {
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Iron Sharpeners")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {

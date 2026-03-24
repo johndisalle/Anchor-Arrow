@@ -53,7 +53,7 @@ struct ArrowView: View {
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Evening Arrow")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {

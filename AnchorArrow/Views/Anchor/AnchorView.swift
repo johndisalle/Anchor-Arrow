@@ -51,7 +51,7 @@ struct AnchorView: View {
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Morning Anchor")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
