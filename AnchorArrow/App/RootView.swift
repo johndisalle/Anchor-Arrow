@@ -144,37 +144,19 @@ struct MainTabView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
-                DashboardView()
-                    .tabItem {
-                        Label("Home", systemImage: "house.fill")
-                    }
-                    .tag(0)
-
-                AnchorView()
-                    .tabItem {
-                        Label("Anchor", systemImage: "anchor.circle.fill")
-                    }
-                    .tag(1)
-
-                ArrowView()
-                    .tabItem {
-                        Label("Arrow", systemImage: "scope")
-                    }
-                    .tag(2)
-
-                ProgressView()
-                    .tabItem {
-                        Label("Progress", systemImage: "chart.bar.fill")
-                    }
-                    .tag(3)
-
-                CirclesView()
-                    .tabItem {
-                        Label("Circles", systemImage: "person.3.fill")
-                    }
-                    .tag(4)
+                DashboardView().tag(0)
+                AnchorView().tag(1)
+                ArrowView().tag(2)
+                ProgressView().tag(3)
+                CirclesView().tag(4)
             }
-            .accentColor(Color("BrandAnchor"))
+            .toolbar(.hidden, for: .tabBar)
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 83)
+            }
+
+            // Custom Tab Bar (supports Canvas icons)
+            CustomTabBar(selectedTab: $selectedTab)
 
             // Floating Drift Log Button
             VStack {
@@ -202,13 +184,74 @@ struct MainTabView: View {
                         }
                     }
                     .padding(.trailing, 20)
-                    .padding(.bottom, 85) // above tab bar
+                    .padding(.bottom, 95) // above custom tab bar
                     .accessibilityLabel("Log a drift moment")
                 }
             }
         }
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
+        }
+    }
+}
+
+// MARK: - Custom Tab Bar
+private struct CustomTabBar: View {
+    @Binding var selectedTab: Int
+
+    private let tabs: [(label: String, tag: Int)] = [
+        ("Home", 0), ("Anchor", 1), ("Arrow", 2), ("Progress", 3), ("Circles", 4)
+    ]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Divider()
+            HStack(spacing: 0) {
+                ForEach(tabs, id: \.tag) { tab in
+                    Button {
+                        selectedTab = tab.tag
+                    } label: {
+                        VStack(spacing: 3) {
+                            tabIcon(tag: tab.tag)
+                                .frame(width: 26, height: 26)
+                            Text(tab.label)
+                                .font(.system(size: 10, weight: .medium))
+                        }
+                        .foregroundColor(
+                            selectedTab == tab.tag
+                                ? Color("BrandAnchor")
+                                : Color("TextSecondary")
+                        )
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 10)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.bottom, 8)
+        }
+        .background(Color("CardBackground").ignoresSafeArea(edges: .bottom))
+    }
+
+    @ViewBuilder
+    private func tabIcon(tag: Int) -> some View {
+        let tint = selectedTab == tag ? Color("BrandAnchor") : Color("TextSecondary")
+        switch tag {
+        case 0:
+            Image(systemName: selectedTab == 0 ? "house.fill" : "house")
+                .font(.system(size: 20))
+        case 1:
+            AnchorSymbolView(color: tint)
+        case 2:
+            SingleArcheryArrowView(color: tint)
+        case 3:
+            Image(systemName: "chart.bar.fill")
+                .font(.system(size: 20))
+        case 4:
+            Image(systemName: "person.3.fill")
+                .font(.system(size: 20))
+        default:
+            EmptyView()
         }
     }
 }
