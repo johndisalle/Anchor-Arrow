@@ -35,19 +35,34 @@ struct AnchorArrowApp: App {
                 .environmentObject(userStore)
                 .environmentObject(storeKitManager)
                 .environmentObject(notificationManager)
-                .preferredColorScheme(.light)
+                .preferredColorScheme(userStore.appUser?.theme.colorScheme)
         }
     }
 
     // MARK: - Appearance Configuration
     private func configureAppearance() {
-        // Hardcode light-mode colors to avoid UIColor(named:) resolving against
-        // the wrong trait collection at init time (before .preferredColorScheme(.light) applies)
-        let bgPrimary    = UIColor(red: 248/255, green: 244/255, blue: 239/255, alpha: 1) // #F8F4EF
-        let bgSecondary  = UIColor(red: 239/255, green: 236/255, blue: 230/255, alpha: 1) // #EFECE6
-        let textPrimary  = UIColor(red:  28/255, green:  25/255, blue:  23/255, alpha: 1) // #1C1917
-        let anchorBlue   = UIColor(red:  44/255, green:  95/255, blue: 138/255, alpha: 1) // #2C5F8A
-        let mutedText    = UIColor(red:  28/255, green:  25/255, blue:  23/255, alpha: 0.4)
+        // Use dynamic UIColors so UIKit chrome (nav bar etc.) adapts to
+        // whatever color scheme is active — light, dark, or system.
+        let bgPrimary = UIColor { t in
+            t.userInterfaceStyle == .dark
+                ? UIColor(red: 42/255,  green: 37/255,  blue: 32/255,  alpha: 1) // #2A2520
+                : UIColor(red: 248/255, green: 244/255, blue: 239/255, alpha: 1) // #F8F4EF
+        }
+        let textPrimary = UIColor { t in
+            t.userInterfaceStyle == .dark
+                ? UIColor(red: 245/255, green: 240/255, blue: 234/255, alpha: 1) // #F5F0EA
+                : UIColor(red:  28/255, green:  25/255, blue:  23/255, alpha: 1) // #1C1917
+        }
+        let anchorBlue = UIColor { t in
+            t.userInterfaceStyle == .dark
+                ? UIColor(red:  74/255, green: 144/255, blue: 196/255, alpha: 1) // #4A90C4
+                : UIColor(red:  44/255, green:  95/255, blue: 138/255, alpha: 1) // #2C5F8A
+        }
+        let mutedText = UIColor { t in
+            t.userInterfaceStyle == .dark
+                ? UIColor(red: 245/255, green: 240/255, blue: 234/255, alpha: 0.4)
+                : UIColor(red:  28/255, green:  25/255, blue:  23/255, alpha: 0.4)
+        }
 
         // Navigation bar
         let navAppearance = UINavigationBarAppearance()
@@ -64,10 +79,10 @@ struct AnchorArrowApp: App {
         UINavigationBar.appearance().standardAppearance = navAppearance
         UINavigationBar.appearance().scrollEdgeAppearance = navAppearance
 
-        // Tab bar
+        // Tab bar (kept for any UIKit tab bars; main tab is now SwiftUI CustomTabBar)
         let tabAppearance = UITabBarAppearance()
         tabAppearance.configureWithOpaqueBackground()
-        tabAppearance.backgroundColor = bgSecondary
+        tabAppearance.backgroundColor = bgPrimary
 
         let itemAppearance = UITabBarItemAppearance()
         itemAppearance.normal.iconColor = mutedText

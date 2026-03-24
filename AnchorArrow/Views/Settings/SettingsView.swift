@@ -281,6 +281,8 @@ struct SettingsView: View {
         Picker("App Theme", selection: .init(
             get: { userStore.appUser?.theme ?? .system },
             set: { theme in
+                // Update local state immediately so .preferredColorScheme reacts now
+                userStore.appUser?.theme = theme
                 Task {
                     if let uid = Auth.auth().currentUser?.uid {
                         try? await FirestoreService.shared.updateUser(uid: uid, fields: ["theme": theme.rawValue])
