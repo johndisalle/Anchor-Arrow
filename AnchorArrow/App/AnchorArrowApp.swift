@@ -5,7 +5,8 @@
 import SwiftUI
 import Firebase
 import FirebaseAuth
-import FirebaseCrashlytics
+// NOTE: Add FirebaseCrashlytics SPM product in Xcode, then uncomment:
+// import FirebaseCrashlytics
 
 @main
 struct AnchorArrowApp: App {
@@ -22,9 +23,10 @@ struct AnchorArrowApp: App {
         FirebaseApp.configure()
 
         // Set Crashlytics user ID when authenticated
-        Auth.auth().addStateDidChangeListener { _, user in
-            Crashlytics.crashlytics().setUserID(user?.uid ?? "anonymous")
-        }
+        // Uncomment after adding FirebaseCrashlytics SPM product:
+        // Auth.auth().addStateDidChangeListener { _, user in
+        //     Crashlytics.crashlytics().setUserID(user?.uid ?? "anonymous")
+        // }
 
         // Enable Firestore offline persistence
         let settings = FirestoreSettings()
