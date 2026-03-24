@@ -322,6 +322,8 @@ struct CircleDetailView: View {
     @State private var showMemberList = false
     @State private var memberProfiles: [String: MemberProfile] = [:]
     @State private var showLeaveAlert = false
+    @State private var showDeleteAlert = false
+    @State private var isDeleting = false
     @State private var selectedPostForComments: CirclePost?
     @State private var codeCopied = false
 
@@ -453,7 +455,11 @@ struct CircleDetailView: View {
                             .foregroundColor(Color("BrandAnchor"))
                     }
                     Menu {
-                        if circle.creatorId != Auth.auth().currentUser?.uid {
+                        if circle.creatorId == Auth.auth().currentUser?.uid {
+                            Button(role: .destructive) { showDeleteAlert = true } label: {
+                                Label("Delete Circle", systemImage: "trash")
+                            }
+                        } else {
                             Button(role: .destructive) { showLeaveAlert = true } label: {
                                 Label("Leave Circle", systemImage: "arrow.right.circle")
                             }
@@ -489,6 +495,12 @@ struct CircleDetailView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need an invite code to rejoin \"\(circle.name)\".")
+            }
+            .alert("Delete Circle?", isPresented: $showDeleteAlert) {
+                Button("Delete", role: .destructive) { Task { await deleteCircle() } }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will permanently delete \"\(circle.name)\" and all its posts. This cannot be undone.")
             }
             .confirmationDialog(
                 "Rally Your Brothers?",
@@ -631,6 +643,20 @@ struct CircleDetailView: View {
         } catch {
             userStore.errorMessage = "Couldn't leave circle. Try again."
         }
+    }
+
+    private func deleteCircle() async {
+        guard let circleId = circle.id,
+              circle.creatorId == Auth.auth().currentUser?.uid else { return }
+        isDeleting = true
+        do {
+            try await service.deleteCircle(circleId: circleId)
+            onLeave()
+            dismiss()
+        } catch {
+            userStore.errorMessage = "Couldn't delete circle. Try again."
+        }
+        isDeleting = false
     }
 }
 
