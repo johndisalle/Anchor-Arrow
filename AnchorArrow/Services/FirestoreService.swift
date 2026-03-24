@@ -272,34 +272,31 @@ class FirestoreService {
         ])
     }
 
-    /// Delete a circle and all its posts/comments. Only the creator should call this.
+    /// Delete a circle. Only the creator should call this.
+    /// Deletes the circle document first (critical), then best-effort cleans subcollections.
     func deleteCircle(circleId: String) async throws {
-        // 1. Best-effort cleanup of subcollections (comments, then posts)
-        //    These may fail due to rules — that's OK, orphaned subcollection
-        //    docs are harmless and can be cleaned up later via Cloud Functions.
-        do {
-            let posts = try await circlePostsRef(circleId).getDocuments()
-            for postDoc in posts.documents {
-                let comments = try await commentsRef(circleId: circleId, postId: postDoc.documentID).getDocuments()
-                if !comments.documents.isEmpty {
+        // 1. Delete the circle document first — this is what matters
+        try await circlesRef().document(circleId).delete()
+
+        // 2. Best-effort cleanup of orphaned subcollections
+        //    These run after the circle is already gone. If they fail, no harm —
+        //    orphaned docs are invisible and can be cleaned up via Cloud Functions.
+        Task {
+            do {
+                let posts = try await circlePostsRef(circleId).getDocuments()
+                for postDoc in posts.documents {
+                    let comments = try await commentsRef(circleId: circleId, postId: postDoc.documentID).getDocuments()
                     let batch = db.batch()
                     comments.documents.forEach { batch.deleteDocument($0.reference) }
+                    batch.deleteDocument(postDoc.reference)
                     try await batch.commit()
                 }
+            } catch {
+                #if DEBUG
+                print("[Firestore] Subcollection cleanup failed (non-fatal): \(error.localizedDescription)")
+                #endif
             }
-            if !posts.documents.isEmpty {
-                let batch = db.batch()
-                posts.documents.forEach { batch.deleteDocument($0.reference) }
-                try await batch.commit()
-            }
-        } catch {
-            #if DEBUG
-            print("[Firestore] Subcollection cleanup failed (non-fatal): \(error.localizedDescription)")
-            #endif
         }
-
-        // 2. Delete the circle document — this is the critical operation
-        try await circlesRef().document(circleId).delete()
     }
 
     func fetchMemberNames(memberIds: [String]) async throws -> [String: String] {
