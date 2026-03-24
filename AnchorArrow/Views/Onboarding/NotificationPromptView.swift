@@ -1,0 +1,104 @@
+// NotificationPromptView.swift
+// Post-signup modal prompting users to enable push notifications
+
+import SwiftUI
+
+struct NotificationPromptView: View {
+    @EnvironmentObject var userStore: UserStore
+    @StateObject private var notificationManager = NotificationManager()
+    @Binding var isPresented: Bool
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+
+            // Bell icon
+            ZStack {
+                Circle()
+                    .fill(Color("BrandAnchor").opacity(0.12))
+                    .frame(width: 100, height: 100)
+
+                Image(systemName: "bell.badge.fill")
+                    .font(.system(size: 44, weight: .medium))
+                    .foregroundColor(Color("BrandAnchor"))
+            }
+            .padding(.bottom, 28)
+
+            // Title
+            Text("Stay Anchored")
+                .font(.system(size: 26, weight: .heavy, design: .rounded))
+                .foregroundColor(Color("TextPrimary"))
+                .padding(.bottom, 10)
+
+            // Description
+            Text("Get daily reminders for your Morning Anchor and Evening Arrow so you never miss a day.")
+                .font(.system(size: 16))
+                .foregroundColor(Color("TextSecondary"))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 36)
+                .padding(.bottom, 8)
+
+            // Bullet points
+            VStack(alignment: .leading, spacing: 12) {
+                NotificationBullet(icon: "sunrise.fill", text: "Morning Anchor reminder at 7 AM")
+                NotificationBullet(icon: "moon.stars.fill", text: "Evening Arrow reminder at 8 PM")
+                NotificationBullet(icon: "flame.fill", text: "Streak warnings so you don't lose progress")
+            }
+            .padding(.horizontal, 40)
+            .padding(.vertical, 20)
+
+            Spacer()
+
+            // Enable button
+            Button {
+                Task {
+                    await notificationManager.requestPermission()
+                    if notificationManager.permissionGranted {
+                        await notificationManager.scheduleReminders(morningHour: 7, eveningHour: 20)
+                    }
+                    isPresented = false
+                }
+            } label: {
+                Text("Enable Notifications")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
+                    .background(Color("BrandAnchor"))
+                    .cornerRadius(14)
+            }
+            .padding(.horizontal, 24)
+
+            // Skip button
+            Button {
+                isPresented = false
+            } label: {
+                Text("Maybe Later")
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(Color("TextSecondary"))
+            }
+            .padding(.top, 14)
+            .padding(.bottom, 40)
+        }
+        .background(Color("BackgroundPrimary").ignoresSafeArea())
+    }
+}
+
+// MARK: - Bullet Row
+private struct NotificationBullet: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(Color("BrandAnchor"))
+                .frame(width: 24)
+
+            Text(text)
+                .font(.system(size: 15))
+                .foregroundColor(Color("TextPrimary"))
+        }
+    }
+}

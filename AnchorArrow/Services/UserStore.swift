@@ -7,6 +7,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 import UIKit
+import StoreKit
 
 @MainActor
 class UserStore: ObservableObject {
@@ -123,6 +124,10 @@ class UserStore: ObservableObject {
             if streakResult.graceDayBurned {
                 await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
             }
+            // Prompt for App Store review at streak milestones (7, 21, 50)
+            if [7, 21, 50].contains(streakResult.streak) {
+                ReviewManager.requestReviewIfAppropriate()
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -218,6 +223,8 @@ class UserStore: ObservableObject {
                 try await firestoreService.completeJourney(uid: uid, series: series)
                 completedJourneySeries = series
                 showJourneyComplete = true
+                // Completing a 30-day journey is a great milestone for a review prompt
+                ReviewManager.requestReviewIfAppropriate()
             }
         } catch {
             errorMessage = error.localizedDescription

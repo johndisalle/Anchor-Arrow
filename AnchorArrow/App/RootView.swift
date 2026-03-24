@@ -141,6 +141,7 @@ struct MainTabView: View {
     @EnvironmentObject var userStore: UserStore
     @State private var selectedTab = 0
     @State private var showDriftLog = false
+    @State private var showNotificationPrompt = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -192,6 +193,20 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
+        }
+        .fullScreenCover(isPresented: $showNotificationPrompt) {
+            NotificationPromptView(isPresented: $showNotificationPrompt)
+                .environmentObject(userStore)
+        }
+        .onAppear {
+            let key = "hasSeenNotificationPrompt"
+            if !UserDefaults.standard.bool(forKey: key) {
+                UserDefaults.standard.set(true, forKey: key)
+                // Small delay so the main UI loads first
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    showNotificationPrompt = true
+                }
+            }
         }
     }
 }
