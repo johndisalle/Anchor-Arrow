@@ -239,7 +239,7 @@ struct CircleCard: View {
                         .lineLimit(1)
 
                     HStack(spacing: 8) {
-                        Label("\(circle.memberCount) brothers", systemImage: "person.2.fill")
+                        Label("\(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers")", systemImage: "person.2.fill")
                             .font(.system(size: 12))
                             .foregroundColor(Color("TextSecondary"))
                             .lineLimit(1)

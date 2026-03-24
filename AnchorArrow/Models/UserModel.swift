@@ -186,7 +186,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .surrenderFirst:    return "arrow.down.to.line"
         case .prophetPriestKing: return "person.3.fill"
         case .strengthInLove:    return "heart.circle.fill"
-        case .guardTheGates:     return "eye.trianglebadge.exclamationmark"
+        case .guardTheGates:     return "eye.fill"
         }
     }
 }

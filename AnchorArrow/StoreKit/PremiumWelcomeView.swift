@@ -66,8 +66,8 @@ struct PremiumWelcomeView: View {
                         PremiumWelcomeCard(
                             icon: "map.fill",
                             iconColor: "BrandArrow",
-                            title: "4 New Journeys",
-                            description: "Armor of God, Surrender First, Prophet Priest King, and Strength in Love — 120 additional daily devotionals.",
+                            title: "5 New Journeys",
+                            description: "Armor of God, Surrender First, Prophet Priest King, Strength in Love, and Guard the Gates — 150 additional daily devotionals.",
                             delay: 0.15
                         )
 
