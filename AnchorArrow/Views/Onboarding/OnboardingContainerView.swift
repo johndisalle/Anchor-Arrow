@@ -205,7 +205,7 @@ struct OnboardingPage2: View {
                     description: "Be watchful. Stand firm. Root yourself in Christ daily."
                 )
                 ConceptCard(
-                    icon: "arrow.up.right.circle.fill",
+                    icon: "arrow.up.right",
                     color: "BrandArrow",
                     title: "The Arrow",
                     description: "Act like men. Be strong in love. Pursue God's purpose."
@@ -232,10 +232,15 @@ struct ConceptCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .renderingMode(.template)
-                .font(.system(size: 28, weight: .semibold))
-                .foregroundColor(Color(color))
+            ZStack {
+                SwiftUI.Circle()
+                    .fill(Color(color).opacity(0.15))
+                    .frame(width: 44, height: 44)
+                Image(systemName: icon)
+                    .renderingMode(.template)
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(Color(color))
+            }
 
             Text(title)
                 .font(.system(size: 16, weight: .bold))
