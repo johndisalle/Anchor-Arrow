@@ -181,6 +181,56 @@ struct AnchorRootsShape: Shape {
     }
 }
 
+// MARK: - Single Upward Archery Arrow
+struct UpwardArcheryArrowView: View {
+    var color: Color = Color("BrandArrow")
+
+    var body: some View {
+        Canvas { context, size in
+            let cx = size.width / 2
+            let tip  = CGPoint(x: cx, y: 0)
+            let tail = CGPoint(x: cx, y: size.height)
+            let shading = GraphicsContext.Shading.color(color)
+
+            // Shaft
+            var shaft = Path()
+            shaft.move(to: tail)
+            shaft.addLine(to: tip)
+            context.stroke(shaft, with: shading,
+                           style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+            // Arrowhead (pointing straight up, angle = -π/2)
+            let angle: CGFloat = -.pi / 2
+            let headLen: CGFloat = 13
+            let headSpread: CGFloat = .pi / 5
+            var head = Path()
+            head.move(to: tip)
+            head.addLine(to: CGPoint(
+                x: tip.x - headLen * cos(angle - headSpread),
+                y: tip.y - headLen * sin(angle - headSpread)))
+            head.move(to: tip)
+            head.addLine(to: CGPoint(
+                x: tip.x - headLen * cos(angle + headSpread),
+                y: tip.y - headLen * sin(angle + headSpread)))
+            context.stroke(head, with: shading,
+                           style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+
+            // Fletching chevrons at tail (shaft goes upward, so ux=0 uy=-1, perp=rightward)
+            let fletchLen: CGFloat = 7
+            for offset: CGFloat in [8, 17] {
+                // move offset pts toward tip (upward)
+                let base = CGPoint(x: cx, y: size.height - offset)
+                var fletch = Path()
+                fletch.move(to: CGPoint(x: base.x - fletchLen, y: base.y))
+                fletch.addLine(to: base)
+                fletch.addLine(to: CGPoint(x: base.x + fletchLen, y: base.y))
+                context.stroke(fletch, with: .color(color.opacity(0.65)),
+                               style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+            }
+        }
+    }
+}
+
 // MARK: - Array safe subscript
 extension Array {
     subscript(safe index: Int) -> Element? {

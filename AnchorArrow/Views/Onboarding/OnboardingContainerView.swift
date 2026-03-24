@@ -110,13 +110,11 @@ struct OnboardingPage1: View {
                     .font(.system(size: 115, weight: .ultraLight))
                     .foregroundStyle(Color("BrandAnchor").opacity(0.18))
 
-                // Foreground: upward arrow → man standing → anchor base
+                // Foreground: archery arrow ↑ → man standing → anchor base
                 VStack(spacing: 2) {
-                    // Arrow: aiming for God's calling
-                    Image(systemName: "arrow.up")
-                        .renderingMode(.template)
-                        .font(.system(size: 16, weight: .heavy))
-                        .foregroundStyle(Color("BrandArrow"))
+                    // Archery arrow pointing up: aiming for God's calling
+                    UpwardArcheryArrowView()
+                        .frame(width: 22, height: 58)
 
                     // Man standing firm
                     Image(systemName: "figure.stand")
