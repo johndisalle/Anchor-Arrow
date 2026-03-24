@@ -2,6 +2,7 @@
 // Stats — streak calendar, badge gallery, weekly/monthly summary
 
 import SwiftUI
+import FirebaseAuth
 
 struct ProgressView: View {
     @EnvironmentObject var userStore: UserStore
@@ -36,10 +37,20 @@ struct ProgressView: View {
                     // Weekly Summary
                     weeklySummarySection
 
+                    // Drift History
+                    if !userStore.driftLogs.isEmpty {
+                        driftHistorySection
+                    }
+
                     Spacer(minLength: 100)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
+            }
+            .refreshable {
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                await userStore.loadUserData(uid: uid)
+                loadCalendarEntries()
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Progress")
@@ -385,6 +396,68 @@ struct ProgressView: View {
                     label: "Full Days",
                     color: "BrandGold"
                 )
+            }
+        }
+        .padding(20)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
+    // MARK: - Drift History
+    private var driftHistorySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Text("Drift Timeline")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                Spacer()
+                Text("\(userStore.driftLogs.count) total")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(Color("TextSecondary"))
+            }
+
+            ForEach(userStore.driftLogs.prefix(10)) { log in
+                HStack(spacing: 12) {
+                    // Timeline dot + line
+                    VStack(spacing: 0) {
+                        SwiftUI.Circle()
+                            .fill(Color("BrandWarning"))
+                            .frame(width: 10, height: 10)
+                        Rectangle()
+                            .fill(Color("BrandWarning").opacity(0.2))
+                            .frame(width: 2)
+                    }
+                    .frame(width: 10)
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Image(systemName: log.category.icon)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(Color("BrandWarning"))
+                            Text(log.category.displayName)
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(Color("TextPrimary"))
+                            Spacer()
+                            Text(log.timestamp.timeAgo)
+                                .font(.system(size: 11))
+                                .foregroundColor(Color("TextSecondary"))
+                        }
+                        if !log.note.isEmpty {
+                            Text(log.note)
+                                .font(.system(size: 13))
+                                .foregroundColor(Color("TextSecondary"))
+                                .lineLimit(2)
+                        }
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+
+            if userStore.driftLogs.count > 10 {
+                Text("\(userStore.driftLogs.count - 10) more entries")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Color("TextSecondary"))
+                    .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .padding(20)

@@ -75,6 +75,22 @@ struct JourneyView: View {
                 selectedSeries = series
                 journeyDays = PromptLibrary.journeyDays(for: series)
             }
+            .fullScreenCover(isPresented: $userStore.showJourneyComplete) {
+                JourneyCompletionView(
+                    series: userStore.completedJourneySeries ?? .standFirm,
+                    onStartNext: { nextSeries in
+                        userStore.showJourneyComplete = false
+                        Task {
+                            await userStore.startJourney(series: nextSeries)
+                            selectedSeries = nextSeries
+                            journeyDays = PromptLibrary.journeyDays(for: nextSeries)
+                        }
+                    },
+                    onDismiss: {
+                        userStore.showJourneyComplete = false
+                    }
+                )
+            }
         }
     }
 
@@ -625,4 +641,158 @@ struct JourneyDayDetailView: View {
         .background(Color("CardBackground"))
         .cornerRadius(16)
     }
+}
+
+// MARK: - Journey Completion Celebration
+struct JourneyCompletionView: View {
+    let series: JourneySeries
+    let onStartNext: (JourneySeries) -> Void
+    let onDismiss: () -> Void
+
+    @State private var appeared = false
+    @State private var confettiParticles: [ConfettiParticle] = []
+
+    var body: some View {
+        ZStack {
+            Color("BackgroundPrimary").ignoresSafeArea()
+
+            // Confetti layer
+            ForEach(confettiParticles) { particle in
+                SwiftUI.Circle()
+                    .fill(particle.color)
+                    .frame(width: particle.size, height: particle.size)
+                    .position(particle.position)
+                    .opacity(appeared ? 0 : 1)
+                    .animation(
+                        .easeOut(duration: particle.duration).delay(particle.delay),
+                        value: appeared
+                    )
+            }
+
+            VStack(spacing: 28) {
+                Spacer()
+
+                // Trophy icon
+                ZStack {
+                    SwiftUI.Circle()
+                        .fill(Color("BrandGold").opacity(0.15))
+                        .frame(width: 120, height: 120)
+                        .scaleEffect(appeared ? 1.0 : 0.3)
+
+                    Image(systemName: "trophy.fill")
+                        .font(.system(size: 56))
+                        .foregroundColor(Color("BrandGold"))
+                        .scaleEffect(appeared ? 1.0 : 0.1)
+                }
+                .animation(.spring(response: 0.6, dampingFraction: 0.5).delay(0.2), value: appeared)
+
+                VStack(spacing: 12) {
+                    Text("Journey Complete")
+                        .font(.system(size: 32, weight: .heavy, design: .rounded))
+                        .foregroundColor(Color("TextPrimary"))
+
+                    Text("You finished the \(series.displayName) journey.")
+                        .font(.system(size: 17))
+                        .foregroundColor(Color("TextSecondary"))
+
+                    Text("30 days of anchoring in truth, standing firm, and sharpening your faith. That's not nothing — that's war won.")
+                        .font(.system(size: 15))
+                        .foregroundColor(Color("TextSecondary"))
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .padding(.horizontal, 32)
+                        .padding(.top, 4)
+                }
+                .opacity(appeared ? 1 : 0)
+                .offset(y: appeared ? 0 : 20)
+                .animation(.easeOut(duration: 0.6).delay(0.4), value: appeared)
+
+                Spacer()
+
+                VStack(spacing: 14) {
+                    // Offer next series
+                    if let next = nextSeries {
+                        Button {
+                            onStartNext(next)
+                        } label: {
+                            HStack {
+                                Image(systemName: next.icon)
+                                Text("Start \(next.displayName)")
+                                    .font(.system(size: 17, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 54)
+                            .background(Color("BrandArrow"))
+                            .cornerRadius(16)
+                        }
+                    }
+
+                    // Restart same
+                    Button {
+                        onStartNext(series)
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text("Restart \(series.displayName)")
+                                .font(.system(size: 16, weight: .semibold))
+                        }
+                        .foregroundColor(Color("BrandAnchor"))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .background(Color("BrandAnchor").opacity(0.1))
+                        .cornerRadius(14)
+                    }
+
+                    Button("Done") { onDismiss() }
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(Color("TextSecondary"))
+                        .padding(.top, 4)
+                }
+                .padding(.horizontal, 32)
+                .opacity(appeared ? 1 : 0)
+                .animation(.easeOut(duration: 0.5).delay(0.8), value: appeared)
+
+                Spacer().frame(height: 40)
+            }
+        }
+        .onAppear {
+            generateConfetti()
+            UIImpactFeedbackGenerator(style: .heavy).impactOccurred()
+            withAnimation { appeared = true }
+        }
+    }
+
+    private var nextSeries: JourneySeries? {
+        JourneySeries.allCases.first { $0 != series }
+    }
+
+    private func generateConfetti() {
+        let colors: [Color] = [
+            Color("BrandGold"), Color("BrandAnchor"), Color("BrandArrow"),
+            .orange, .yellow, .green, .blue
+        ]
+        let screenWidth = UIScreen.main.bounds.width
+        confettiParticles = (0..<60).map { _ in
+            ConfettiParticle(
+                color: colors.randomElement()!,
+                size: CGFloat.random(in: 4...10),
+                position: CGPoint(
+                    x: CGFloat.random(in: 0...screenWidth),
+                    y: CGFloat.random(in: -50...UIScreen.main.bounds.height * 0.6)
+                ),
+                duration: Double.random(in: 2.0...4.0),
+                delay: Double.random(in: 0...1.5)
+            )
+        }
+    }
+}
+
+struct ConfettiParticle: Identifiable {
+    let id = UUID()
+    let color: Color
+    let size: CGFloat
+    let position: CGPoint
+    let duration: Double
+    let delay: Double
 }

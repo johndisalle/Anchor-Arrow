@@ -6,6 +6,7 @@ import Combine
 import Firebase
 import FirebaseAuth
 import FirebaseFirestore
+import UIKit
 
 @MainActor
 class UserStore: ObservableObject {
@@ -17,6 +18,8 @@ class UserStore: ObservableObject {
     @Published var hasCompletedOnboarding: Bool = false
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var showJourneyComplete = false
+    @Published var completedJourneySeries: JourneySeries?
 
     /// Theme stored locally for instant switching — no Firestore round-trip needed
     @AppStorage("appTheme") var savedTheme: String = AppTheme.system.rawValue
@@ -92,6 +95,14 @@ class UserStore: ObservableObject {
 
     // MARK: - Today's Entry Actions
 
+    private func haptic(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        UIImpactFeedbackGenerator(style: style).impactOccurred()
+    }
+
+    private func notificationHaptic(_ type: UINotificationFeedbackGenerator.FeedbackType) {
+        UINotificationFeedbackGenerator().notificationOccurred(type)
+    }
+
     func completeAnchor(reflection: String, tags: [AnchorTag]) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
 
@@ -104,10 +115,14 @@ class UserStore: ObservableObject {
 
         do {
             try await firestoreService.saveEntry(uid: uid, entry: entry)
-            try await firestoreService.updateStreak(uid: uid)
+            let streakResult = try await firestoreService.updateStreak(uid: uid)
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
             await refreshRecent(uid: uid)
+            notificationHaptic(.success)
+            if streakResult.graceDayBurned {
+                await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -125,10 +140,14 @@ class UserStore: ObservableObject {
 
         do {
             try await firestoreService.saveEntry(uid: uid, entry: entry)
-            try await firestoreService.updateStreak(uid: uid)
+            let streakResult = try await firestoreService.updateStreak(uid: uid)
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
             await refreshRecent(uid: uid)
+            notificationHaptic(.success)
+            if streakResult.graceDayBurned {
+                await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -142,6 +161,7 @@ class UserStore: ObservableObject {
             try await firestoreService.saveDriftLog(uid: uid, log: log)
             driftLogs.insert(log, at: 0)
             try await firestoreService.evaluateAndAwardBadges(uid: uid)
+            haptic(.medium)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -176,6 +196,7 @@ class UserStore: ObservableObject {
         do {
             try await firestoreService.saveEntry(uid: uid, entry: entry)
             todayEntry = entry
+            notificationHaptic(.success)
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -195,6 +216,8 @@ class UserStore: ObservableObject {
             if nextDay >= 30 {
                 try await firestoreService.awardBadge(uid: uid, badgeType: .journeyComplete)
                 try await firestoreService.completeJourney(uid: uid, series: series)
+                completedJourneySeries = series
+                showJourneyComplete = true
             }
         } catch {
             errorMessage = error.localizedDescription

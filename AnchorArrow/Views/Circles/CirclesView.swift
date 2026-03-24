@@ -22,8 +22,7 @@ struct CirclesView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    SwiftUI.ProgressView("Loading circles...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    SkeletonCirclesList()
                 } else if circles.isEmpty {
                     emptyState
                 } else {
@@ -292,8 +291,7 @@ struct CircleDetailView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    SkeletonPostFeed()
                 } else {
                     ZStack(alignment: .bottom) {
                         ScrollView(showsIndicators: false) {

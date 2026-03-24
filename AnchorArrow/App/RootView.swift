@@ -256,3 +256,104 @@ private struct CustomTabBar: View {
         }
     }
 }
+
+// MARK: - Skeleton Shimmer
+struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = 0
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                LinearGradient(
+                    colors: [.clear, .white.opacity(0.15), .clear],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .offset(x: phase)
+                .mask(content)
+            )
+            .onAppear {
+                withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
+                    phase = UIScreen.main.bounds.width
+                }
+            }
+    }
+}
+
+extension View {
+    func shimmer() -> some View { modifier(ShimmerModifier()) }
+}
+
+// MARK: - Skeleton Loading Cards
+struct SkeletonCard: View {
+    var height: CGFloat = 80
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .fill(Color("CardBackground"))
+            .frame(height: height)
+            .shimmer()
+    }
+}
+
+struct SkeletonCirclesList: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            ForEach(0..<3, id: \.self) { _ in
+                HStack(spacing: 16) {
+                    SwiftUI.Circle()
+                        .fill(Color("CardBackground"))
+                        .frame(width: 52, height: 52)
+                    VStack(alignment: .leading, spacing: 8) {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color("CardBackground"))
+                            .frame(width: 140, height: 14)
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color("CardBackground"))
+                            .frame(width: 90, height: 10)
+                    }
+                    Spacer()
+                }
+                .padding(16)
+                .background(Color("CardBackground").opacity(0.5))
+                .cornerRadius(16)
+            }
+        }
+        .shimmer()
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+    }
+}
+
+struct SkeletonPostFeed: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            SkeletonCard(height: 100)
+            ForEach(0..<3, id: \.self) { _ in
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(Color("CardBackground"))
+                            .frame(width: 70, height: 22)
+                        Spacer()
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color("CardBackground"))
+                            .frame(width: 40, height: 10)
+                    }
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(height: 12)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(width: 200, height: 12)
+                }
+                .padding(14)
+                .background(Color("CardBackground").opacity(0.5))
+                .cornerRadius(14)
+            }
+        }
+        .shimmer()
+        .padding(.horizontal, 20)
+        .padding(.top, 16)
+    }
+}

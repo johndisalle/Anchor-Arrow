@@ -126,6 +126,24 @@ class NotificationManager: ObservableObject {
         try? await notificationCenter.add(request)
     }
 
+    // MARK: - Grace Day Used
+    func sendGraceDayNotification(streakSaved: Int) async {
+        guard permissionGranted else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Grace Day Used"
+        content.body = "Your grace day saved your \(streakSaved)-day streak. You have none left for 30 days. Stay anchored."
+        content.sound = .default
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(
+            identifier: NotificationID.graceDayUsed,
+            content: content,
+            trigger: trigger
+        )
+        try? await notificationCenter.add(request)
+    }
+
     // MARK: - Cancel
     func cancelAll() {
         notificationCenter.removeAllPendingNotificationRequests()
@@ -143,4 +161,5 @@ enum NotificationID {
     static let morningAnchor = "com.anchorarrow.notification.morning"
     static let eveningArrow  = "com.anchorarrow.notification.evening"
     static let streakWarning = "com.anchorarrow.notification.streak_warning"
+    static let graceDayUsed  = "com.anchorarrow.notification.grace_day_used"
 }

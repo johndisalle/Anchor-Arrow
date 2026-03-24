@@ -122,9 +122,15 @@ class FirestoreService {
 
     // MARK: - Streak Management
 
+    struct StreakResult {
+        let streak: Int
+        let graceDayBurned: Bool
+    }
+
     /// Recalculate and update streak after entry completion.
     /// Premium users get one grace day per 30-day period — a missed day that doesn't break the streak.
-    func updateStreak(uid: String) async throws {
+    @discardableResult
+    func updateStreak(uid: String) async throws -> StreakResult {
         let entries = try await fetchRecentEntries(uid: uid, limit: 120)
         let activeDates = Set(
             entries
@@ -177,6 +183,7 @@ class FirestoreService {
         }
 
         try await updateUser(uid: uid, fields: updates)
+        return StreakResult(streak: streak, graceDayBurned: usedGraceDay)
     }
 
     // MARK: - Drift Logs

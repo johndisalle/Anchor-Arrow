@@ -2,6 +2,7 @@
 // Home screen — tree/arrow visual, streak, today's status, badges
 
 import SwiftUI
+import FirebaseAuth
 
 struct DashboardView: View {
     @EnvironmentObject var userStore: UserStore
@@ -46,6 +47,10 @@ struct DashboardView: View {
                     Spacer(minLength: 100) // tab bar clearance
                 }
                 .padding(.top, 8)
+            }
+            .refreshable {
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                await userStore.loadUserData(uid: uid)
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("Anchor & Arrow")
