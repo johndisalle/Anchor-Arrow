@@ -94,6 +94,7 @@ struct CirclesView: View {
             }
         }
         .task { await loadCircles() }
+        .refreshable { await loadCircles() }
     }
 
     // MARK: - Empty State
