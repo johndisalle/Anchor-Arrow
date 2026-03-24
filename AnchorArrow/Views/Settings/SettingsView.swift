@@ -18,6 +18,7 @@ struct SettingsView: View {
     @State private var eveningTime = Date()
     @State private var showExportSheet = false
     @State private var exportContent = ""
+    @State private var isDeleting = false
 
     var body: some View {
         NavigationStack {
@@ -80,12 +81,21 @@ struct SettingsView: View {
                     } label: {
                         Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
                     }
+                    .disabled(isDeleting)
 
                     Button(role: .destructive) {
                         showDeleteConfirm = true
                     } label: {
-                        Label("Delete Account", systemImage: "person.crop.circle.badge.minus")
+                        HStack {
+                            Label("Delete Account", systemImage: "person.crop.circle.badge.minus")
+                            if isDeleting {
+                                Spacer()
+                                ProgressView()
+                                    .tint(Color("BrandDanger"))
+                            }
+                        }
                     }
+                    .disabled(isDeleting)
                 } header: {
                     Text("Account")
                 }
@@ -118,7 +128,9 @@ struct SettingsView: View {
             ) {
                 Button("Delete Permanently", role: .destructive) {
                     Task {
+                        isDeleting = true
                         try? await authManager.deleteAccount()
+                        isDeleting = false
                     }
                 }
                 Button("Cancel", role: .cancel) {}
@@ -200,7 +212,7 @@ struct SettingsView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(Color("TextPrimary"))
                             }
-                            Text("Unlimited circles • Full Journey • Theme packs")
+                            Text("Circles • Drift Insights • Grace Day • Journeys")
                                 .font(.system(size: 12))
                                 .foregroundColor(Color("TextSecondary"))
                         }

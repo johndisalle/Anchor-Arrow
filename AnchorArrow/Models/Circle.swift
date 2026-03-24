@@ -12,15 +12,39 @@ struct Circle: Codable, Identifiable {
     var creatorId: String
     var memberIds: [String]
     var createdAt: Date
+    var isPublic: Bool
+
     var memberCount: Int { memberIds.count }
 
-    static func new(name: String, creatorId: String) -> Circle {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        _id        = try c.decode(DocumentID<String>.self, forKey: .id)
+        name       = try c.decode(String.self, forKey: .name)
+        inviteCode = try c.decode(String.self, forKey: .inviteCode)
+        creatorId  = try c.decode(String.self, forKey: .creatorId)
+        memberIds  = try c.decode([String].self, forKey: .memberIds)
+        createdAt  = try c.decode(Date.self, forKey: .createdAt)
+        isPublic   = try c.decodeIfPresent(Bool.self, forKey: .isPublic) ?? false
+    }
+
+    init(name: String, inviteCode: String, creatorId: String,
+         memberIds: [String], createdAt: Date, isPublic: Bool = false) {
+        self.name = name
+        self.inviteCode = inviteCode
+        self.creatorId = creatorId
+        self.memberIds = memberIds
+        self.createdAt = createdAt
+        self.isPublic = isPublic
+    }
+
+    static func new(name: String, creatorId: String, isPublic: Bool = false) -> Circle {
         Circle(
             name: name,
             inviteCode: Circle.generateCode(),
             creatorId: creatorId,
             memberIds: [creatorId],
-            createdAt: Date()
+            createdAt: Date(),
+            isPublic: isPublic
         )
     }
 

@@ -7,6 +7,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseFirestore
 import UIKit
+import StoreKit
 
 @MainActor
 class UserStore: ObservableObject {
@@ -123,6 +124,10 @@ class UserStore: ObservableObject {
             if streakResult.graceDayBurned {
                 await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
             }
+            // Prompt for App Store review at streak milestones (7, 21, 50)
+            if [7, 21, 50].contains(streakResult.streak) {
+                ReviewManager.requestReviewIfAppropriate()
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -218,6 +223,8 @@ class UserStore: ObservableObject {
                 try await firestoreService.completeJourney(uid: uid, series: series)
                 completedJourneySeries = series
                 showJourneyComplete = true
+                // Completing a 30-day journey is a great milestone for a review prompt
+                ReviewManager.requestReviewIfAppropriate()
             }
         } catch {
             errorMessage = error.localizedDescription
@@ -289,9 +296,9 @@ class UserStore: ObservableObject {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         // Build 12 week buckets by actual date ranges (avoids year boundary issues)
-        return (0..<12).reversed().map { offset in
-            let weekEnd = cal.date(byAdding: .weekOfYear, value: -offset, to: today)!
-            let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd)!
+        return (0..<12).reversed().compactMap { offset in
+            guard let weekEnd = cal.date(byAdding: .weekOfYear, value: -offset, to: today),
+                  let weekStart = cal.date(byAdding: .day, value: -7, to: weekEnd) else { return nil }
             return driftLogs.filter { $0.timestamp >= weekStart && $0.timestamp < weekEnd }.count
         }
     }

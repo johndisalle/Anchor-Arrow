@@ -9,8 +9,10 @@ struct CirclesView: View {
     @EnvironmentObject var userStore: UserStore
     @EnvironmentObject var storeKitManager: StoreKitManager
     @State private var circles: [Circle] = []
+    @State private var publicCircles: [Circle] = []
     @State private var showCreateCircle = false
     @State private var showJoinCircle = false
+    @State private var showBrowsePublic = false
     @State private var showPremiumUpsell = false
     @State private var isLoading = false
     @State private var selectedCircle: Circle?
@@ -51,6 +53,11 @@ struct CirclesView: View {
                         } label: {
                             Label("Join with Code", systemImage: "link")
                         }
+                        Button {
+                            showBrowsePublic = true
+                        } label: {
+                            Label("Browse Public Circles", systemImage: "globe")
+                        }
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 17, weight: .semibold))
@@ -65,6 +72,13 @@ struct CirclesView: View {
             }
             .sheet(isPresented: $showJoinCircle) {
                 JoinCircleView { joinedCircle in
+                    if !circles.contains(where: { $0.id == joinedCircle.id }) {
+                        circles.append(joinedCircle)
+                    }
+                }
+            }
+            .sheet(isPresented: $showBrowsePublic) {
+                BrowsePublicCirclesView { joinedCircle in
                     if !circles.contains(where: { $0.id == joinedCircle.id }) {
                         circles.append(joinedCircle)
                     }
@@ -100,7 +114,7 @@ struct CirclesView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                     .padding(.horizontal, 32)
-                Text("Start or join a private circle of 3–8 brothers to share wins, struggles, and accountability.")
+                Text("Start or join a circle of 3–8 brothers to share wins, struggles, and accountability.")
                     .font(.system(size: 14))
                     .foregroundColor(Color("TextSecondary"))
                     .multilineTextAlignment(.center)
@@ -129,6 +143,17 @@ struct CirclesView: View {
                     .foregroundColor(Color("BrandAnchor"))
                     .frame(maxWidth: .infinity).frame(height: 52)
                     .background(Color("BrandAnchor").opacity(0.1))
+                    .cornerRadius(14)
+                }
+                Button { showBrowsePublic = true } label: {
+                    HStack {
+                        Image(systemName: "globe")
+                        Text("Browse Public Circles")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .foregroundColor(Color("BrandArrow"))
+                    .frame(maxWidth: .infinity).frame(height: 52)
+                    .background(Color("BrandArrow").opacity(0.1))
                     .cornerRadius(14)
                 }
             }
@@ -216,6 +241,15 @@ struct CircleCard: View {
                             .font(.system(size: 12))
                             .foregroundColor(Color("TextSecondary"))
 
+                        // Public/Private badge
+                        HStack(spacing: 3) {
+                            Image(systemName: circle.isPublic ? "globe" : "lock.fill")
+                                .font(.system(size: 9, weight: .semibold))
+                            Text(circle.isPublic ? "Public" : "Private")
+                                .font(.system(size: 11, weight: .semibold))
+                        }
+                        .foregroundColor(circle.isPublic ? Color("BrandArrow") : Color("TextSecondary"))
+
                         // Weekly health badge
                         if let active = activeThisWeek {
                             HStack(spacing: 3) {
@@ -251,6 +285,7 @@ struct CircleCard: View {
                     .cornerRadius(8)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(showCopiedToast ? "Invite code copied" : "Copy invite code \(circle.inviteCode)")
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
@@ -275,6 +310,7 @@ struct CircleDetailView: View {
     @State private var isLoading = false
     @State private var showNewPost = false
     @State private var showQuickRally = false
+    @State private var showRallyConfirm = false
     @State private var showPremiumUpsell = false
     @State private var showMemberList = false
     @State private var memberProfiles: [String: MemberProfile] = [:]
@@ -352,9 +388,9 @@ struct CircleDetailView: View {
                         }
                         .refreshable { await loadPosts() }
 
-                        // Quick Rally — one tap to send a struggle to the circle
+                        // Quick Rally — send a struggle to the circle
                         Button {
-                            if canPost { showQuickRally = true }
+                            if canPost { showRallyConfirm = true }
                             else { showPremiumUpsell = true }
                         } label: {
                             HStack(spacing: 8) {
@@ -387,14 +423,14 @@ struct CircleDetailView: View {
                     Button("Done") { dismiss() }.foregroundColor(Color("BrandAnchor"))
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        UIPasteboard.general.string = circle.inviteCode
-                        codeCopied = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { codeCopied = false }
-                    } label: {
-                        Image(systemName: codeCopied ? "checkmark" : "link")
+                    ShareLink(
+                        item: URL(string: "anchorarrow://join?code=\(circle.inviteCode)")!,
+                        subject: Text("Join \(circle.name) on Anchor & Arrow"),
+                        message: Text("Join my circle \"\(circle.name)\" on Anchor & Arrow! Use code \(circle.inviteCode) or tap this link.")
+                    ) {
+                        Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16))
-                            .foregroundColor(codeCopied ? Color("BrandArrow") : Color("BrandAnchor"))
+                            .foregroundColor(Color("BrandAnchor"))
                     }
                     Button { showMemberList = true } label: {
                         Image(systemName: "person.2")
@@ -446,6 +482,16 @@ struct CircleDetailView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need an invite code to rejoin \"\(circle.name)\".")
+            }
+            .confirmationDialog(
+                "Rally Your Brothers?",
+                isPresented: $showRallyConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Yes, I Need Them") { showQuickRally = true }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will share a drift moment with your circle so they can stand with you.")
             }
         }
         .task { await loadData() }
@@ -519,9 +565,13 @@ struct CircleDetailView: View {
 
     private func markAnswered(post: CirclePost) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        try? await service.markPrayerAnswered(circleId: circleId, postId: postId)
-        if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-            posts[idx].isAnswered = true
+        do {
+            try await service.markPrayerAnswered(circleId: circleId, postId: postId)
+            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                posts[idx].isAnswered = true
+            }
+        } catch {
+            userStore.errorMessage = "Couldn't mark prayer as answered. Try again."
         }
     }
 
@@ -532,28 +582,35 @@ struct CircleDetailView: View {
 
     private func react(to post: CirclePost, emoji: String) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        try? await service.reactToPost(circleId: circleId, postId: postId, emoji: emoji)
-        // Optimistic local update
-        if let index = posts.firstIndex(where: { $0.id == post.id }) {
-            let current = posts[index].reactions[emoji] ?? 0
-            posts[index].reactions[emoji] = current + 1
+        do {
+            try await service.reactToPost(circleId: circleId, postId: postId, emoji: emoji)
+            // Optimistic local update only on success
+            if let index = posts.firstIndex(where: { $0.id == post.id }) {
+                let current = posts[index].reactions[emoji] ?? 0
+                posts[index].reactions[emoji] = current + 1
+            }
+        } catch {
+            userStore.errorMessage = "Couldn't send reaction. Check your connection."
         }
     }
 
     private func togglePin(post: CirclePost) async {
         guard let circleId = circle.id, let postId = post.id else { return }
-        if post.isPinned {
-            try? await service.unpinPost(circleId: circleId, postId: postId)
-            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-                posts[idx].isPinned = false
+        do {
+            if post.isPinned {
+                try await service.unpinPost(circleId: circleId, postId: postId)
+                if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                    posts[idx].isPinned = false
+                }
+            } else {
+                try await service.pinPost(circleId: circleId, postId: postId)
+                for i in posts.indices { posts[i].isPinned = false }
+                if let idx = posts.firstIndex(where: { $0.id == post.id }) {
+                    posts[idx].isPinned = true
+                }
             }
-        } else {
-            try? await service.pinPost(circleId: circleId, postId: postId)
-            // Unpin all others locally
-            for i in posts.indices { posts[i].isPinned = false }
-            if let idx = posts.firstIndex(where: { $0.id == post.id }) {
-                posts[idx].isPinned = true
-            }
+        } catch {
+            userStore.errorMessage = "Couldn't update pin. Try again."
         }
     }
 
@@ -564,7 +621,9 @@ struct CircleDetailView: View {
             try await service.leaveCircle(circleId: circleId, uid: uid)
             onLeave()
             dismiss()
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't leave circle. Try again."
+        }
     }
 }
 
@@ -1110,7 +1169,9 @@ struct CommentsSheet: View {
             try await service.postComment(comment: comment)
             comments.append(comment)
             newComment = ""
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't post comment. Check your connection."
+        }
         isPosting = false
     }
 }
@@ -1152,6 +1213,7 @@ struct CreateCircleView: View {
     let onCreate: (Circle) -> Void
     @Environment(\.dismiss) var dismiss
     @State private var circleName = ""
+    @State private var isPublic = false
     @State private var isCreating = false
     @State private var errorMessage = ""
     @FocusState private var focused: Bool
@@ -1169,6 +1231,43 @@ struct CreateCircleView: View {
                 AuthTextField(icon: "person.3.fill", placeholder: "Circle name (e.g. The Remnant)", text: $circleName)
                     .focused($focused)
                     .padding(.horizontal, 24)
+
+                // Public / Private toggle with explanation
+                VStack(spacing: 14) {
+                    Toggle(isOn: $isPublic) {
+                        HStack(spacing: 10) {
+                            Image(systemName: isPublic ? "globe" : "lock.fill")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(isPublic ? Color("BrandArrow") : Color("BrandAnchor"))
+                                .frame(width: 22)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(isPublic ? "Public Circle" : "Private Circle")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(Color("TextPrimary"))
+                            }
+                        }
+                    }
+                    .tint(Color("BrandArrow"))
+
+                    // Contextual explanation
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "info.circle.fill")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color("TextSecondary").opacity(0.6))
+                            .padding(.top, 1)
+                        Text(isPublic
+                             ? "Anyone can find and join this circle. All users (free or premium) can read posts. Great for open communities."
+                             : "Only people with the invite code can join. Best for close accountability groups.")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color("TextSecondary"))
+                            .lineSpacing(3)
+                    }
+                    .padding(12)
+                    .background(Color("CardBackground"))
+                    .cornerRadius(10)
+                    .animation(.easeInOut(duration: 0.2), value: isPublic)
+                }
+                .padding(.horizontal, 24)
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
@@ -1211,9 +1310,8 @@ struct CreateCircleView: View {
     private func createCircle() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isCreating = true
-        let newCircle = Circle.new(name: circleName, creatorId: uid)
+        let newCircle = Circle.new(name: circleName, creatorId: uid, isPublic: isPublic)
         do {
-            // Fix: fetch back from Firestore so @DocumentID is populated
             let id = try await FirestoreService.shared.createCircle(circle: newCircle)
             let saved = try await FirestoreService.shared.fetchCircle(circleId: id)
             onCreate(saved)
@@ -1436,8 +1534,175 @@ struct NewCirclePostView: View {
             try await FirestoreService.shared.postToCircle(post: post)
             onPost(post)
             dismiss()
-        } catch { }
+        } catch {
+            userStore.errorMessage = "Couldn't share post. Check your connection."
+        }
         isPosting = false
+    }
+}
+
+// MARK: - BrowsePublicCirclesView
+struct BrowsePublicCirclesView: View {
+    let onJoin: (Circle) -> Void
+    @Environment(\.dismiss) var dismiss
+    @State private var publicCircles: [Circle] = []
+    @State private var isLoading = false
+    @State private var joiningCircleId: String?
+    @State private var errorMessage = ""
+
+    var body: some View {
+        NavigationStack {
+            Group {
+                if isLoading {
+                    SkeletonCirclesList()
+                } else if publicCircles.isEmpty {
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "globe")
+                            .font(.system(size: 44))
+                            .foregroundColor(Color("TextSecondary").opacity(0.4))
+                        Text("No Public Circles Yet")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundColor(Color("TextPrimary"))
+                        Text("Be the first to create one — tap Create a Circle and set it to Public.")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color("TextSecondary"))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 40)
+                        Spacer()
+                    }
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(spacing: 12) {
+                            // Explanation banner
+                            HStack(spacing: 10) {
+                                Image(systemName: "globe")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(Color("BrandArrow"))
+                                Text("Public circles are open to all. Join to read posts, share, and find brotherhood.")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(Color("TextSecondary"))
+                                    .lineSpacing(3)
+                            }
+                            .padding(14)
+                            .background(Color("BrandArrow").opacity(0.08))
+                            .cornerRadius(12)
+                            .padding(.horizontal, 20)
+
+                            if !errorMessage.isEmpty {
+                                Text(errorMessage)
+                                    .font(.system(size: 13))
+                                    .foregroundColor(Color("BrandDanger"))
+                                    .padding(.horizontal, 20)
+                            }
+
+                            ForEach(publicCircles) { circle in
+                                PublicCircleRow(
+                                    circle: circle,
+                                    isJoining: joiningCircleId == circle.id,
+                                    onJoinTap: { Task { await joinCircle(circle) } }
+                                )
+                                .padding(.horizontal, 20)
+                            }
+
+                            Spacer(minLength: 40)
+                        }
+                        .padding(.top, 16)
+                    }
+                }
+            }
+            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .navigationTitle("Public Circles")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") { dismiss() }
+                        .foregroundColor(Color("TextSecondary"))
+                }
+            }
+            .task { await loadPublicCircles() }
+        }
+    }
+
+    private func loadPublicCircles() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        isLoading = true
+        publicCircles = (try? await FirestoreService.shared.fetchPublicCircles(excludingUid: uid)) ?? []
+        isLoading = false
+    }
+
+    private func joinCircle(_ circle: Circle) async {
+        guard let uid = Auth.auth().currentUser?.uid,
+              let circleId = circle.id else { return }
+        joiningCircleId = circleId
+        errorMessage = ""
+        do {
+            let joined = try await FirestoreService.shared.joinPublicCircle(circleId: circleId, uid: uid)
+            onJoin(joined)
+            publicCircles.removeAll { $0.id == circleId }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        joiningCircleId = nil
+    }
+}
+
+// MARK: - PublicCircleRow
+private struct PublicCircleRow: View {
+    let circle: Circle
+    let isJoining: Bool
+    let onJoinTap: () -> Void
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                SwiftUI.Circle()
+                    .fill(Color("BrandArrow").opacity(0.15))
+                    .frame(width: 48, height: 48)
+                Text(String(circle.name.prefix(2)).uppercased())
+                    .font(.system(size: 16, weight: .heavy))
+                    .foregroundColor(Color("BrandArrow"))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(circle.name)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(Color("TextPrimary"))
+                HStack(spacing: 6) {
+                    Label("\(circle.memberCount)/8", systemImage: "person.2.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(Color("TextSecondary"))
+                    if circle.memberCount >= 7 {
+                        Text("Almost full")
+                            .font(.system(size: 11, weight: .semibold))
+                            .foregroundColor(Color("BrandWarning"))
+                    }
+                }
+            }
+
+            Spacer()
+
+            Button(action: onJoinTap) {
+                Group {
+                    if isJoining {
+                        ProgressView()
+                            .tint(Color("BrandArrow"))
+                    } else {
+                        Text("Join")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                }
+                .foregroundColor(Color("BrandArrow"))
+                .padding(.horizontal, 18)
+                .padding(.vertical, 8)
+                .background(Color("BrandArrow").opacity(0.12))
+                .cornerRadius(10)
+            }
+            .disabled(isJoining || circle.memberCount >= 8)
+        }
+        .padding(14)
+        .background(Color("CardBackground"))
+        .cornerRadius(14)
     }
 }
 

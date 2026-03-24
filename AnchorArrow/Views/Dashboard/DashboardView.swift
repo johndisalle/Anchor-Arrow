@@ -15,6 +15,9 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
+                if userStore.isLoading && userStore.appUser == nil {
+                    dashboardSkeleton
+                } else {
                 VStack(spacing: 24) {
 
                     // Greeting Header
@@ -47,6 +50,7 @@ struct DashboardView: View {
                     Spacer(minLength: 100) // tab bar clearance
                 }
                 .padding(.top, 8)
+                }
             }
             .refreshable {
                 guard let uid = Auth.auth().currentUser?.uid else { return }
@@ -65,6 +69,7 @@ struct DashboardView: View {
                         Image(systemName: "person.circle.fill")
                             .font(.system(size: 22))
                             .foregroundColor(Color("BrandAnchor"))
+                            .accessibilityLabel("Profile and Settings")
                     }
                 }
             }
@@ -113,6 +118,8 @@ struct DashboardView: View {
                 .padding(.vertical, 10)
                 .background(Color("CardBackground"))
                 .cornerRadius(12)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Today is \(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))")
             }
         }
         .padding(.horizontal, 24)
@@ -179,6 +186,7 @@ struct DashboardView: View {
                 }
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color("BrandAnchor"))
+                .accessibilityLabel("See all badges")
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -194,7 +202,8 @@ struct DashboardView: View {
 
     private var journeyCTASection: some View {
         Button {
-            if userStore.isPremium || !(userStore.appUser?.journeyActive ?? false) {
+            // Always let the user view their active journey; only gate starting NEW journeys
+            if userStore.appUser?.journeyActive == true || userStore.isPremium || !userStore.availableJourneys.isEmpty {
                 showJourney = true
             } else {
                 showPremiumUpsell = true
@@ -233,6 +242,62 @@ struct DashboardView: View {
             .padding(.horizontal, 24)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(userStore.appUser?.journeyActive == true
+            ? "\(userStore.currentJourneySeries.displayName) Journey, Day \(userStore.appUser?.journeyDay ?? 0) of 30"
+            : "\(userStore.currentJourneySeries.displayName) Journey, 30-day guided plan")
+        .accessibilityHint("Double tap to open")
+    }
+
+    // MARK: - Skeleton
+    private var dashboardSkeleton: some View {
+        VStack(spacing: 24) {
+            // Header placeholder
+            HStack {
+                VStack(alignment: .leading, spacing: 8) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(width: 100, height: 14)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color("CardBackground"))
+                        .frame(width: 160, height: 24)
+                }
+                Spacer()
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color("CardBackground"))
+                    .frame(width: 52, height: 60)
+            }
+            .padding(.horizontal, 24)
+
+            // Tree placeholder
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color("CardBackground"))
+                .frame(height: 280)
+                .padding(.horizontal, 24)
+
+            // Status cards
+            HStack(spacing: 14) {
+                SkeletonCard(height: 130)
+                SkeletonCard(height: 130)
+            }
+            .padding(.horizontal, 24)
+
+            // Stats row
+            HStack(spacing: 14) {
+                SkeletonCard(height: 80)
+                SkeletonCard(height: 80)
+                SkeletonCard(height: 80)
+            }
+            .padding(.horizontal, 24)
+
+            // Journey CTA
+            SkeletonCard(height: 80)
+                .padding(.horizontal, 24)
+
+            Spacer(minLength: 100)
+        }
+        .padding(.top, 8)
+        .shimmer()
     }
 
     // MARK: - Helpers
@@ -324,6 +389,9 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title) \(subtitle), \(isComplete ? "completed" : "not yet completed")")
+        .accessibilityHint(isComplete ? "Tap to review" : "Tap to begin your \(title.lowercased())")
     }
 }
 
@@ -348,6 +416,8 @@ struct StatPill<Icon: View>: View {
         .padding(.vertical, 14)
         .background(Color("CardBackground"))
         .cornerRadius(14)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(value) \(label)")
     }
 }
 
@@ -372,5 +442,7 @@ struct BadgePill: View {
                 .multilineTextAlignment(.center)
                 .frame(width: 60)
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Badge: \(badge.name)")
     }
 }

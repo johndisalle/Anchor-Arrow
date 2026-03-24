@@ -139,8 +139,15 @@ struct SplashView: View {
 // MARK: - Main Tab View
 struct MainTabView: View {
     @EnvironmentObject var userStore: UserStore
+    @EnvironmentObject var networkMonitor: NetworkMonitor
     @State private var selectedTab = 0
     @State private var showDriftLog = false
+    @State private var showNotificationPrompt = false
+    @State private var showWelcomeGuide = false
+    @State private var showErrorToast = false
+    @State private var errorToastMessage = ""
+    @State private var errorToastId = UUID()
+    @State private var pendingCircleCode: String?
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -189,9 +196,118 @@ struct MainTabView: View {
                     .accessibilityLabel("Log a drift moment")
                 }
             }
+
+            // Offline banner
+            if !networkMonitor.isConnected {
+                VStack {
+                    HStack(spacing: 8) {
+                        Image(systemName: "wifi.slash")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("No internet connection")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.vertical, 8)
+                    .frame(maxWidth: .infinity)
+                    .background(Color("TextSecondary").opacity(0.85))
+                    Spacer()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.easeInOut(duration: 0.3), value: networkMonitor.isConnected)
+                .zIndex(99)
+            }
         }
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
+        }
+        .fullScreenCover(isPresented: $showNotificationPrompt) {
+            NotificationPromptView(isPresented: $showNotificationPrompt)
+                .environmentObject(userStore)
+        }
+        .fullScreenCover(isPresented: $showWelcomeGuide) {
+            WelcomeGuideView(isPresented: $showWelcomeGuide)
+        }
+        .checkNotificationPermission()
+        .onOpenURL { url in
+            // Deep link: anchorarrow://join?code=ABC123
+            if url.scheme == "anchorarrow", url.host == "join",
+               let code = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+                .queryItems?.first(where: { $0.name == "code" })?.value {
+                selectedTab = 4 // Switch to Circles tab
+                pendingCircleCode = code
+            }
+        }
+        .onAppear {
+            // Show welcome guide first, then notification prompt
+            let guideKey = "hasSeenWelcomeGuide"
+            let notifKey = "hasSeenNotificationPrompt"
+            if !UserDefaults.standard.bool(forKey: guideKey) {
+                UserDefaults.standard.set(true, forKey: guideKey)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    showWelcomeGuide = true
+                }
+            } else if !UserDefaults.standard.bool(forKey: notifKey) {
+                UserDefaults.standard.set(true, forKey: notifKey)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    showNotificationPrompt = true
+                }
+            }
+        }
+        // Show notification prompt after welcome guide dismisses
+        .onChange(of: showWelcomeGuide) { _, isShowing in
+            if !isShowing {
+                let notifKey = "hasSeenNotificationPrompt"
+                if !UserDefaults.standard.bool(forKey: notifKey) {
+                    UserDefaults.standard.set(true, forKey: notifKey)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showNotificationPrompt = true
+                    }
+                }
+            }
+        }
+        .onChange(of: userStore.errorMessage) { _, newValue in
+            if let message = newValue, !message.isEmpty {
+                errorToastMessage = message
+                showErrorToast = true
+                // Rotate ID so identical consecutive messages still trigger animations
+                errorToastId = UUID()
+                userStore.errorMessage = nil
+                let dismissId = errorToastId
+                // Auto-dismiss after 4 seconds (only if no newer toast replaced it)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                    if errorToastId == dismissId {
+                        showErrorToast = false
+                    }
+                }
+            }
+        }
+        .safeAreaInset(edge: .top) {
+            if showErrorToast {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(.white)
+                    Text(errorToastMessage)
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(.white)
+                        .lineLimit(2)
+                    Spacer()
+                    Button {
+                        showErrorToast = false
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundColor(.white.opacity(0.7))
+                    }
+                }
+                .padding(14)
+                .background(Color("BrandDanger").cornerRadius(12))
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.4), value: showErrorToast)
+                .id(errorToastId)
+            }
         }
     }
 }
@@ -227,6 +343,9 @@ private struct CustomTabBar: View {
                         .padding(.top, 10)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(tab.label) tab")
+                    .accessibilityHint(selectedTab == tab.tag ? "Currently selected" : "Double tap to switch")
+                    .accessibilityAddTraits(selectedTab == tab.tag ? .isSelected : [])
                 }
             }
             .padding(.bottom, 8)

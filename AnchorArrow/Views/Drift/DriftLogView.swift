@@ -289,6 +289,9 @@ struct DriftCategoryButton: View {
             .animation(.spring(response: 0.2), value: isSelected)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("\(tag.displayName) drift category")
+        .accessibilityHint(isSelected ? "Currently selected. Double tap to deselect." : "Double tap to select.")
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
 

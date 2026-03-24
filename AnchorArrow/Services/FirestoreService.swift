@@ -149,11 +149,13 @@ class FirestoreService {
         while true {
             if activeDates.contains(checkDate) {
                 streak += 1
-                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+                guard let prev = Calendar.current.date(byAdding: .day, value: -1, to: checkDate) else { break }
+                checkDate = prev
             } else if graceDayAvailable && !usedGraceDay && checkDate != today && streak > 0 {
                 // Grace day: skip this gap, don't increment streak count
                 usedGraceDay = true
-                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+                guard let prev = Calendar.current.date(byAdding: .day, value: -1, to: checkDate) else { break }
+                checkDate = prev
             } else {
                 break
             }
@@ -306,6 +308,35 @@ class FirestoreService {
             .whereField("memberIds", arrayContains: uid)
             .getDocuments()
         return snapshot.documents.compactMap { try? $0.data(as: Circle.self) }
+    }
+
+    /// Fetch public circles that the user hasn't already joined
+    func fetchPublicCircles(excludingUid uid: String) async throws -> [Circle] {
+        let snapshot = try await circlesRef()
+            .whereField("isPublic", isEqualTo: true)
+            .order(by: "createdAt", descending: true)
+            .limit(to: 30)
+            .getDocuments()
+        return snapshot.documents
+            .compactMap { try? $0.data(as: Circle.self) }
+            .filter { !$0.memberIds.contains(uid) }
+    }
+
+    /// Join a public circle directly (no invite code needed)
+    func joinPublicCircle(circleId: String, uid: String) async throws -> Circle {
+        let doc = try await circlesRef().document(circleId).getDocument()
+        var circle = try doc.data(as: Circle.self)
+
+        guard circle.isPublic else { throw CircleError.invalidCode }
+        guard circle.memberCount < 8 else { throw CircleError.full }
+        guard !circle.memberIds.contains(uid) else { throw CircleError.alreadyMember }
+
+        try await circlesRef().document(circleId).updateData([
+            "memberIds": FieldValue.arrayUnion([uid])
+        ])
+
+        circle.memberIds.append(uid)
+        return circle
     }
 
     func joinCircle(code: String, uid: String) async throws -> Circle {
