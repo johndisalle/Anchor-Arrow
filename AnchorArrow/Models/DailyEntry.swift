@@ -158,7 +158,7 @@ struct DriftLog: Codable, Identifiable {
     }
 
     static func new(category: AnchorTag, note: String, customCategory: String? = nil) -> DriftLog {
-        DriftLog(timestamp: Date(), category: category, note: note, customCategory: customCategory)
+        DriftLog(timestamp: Date(), category: category, customCategory: customCategory, note: note)
     }
 }
 
