@@ -121,22 +121,33 @@ class FirestoreService {
 
     // MARK: - Streak Management
 
-    /// Recalculate and update streak after entry completion
+    /// Recalculate and update streak after entry completion.
+    /// Premium users get one grace day per 30-day period — a missed day that doesn't break the streak.
     func updateStreak(uid: String) async throws {
         let entries = try await fetchRecentEntries(uid: uid, limit: 120)
-        let sortedDates = entries
-            .filter { $0.anchorCompleted || $0.arrowCompleted }
-            .compactMap { Calendar.current.startOfDay(for: $0.date) }
-            .sorted(by: >)
+        let activeDates = Set(
+            entries
+                .filter { $0.anchorCompleted || $0.arrowCompleted }
+                .map { Calendar.current.startOfDay(for: $0.date) }
+        )
+
+        let user = try await fetchUser(uid: uid)
+        let today = Calendar.current.startOfDay(for: Date())
 
         var streak = 0
-        var checkDate = Calendar.current.startOfDay(for: Date())
+        var checkDate = today
+        var usedGraceDay = false
+        let graceDayAvailable = user.hasGraceDayAvailable
 
-        for date in sortedDates {
-            if date == checkDate {
+        while true {
+            if activeDates.contains(checkDate) {
                 streak += 1
                 checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
-            } else if date < checkDate {
+            } else if graceDayAvailable && !usedGraceDay && checkDate != today && streak > 0 {
+                // Grace day: skip this gap, don't increment streak count
+                usedGraceDay = true
+                checkDate = Calendar.current.date(byAdding: .day, value: -1, to: checkDate)!
+            } else {
                 break
             }
         }
@@ -151,10 +162,17 @@ class FirestoreService {
             "lastEntryDate": Timestamp(date: Date())
         ]
 
-        // Fetch current user to check longestStreak
-        let user = try await fetchUser(uid: uid)
         if streak > user.longestStreak {
             updates["longestStreak"] = streak
+        }
+
+        // Burn the grace day if it was used
+        if usedGraceDay {
+            updates["graceDayUsedDate"] = Timestamp(date: Date())
+            if user.graceDayPeriodStart == nil ||
+               (Calendar.current.dateComponents([.day], from: user.graceDayPeriodStart!, to: Date()).day ?? 0) >= 30 {
+                updates["graceDayPeriodStart"] = Timestamp(date: Date())
+            }
         }
 
         try await updateUser(uid: uid, fields: updates)
@@ -324,6 +342,23 @@ class FirestoreService {
         ])
     }
 
+    /// Pin a post to the top of a circle feed (leader only). Unpins any previously pinned post.
+    func pinPost(circleId: String, postId: String) async throws {
+        // Unpin all existing pinned posts first
+        let pinned = try await circlePostsRef(circleId)
+            .whereField("isPinned", isEqualTo: true)
+            .getDocuments()
+        for doc in pinned.documents {
+            try await circlePostsRef(circleId).document(doc.documentID).updateData(["isPinned": false])
+        }
+        // Pin the selected post
+        try await circlePostsRef(circleId).document(postId).updateData(["isPinned": true])
+    }
+
+    func unpinPost(circleId: String, postId: String) async throws {
+        try await circlePostsRef(circleId).document(postId).updateData(["isPinned": false])
+    }
+
     // MARK: - Account Deletion (cascade)
 
     /// Deletes all user data from Firestore before the Auth account is removed.
@@ -369,7 +404,7 @@ class FirestoreService {
     }
 
     // MARK: - Journey
-    func updateJourney(uid: String, day: Int, startDate: Date?) async throws {
+    func updateJourney(uid: String, day: Int, startDate: Date?, series: JourneySeries? = nil) async throws {
         var updates: [String: Any] = [
             "journeyActive": true,
             "journeyDay": day
@@ -377,7 +412,18 @@ class FirestoreService {
         if let start = startDate {
             updates["journeyStartDate"] = Timestamp(date: start)
         }
+        if let series {
+            updates["journeySeries"] = series.rawValue
+        }
         try await updateUser(uid: uid, fields: updates)
+    }
+
+    /// Mark a journey series as completed and deactivate
+    func completeJourney(uid: String, series: JourneySeries) async throws {
+        try await updateUser(uid: uid, fields: [
+            "journeyActive": false,
+            "completedJourneys": FieldValue.arrayUnion([series.rawValue])
+        ])
     }
 }
 

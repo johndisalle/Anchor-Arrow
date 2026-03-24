@@ -137,10 +137,10 @@ class UserStore: ObservableObject {
 
     // MARK: - Journey
 
-    func startJourney() async {
+    func startJourney(series: JourneySeries = .standFirm) async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         do {
-            try await firestoreService.updateJourney(uid: uid, day: 0, startDate: Date())
+            try await firestoreService.updateJourney(uid: uid, day: 0, startDate: Date(), series: series)
             try await firestoreService.awardBadge(uid: uid, badgeType: .journeyStarted)
         } catch {
             errorMessage = error.localizedDescription
@@ -151,13 +151,32 @@ class UserStore: ObservableObject {
         guard let uid = Auth.auth().currentUser?.uid,
               let user = appUser else { return }
         let nextDay = user.journeyDay + 1
+        let series = JourneySeries(rawValue: user.journeySeries) ?? .standFirm
         do {
             try await firestoreService.updateJourney(uid: uid, day: nextDay, startDate: nil)
             if nextDay >= 7  { try await firestoreService.awardBadge(uid: uid, badgeType: .journeyWeek1) }
-            if nextDay >= 30 { try await firestoreService.awardBadge(uid: uid, badgeType: .journeyComplete) }
+            if nextDay >= 30 {
+                try await firestoreService.awardBadge(uid: uid, badgeType: .journeyComplete)
+                try await firestoreService.completeJourney(uid: uid, series: series)
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// Journey series the user can start (premium gets all, free gets first only)
+    var availableJourneys: [JourneySeries] {
+        let completed = Set(appUser?.completedJourneys ?? [])
+        if isPremium {
+            return JourneySeries.allCases
+        } else {
+            // Free tier: only Stand Firm if not completed
+            return completed.contains(JourneySeries.standFirm.rawValue) ? [] : [.standFirm]
+        }
+    }
+
+    var currentJourneySeries: JourneySeries {
+        JourneySeries(rawValue: appUser?.journeySeries ?? "") ?? .standFirm
     }
 
     // MARK: - Helpers
@@ -174,6 +193,83 @@ class UserStore: ObservableObject {
         (appUser?.badges ?? []).compactMap { BadgeType(rawValue: $0) }
     }
 
+    // MARK: - Drift Insights (computed from driftLogs)
+
+    /// Top drift categories this month, sorted by count descending
+    var topDriftCategoriesThisMonth: [(tag: AnchorTag, count: Int)] {
+        let cal = Calendar.current
+        let now = Date()
+        let monthLogs = driftLogs.filter { cal.isDate($0.timestamp, equalTo: now, toGranularity: .month) }
+        var counts: [AnchorTag: Int] = [:]
+        for log in monthLogs { counts[log.category, default: 0] += 1 }
+        return counts.sorted { $0.value > $1.value }
+    }
+
+    /// Weakest day of week — the day with the most drifts in the last 90 days
+    var weakestDayOfWeek: String? {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -90, to: Date()) ?? Date()
+        let recentDrifts = driftLogs.filter { $0.timestamp >= cutoff }
+        guard !recentDrifts.isEmpty else { return nil }
+        var dayCounts: [Int: Int] = [:]
+        for log in recentDrifts {
+            let weekday = Calendar.current.component(.weekday, from: log.timestamp)
+            dayCounts[weekday, default: 0] += 1
+        }
+        guard let weakest = dayCounts.max(by: { $0.value < $1.value }) else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE"
+        // weekday 1 = Sunday
+        let refDate = Calendar.current.date(from: DateComponents(weekday: weakest.key))!
+        return formatter.string(from: refDate)
+    }
+
+    /// 90-day trend: drifts per week, returns recent 12 weeks
+    var driftWeeklyTrend: [Int] {
+        let cal = Calendar.current
+        let cutoff = cal.date(byAdding: .day, value: -84, to: Date()) ?? Date() // 12 weeks
+        let recentDrifts = driftLogs.filter { $0.timestamp >= cutoff }
+        var weeks: [Int: Int] = [:]
+        for log in recentDrifts {
+            let weekOfYear = cal.component(.weekOfYear, from: log.timestamp)
+            weeks[weekOfYear, default: 0] += 1
+        }
+        // Return last 12 weeks in order
+        let currentWeek = cal.component(.weekOfYear, from: Date())
+        return (0..<12).reversed().map { offset in
+            var w = currentWeek - offset
+            if w <= 0 { w += 52 }
+            return weeks[w] ?? 0
+        }
+    }
+
+    /// Whether drifts are trending up or down (comparing last 4 weeks to previous 4)
+    var driftTrending: DriftTrend {
+        let trend = driftWeeklyTrend
+        guard trend.count >= 8 else { return .stable }
+        let recent4 = trend.suffix(4).reduce(0, +)
+        let previous4 = trend.dropLast(4).suffix(4).reduce(0, +)
+        if recent4 < previous4 { return .down }
+        if recent4 > previous4 { return .up }
+        return .stable
+    }
+
+    /// Positive reinforcement: tag the user has been clean of for N weeks
+    var accountabilityStreaks: [(tag: AnchorTag, weeks: Int)] {
+        let cal = Calendar.current
+        let now = Date()
+        var results: [(AnchorTag, Int)] = []
+        for tag in AnchorTag.allCases {
+            let lastDrift = driftLogs.first { $0.category == tag }
+            if let last = lastDrift {
+                let weeks = (cal.dateComponents([.weekOfYear], from: last.timestamp, to: now).weekOfYear ?? 0)
+                if weeks >= 2 {
+                    results.append((tag, weeks))
+                }
+            }
+        }
+        return results.sorted { $0.1 > $1.1 }
+    }
+
     private func refreshRecent(uid: String) async {
         recentEntries = (try? await firestoreService.fetchRecentEntries(uid: uid, limit: 60)) ?? []
     }
@@ -185,5 +281,34 @@ class UserStore: ObservableObject {
         driftLogs = []
         userListener?.remove()
         userListener = nil
+    }
+}
+
+// MARK: - DriftTrend
+enum DriftTrend {
+    case up, down, stable
+
+    var label: String {
+        switch self {
+        case .up:     return "Trending up"
+        case .down:   return "Trending down"
+        case .stable: return "Stable"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .up:     return "arrow.up.right"
+        case .down:   return "arrow.down.right"
+        case .stable: return "minus"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .up:     return "BrandDanger"
+        case .down:   return "BrandArrow"
+        case .stable: return "TextSecondary"
+        }
     }
 }

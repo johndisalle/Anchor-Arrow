@@ -69,6 +69,7 @@ struct CirclePost: Codable, Identifiable {
     var timestamp: Date
     var reactions: [String: Int] = [:]  // emoji: count
     var isAnswered: Bool = false         // prayer posts only — marks as answered praise
+    var isPinned: Bool = false           // circle leader can pin one post to top
 
     var totalReactions: Int { reactions.values.reduce(0, +) }
 }

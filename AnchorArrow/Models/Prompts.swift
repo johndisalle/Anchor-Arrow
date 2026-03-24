@@ -144,7 +144,14 @@ struct PromptLibrary {
     ]
 
     // MARK: - Journey Plan (30 Days)
-    static func journeyDays() -> [JourneyDay] {
+    static func journeyDays(for series: JourneySeries = .standFirm) -> [JourneyDay] {
+        switch series {
+        case .standFirm:  return standFirmJourneyDays()
+        case .armorOfGod: return armorOfGodJourneyDays()
+        }
+    }
+
+    private static func standFirmJourneyDays() -> [JourneyDay] {
         struct DayData {
             let week: Int
             let theme: String
@@ -315,6 +322,196 @@ struct PromptLibrary {
                 devotional: "Here it is again — the verse that started everything. Be watchful. Stand firm in the faith. Act like men. Be strong. Let all that you do be done in love. These are not commands to be completed once. They are the posture of a man who has decided who he is. A man who is anchored doesn't drift because he knows what he's anchored to. A man who is purposeful doesn't wander because he knows what he's aiming at. You were made for this — designed for courage, faithfulness, and strength in love. Not perfect. Faithful. Not without failures. Without quitting. This is not the end of a 30-day program. It is the beginning of the rest of your life as a man who stands firm. The best thing you can do with what you've received is give it away. Go sharpen another man.",
                 anchor: "What is my one-sentence commitment going forward as an anchored, purposeful man? Write it. Say it out loud. Mean it.",
                 arrow: "Set one new goal. Plan to restart the journey. And identify one man you will invest in — invite him to start this journey with you."),
+        ]
+
+        return data.enumerated().map { index, item in
+            JourneyDay(
+                id: index + 1,
+                week: item.week,
+                theme: item.theme,
+                scripture: item.scripture,
+                devotional: item.devotional,
+                anchorPrompt: item.anchor,
+                arrowPrompt: item.arrow,
+                isUnlocked: index == 0,
+                completedDate: nil
+            )
+        }
+    }
+
+    // MARK: - Armor of God Journey (30 Days in Ephesians 6)
+    private static func armorOfGodJourneyDays() -> [JourneyDay] {
+        struct DayData {
+            let week: Int
+            let theme: String
+            let scripture: String
+            let devotional: String
+            let anchor: String
+            let arrow: String
+        }
+
+        let data: [DayData] = [
+
+            // MARK: Week 1 — The Belt of Truth & Breastplate of Righteousness
+
+            DayData(week: 1, theme: "Be Strong in the Lord", scripture: "Ephesians 6:10",
+                devotional: "Before Paul names a single piece of armor, he gives the foundation: be strong in the Lord and in the strength of His might. Not your might. His. Every man who has tried to white-knuckle his way through temptation, discipline his way out of sin, or hustle his way to spiritual maturity has discovered the same thing — it doesn't hold. Your strength has a ceiling. God's doesn't. The phrase 'be strong' is passive in Greek — it means 'be strengthened,' let yourself be empowered. You don't generate this. You receive it. The man who walks in God's strength isn't the one trying harder. He's the one who has stopped trying to do it alone and started depending on the One who already won the battle.",
+                anchor: "Where am I relying on my own strength instead of God's? What would it look like to actually depend on Him today?",
+                arrow: "Identify one area where you've been striving in your own power. Consciously surrender it to God's strength before you act today."),
+
+            DayData(week: 1, theme: "The Schemes of the Devil", scripture: "Ephesians 6:11",
+                devotional: "Paul doesn't say the devil attacks with brute force. He says 'schemes' — methodeia in Greek, from which we get 'method.' The enemy has a method. He studies you. He knows your patterns, your weak spots, the time of day you're most vulnerable, the emotion that makes you most reckless. He's not creative — he doesn't need to be. He just runs the same play over and over because it keeps working. The scheme against the angry man is provocation. The scheme against the lonely man is counterfeit intimacy. The scheme against the successful man is self-sufficiency. The scheme against the discouraged man is despair. What's the play he keeps running against you? Until you name it, you can't defend against it. The full armor of God isn't optional equipment — it's the only thing that stands against a strategic enemy.",
+                anchor: "What pattern does the enemy keep exploiting in my life? What is the scheme I keep falling for?",
+                arrow: "Write down the enemy's most effective play against you. Then write down the specific truth from God's Word that counters it."),
+
+            DayData(week: 1, theme: "The Real Battle", scripture: "Ephesians 6:12",
+                devotional: "We do not wrestle against flesh and blood. Every man needs to hear this and actually believe it. Your wife is not your enemy. Your boss is not your enemy. The culture is not your enemy. There is a real, personal, spiritual adversary behind the things that tear at your marriage, your integrity, your faith, and your peace. This doesn't mean people don't sin against you — they do. But behind the human conflict is often a spiritual one. When you fight flesh and blood, you use flesh-and-blood weapons: anger, control, manipulation, withdrawal. When you fight spiritual battles with spiritual weapons, everything changes. You pray instead of rage. You speak truth instead of attacking. You stand firm instead of retaliating. The man who understands Ephesians 6:12 fights differently — and he wins differently.",
+                anchor: "Where am I fighting flesh and blood when the real battle is spiritual? Who have I been treating as the enemy who isn't?",
+                arrow: "Before reacting to any conflict today, pause and ask: is this a flesh-and-blood issue or a spiritual one? Respond accordingly."),
+
+            DayData(week: 1, theme: "The Belt of Truth", scripture: "Ephesians 6:14a",
+                devotional: "The belt was the first piece of armor a Roman soldier put on. Everything else attached to it. Without it, nothing held together. Paul says truth is your belt — the foundational piece that holds everything else in place. But truth here isn't just theological knowledge. It's integrity — living the same in private as in public. The belt of truth means you're not hiding anything. You're not performing a version of yourself for the world while living another version behind closed doors. Deception is the enemy's native language. Every stronghold in your life started with a lie you believed or a truth you refused to tell. When a man walks in truth — about who God is, who he is, and what's really going on in his heart — the enemy loses his primary weapon.",
+                anchor: "Where am I living with a gap between my public self and my private self? What truth am I avoiding?",
+                arrow: "Tell one person one true thing about where you actually are today — spiritually, emotionally, or relationally. No filter."),
+
+            DayData(week: 1, theme: "Truth Sets Free", scripture: "John 8:32",
+                devotional: "Jesus said the truth will set you free. Not comfort. Not avoidance. Not denial. Truth. Most men are imprisoned by things they refuse to name. The addiction you won't call an addiction. The marriage issue you keep hoping will fix itself. The bitterness you've relabeled as 'boundaries.' The fear you've disguised as wisdom. Freedom doesn't begin with victory — it begins with honesty. The moment you say 'this is what's really happening' is the moment the chains start to loosen. Not because confession is magic, but because deception is the lock, and truth is the key. You cannot be set free from something you won't acknowledge. What have you been calling by the wrong name?",
+                anchor: "What am I calling by the wrong name in my life right now? What truth am I softening to make it easier to live with?",
+                arrow: "Name the thing you've been avoiding with its real name — in your journal, to God, or to a trusted brother. Start the freedom process today."),
+
+            DayData(week: 1, theme: "The Breastplate of Righteousness", scripture: "Ephesians 6:14b",
+                devotional: "The breastplate protected the heart and vital organs. Paul says righteousness is your breastplate. This is both positional — you are declared righteous through Christ — and practical — you live in a way that guards your heart. A man with no breastplate is a man whose heart is exposed. And an exposed heart gets pierced. Practical righteousness isn't about perfection. It's about alignment — living in step with what you know to be true. Every compromise leaves a crack in the breastplate. Every 'just this once' opens a gap the enemy knows how to exploit. The righteous man isn't the one who never fails. He's the one who refuses to stay down, who repents quickly, who doesn't let yesterday's failure become today's identity. Guard your heart by guarding your choices.",
+                anchor: "Where is there a crack in my breastplate — a compromise I've made peace with that's leaving my heart exposed?",
+                arrow: "Close one gap today. One area where you know you've been compromising — make the right choice before the temptation comes, not during it."),
+
+            DayData(week: 1, theme: "Week 1 Review", scripture: "Psalm 51:6",
+                devotional: "God desires truth in the inward parts. Not external performance. Not polished answers. Truth — the deep, uncomfortable, no-one-is-watching kind. Week 1 was about the foundation: truth and righteousness. The belt that holds everything together and the breastplate that guards your heart. Without these two, nothing else in the armor matters. A man who lies to himself can't fight effectively. A man whose heart is unguarded will take hits that should have been blocked. So here's the honest review: Did you name your enemy's scheme? Did you close a gap in your integrity? Did you tell someone the truth about where you are? If you did — good. Build on it. If you didn't — don't waste time in guilt. Start now. Today is the day.",
+                anchor: "What did God reveal this week about my relationship with truth and integrity? Where did I grow? Where did I resist?",
+                arrow: "Share one honest insight from this week with a brother. Not a polished summary — the real takeaway."),
+
+            // MARK: Week 2 — Shoes of the Gospel & Shield of Faith
+
+            DayData(week: 2, theme: "Feet Fitted with Readiness", scripture: "Ephesians 6:15",
+                devotional: "Roman soldiers wore caligae — heavy sandals studded with nails for grip on any terrain. Paul says your feet should be fitted with the readiness that comes from the gospel of peace. Readiness. Not reaction — readiness. The gospel-ready man doesn't wait for the perfect moment to share his faith, serve his neighbor, or step into hard ground. He's already prepared. His footing is sure because he knows what he stands on. Peace here isn't passive — it's the settled confidence of a man who knows the war is already won. He walks into hostile territory not because he's reckless but because the ground beneath his feet is the finished work of Christ. Where are you hesitating to step because the terrain looks too rough?",
+                anchor: "Where is God calling me to step forward that I've been avoiding because the ground feels uncertain?",
+                arrow: "Take one step today onto difficult ground — a hard conversation, a new commitment, an act of service — with the confidence that the gospel gives you footing."),
+
+            DayData(week: 2, theme: "The Gospel of Peace", scripture: "Romans 10:15",
+                devotional: "How beautiful are the feet of those who bring good news. In a world drowning in bad news, anxiety, and division, you carry the only message that actually solves the problem at the root. Not a political solution. Not a self-help framework. The gospel — that God loved the world so much He entered it, lived in it, died in it, and defeated death in it. Every man you meet today is either at peace with God or at war with Him, and most don't even know which one they are. You do. That knowledge is not for hoarding — it's for delivering. You don't have to be a preacher. You have to be available. The man next to you at work, the friend who's falling apart, the family member who's searching — they need what you carry. Are your feet fitted, or are they planted in comfort?",
+                anchor: "Who in my life needs the peace of the gospel, and what is keeping me from bringing it to them?",
+                arrow: "Identify one person in your life who is far from God. Pray for them by name, and look for one opportunity to point them toward hope today."),
+
+            DayData(week: 2, theme: "The Shield of Faith", scripture: "Ephesians 6:16",
+                devotional: "The Roman scutum was a full-body shield, large enough to crouch behind. Paul says faith is your shield — and it extinguishes all the flaming arrows of the evil one. All of them. Not some. All. But notice: the shield works only when you hold it up. Faith isn't a concept you agree with — it's an active posture you take. The flaming arrows are the lies, doubts, accusations, and temptations the enemy launches at your mind. 'You'll never change.' 'God is disappointed in you.' 'This sin defines you.' 'You're alone in this.' Every single one of those is a lie, and faith — active, deliberate trust in what God says over what you feel — extinguishes them. The question isn't whether the arrows will come. The question is whether your shield is up.",
+                anchor: "What flaming arrow has hit me recently — what lie, doubt, or accusation have I been absorbing instead of blocking?",
+                arrow: "Write down the specific lie the enemy has been firing at you. Next to it, write the truth from Scripture that extinguishes it. Carry both with you today."),
+
+            DayData(week: 2, theme: "Walking by Faith", scripture: "2 Corinthians 5:7",
+                devotional: "We walk by faith, not by sight. This is one of the hardest commands in Scripture because everything in your natural wiring screams for evidence, proof, guarantees. You want to see the outcome before you commit. You want certainty before you obey. But faith by definition operates beyond sight. Abraham left Ur without a map. Moses walked toward a sea that hadn't parted yet. David ran toward a giant everyone else was running from. None of them had guarantees — they had God's word, and they acted on it. What decision are you facing right now where God has spoken but you're waiting for more evidence? Faith doesn't mean you're certain about the outcome. It means you're certain about the One who called you to walk.",
+                anchor: "Where am I demanding sight when God is asking for faith? What step is He calling me to take that I can't yet see the end of?",
+                arrow: "Take one faith step today — not reckless, but deliberate — in an area where you've been waiting for certainty that may never come."),
+
+            DayData(week: 2, theme: "Faith Under Fire", scripture: "1 Peter 1:7",
+                devotional: "Your faith is being tested by fire so that it may be found genuine — more precious than gold. Gold is refined by heat. Impurities rise to the surface and are removed. The process is uncomfortable, but the result is pure. Your faith works the same way. The trials you're going through aren't evidence that God has abandoned you. They're evidence that He's refining you. A faith that has never been tested is a faith you can't rely on. But a faith that has gone through the fire and come out still standing — still believing, still trusting, still choosing God over circumstance — that faith is unshakeable. The men in Scripture who changed the world were all men whose faith had been through fire. Yours is no different. What feels like destruction may actually be purification.",
+                anchor: "How is my faith being refined right now? What impurities is God burning away through my current circumstances?",
+                arrow: "Instead of asking God to remove your trial today, ask Him what He is building in you through it. Write down what you hear."),
+
+            DayData(week: 2, theme: "Community of Faith", scripture: "Hebrews 10:24-25",
+                devotional: "Let us consider how to stir up one another to love and good works, not neglecting to meet together. Your shield is big — but it wasn't designed for solo use. Roman soldiers locked their shields together in a formation called the testudo, creating an impenetrable wall. Your faith is stronger when it's linked with other men's faith. Isolation is the enemy's primary strategy. He doesn't need to overpower you if he can just get you alone. The man fighting by himself will eventually get hit from an angle his shield can't cover. But the man standing in formation — shoulder to shoulder with brothers — has coverage on every side. If you are isolated right now, that is your number one vulnerability. Fix it before you try to fix anything else.",
+                anchor: "Am I fighting in formation or fighting alone? Where do I need to lock shields with another man?",
+                arrow: "Reach out to one brother today and tell him where you're taking fire. Ask him to stand with you. That's not weakness — it's warfare."),
+
+            DayData(week: 2, theme: "Week 2 Review", scripture: "Hebrews 11:6",
+                devotional: "Without faith it is impossible to please God, because anyone who comes to Him must believe that He exists and that He rewards those who earnestly seek Him. Faith is the operating system of the Christian life. Without it, nothing else works. You can't pray without faith. You can't obey without faith. You can't love sacrificially without believing there's something greater on the other side of the sacrifice. This week you've looked at readiness, the gospel of peace, the shield that blocks every arrow, and the fire that refines what's real. Where did your faith grow this week? Where did it waver? Don't judge yourself — assess honestly. A man who knows where his faith is strong and where it's weak is a man who can actually grow. Report in. Tell a brother. Keep building.",
+                anchor: "Where did my faith hold firm this week, and where did it crack? What did I learn about trusting God in the process?",
+                arrow: "Identify one area where your faith grew this week and one where it faltered. Share both with someone who will hold you accountable."),
+
+            // MARK: Week 3 — Helmet of Salvation & Sword of the Spirit
+
+            DayData(week: 3, theme: "The Helmet of Salvation", scripture: "Ephesians 6:17a",
+                devotional: "The helmet protects the head — the mind. Paul says salvation is your helmet. This isn't just about being saved from hell. It's about knowing whose you are and letting that truth protect how you think about yourself, your future, and your worth. The enemy's most effective attacks target your identity. 'You're a failure.' 'You'll never be free.' 'God could never use you after what you've done.' Every one of those is an attack on your helmet — an attempt to make you forget that you are saved, redeemed, adopted, and sealed. When your helmet is on, those attacks bounce off. When it's off, they penetrate and shape your self-image. Put your helmet on today by declaring who God says you are — not who your failures say you are.",
+                anchor: "What lies about my identity have I been absorbing because my helmet was off? What does God actually say about who I am?",
+                arrow: "Write down three truths about your identity in Christ. Read them out loud. Repeat them until they feel more real than the lies."),
+
+            DayData(week: 3, theme: "Renewing the Mind", scripture: "Romans 12:2",
+                devotional: "Do not be conformed to this world, but be transformed by the renewal of your mind. Transformation doesn't start with behavior change — it starts with mind change. Your actions flow from your thoughts. Your thoughts are shaped by what you consume. If you're consuming the world's narrative about masculinity, success, sexuality, and purpose, you'll think like the world and live like the world. If you're consuming God's Word, you'll think differently — and eventually live differently. Renewal isn't passive. You don't accidentally renew your mind. It requires intention: choosing what enters, evaluating what stays, and replacing what's false. Most men try to change their behavior without changing their thinking. It never lasts. Change the inputs. The outputs will follow.",
+                anchor: "What am I consuming that is shaping my mind more than God's Word? What needs to change in my inputs?",
+                arrow: "Replace one daily input today — one scroll session, one show, one habit — with time in Scripture. Even fifteen minutes changes the trajectory."),
+
+            DayData(week: 3, theme: "The Sword of the Spirit", scripture: "Ephesians 6:17b",
+                devotional: "The sword of the Spirit is the Word of God — the only offensive weapon in the armor. Everything else is defensive. This tells you something critical: the Word isn't just for study. It's for combat. When Jesus was tempted in the wilderness, He didn't debate the devil. He didn't try to out-argue him. He quoted Scripture. 'It is written.' Three times. Three specific, precise, relevant truths deployed against three specific attacks. That's how the sword works — not as a blunt instrument, but as a precision weapon. Knowing 'the Bible says some stuff about that' isn't enough. You need to know which verse answers which lie, which promise meets which fear, which truth counters which temptation. Sharpen your sword. Know it well enough to use it in the fight.",
+                anchor: "Do I know God's Word well enough to use it in battle, or is my sword dull from neglect?",
+                arrow: "Memorize one verse today that directly addresses your most common temptation or struggle. Not just read it — memorize it. It's a weapon."),
+
+            DayData(week: 3, theme: "The Word in Action", scripture: "Hebrews 4:12",
+                devotional: "The Word of God is living and active, sharper than any two-edged sword, piercing to the division of soul and spirit, of joints and marrow, and discerning the thoughts and intentions of the heart. This verse tells you three things about your weapon. First, it's alive — not a dead religious text but a living document that speaks into your specific situation. Second, it's precise — it cuts to the exact place that needs cutting, separating what's genuinely from God and what's from your flesh. Third, it sees you — it discerns your real motives, the ones you hide even from yourself. When you open the Bible honestly, it reads you as much as you read it. That's why some men avoid it — because the sword cuts both ways. But the cuts it makes are surgical, not destructive. They heal.",
+                anchor: "When was the last time God's Word cut me — revealed something I was hiding or showed me a motive I didn't want to see?",
+                arrow: "Open Scripture today not for information but for examination. Ask God: 'What do You want to show me about myself?' and read until He does."),
+
+            DayData(week: 3, theme: "Speaking Truth in Battle", scripture: "Matthew 4:4",
+                devotional: "Man shall not live by bread alone, but by every word that comes from the mouth of God. Jesus spoke this when He was physically starving, at His weakest, being tempted at His most vulnerable. The enemy came at Him with something reasonable: 'You're hungry. You have the power to fix it. Why wouldn't You?' And Jesus didn't argue the logic. He wielded the sword. 'It is written.' This is how you fight. Not by debating whether the temptation makes sense — it often does. Not by evaluating whether the shortcut is really that bad — sometimes it isn't. But by declaring what God says is true regardless of how the situation feels. The enemy can't argue with Scripture wielded by a man who believes it. He has to flee. Jesus proved it. You can too.",
+                anchor: "When temptation comes with a reasonable argument, do I debate it or cut it with truth? What's my default response?",
+                arrow: "Practice the Jesus pattern today: when a temptation or lie arises, respond out loud with 'It is written...' and quote the specific truth."),
+
+            DayData(week: 3, theme: "Guarding Your Thought Life", scripture: "2 Corinthians 10:5",
+                devotional: "We take every thought captive to obey Christ. Every thought. Not just the obviously sinful ones. The subtle ones too — the self-pity, the comparison, the entitlement, the rehearsed grievance, the fantasy you keep returning to. Taking thoughts captive is a military image. It means you don't let enemy ideas roam free in your mind. You intercept them. You evaluate them. And if they don't align with Christ, you don't give them a seat at the table. Most men's thought lives are completely unguarded. Thoughts come and go, shaping mood, driving decisions, building resentment or lust or despair — and the man never once stops to examine whether those thoughts are from God, from himself, or from the enemy. Today, stand guard at the gate of your mind. Not every thought deserves residency.",
+                anchor: "What thought pattern has been running unchecked in my mind? What would it look like to take it captive today?",
+                arrow: "Set three checkpoints today — morning, midday, evening — to examine your thoughts. Ask: what have I been thinking about, and does it honor Christ?"),
+
+            DayData(week: 3, theme: "Week 3 Review", scripture: "Philippians 4:8",
+                devotional: "Whatever is true, whatever is honorable, whatever is just, whatever is pure, whatever is lovely, whatever is commendable — think about these things. Paul isn't giving a nice suggestion. He's giving a battle strategy. What you think about determines what you become. Week 3 has been about the mind: the helmet that protects your identity, the sword you wield in battle, the thought life you choose to guard or neglect. This is where most men lose. Not in dramatic moral failures, but in undisciplined thought lives that slowly erode conviction, clarity, and courage. How is your mind right now — renewed or conformed? Sharp or dull? Guarded or wide open? Honest assessment leads to honest growth. Don't perform this review — own it.",
+                anchor: "How is the state of my mind after this week? Am I more disciplined in my thinking or still drifting through my thought life?",
+                arrow: "Choose one area of your thought life to bring under intentional discipline this week. Tell a brother what it is and ask him to check in."),
+
+            // MARK: Week 4 — Prayer, Perseverance & Standing Together
+
+            DayData(week: 4, theme: "Praying at All Times", scripture: "Ephesians 6:18",
+                devotional: "After naming every piece of armor, Paul adds the power source: prayer. Praying at all times in the Spirit, with all prayer and supplication. Notice the intensity — all times, all prayer. This isn't a quick morning prayer and then you're done. This is an ongoing conversation with the Commander who sees the whole battlefield when you can only see your sector. Prayer isn't asking God for things — though it includes that. Prayer is staying connected to the source of your strength, wisdom, and courage. A soldier who loses communication with command is a soldier in danger. Your prayer life is your lifeline. When it goes quiet, you're operating alone — and the enemy knows it. The most armored man in the world is still vulnerable if he's not praying.",
+                anchor: "Is my prayer life a lifeline or a formality? What would 'praying at all times' actually look like in my daily routine?",
+                arrow: "Set three prayer alarms today — morning, midday, and evening. Even sixty seconds of deliberate, honest prayer three times changes everything."),
+
+            DayData(week: 4, theme: "Perseverance in Prayer", scripture: "Luke 18:1",
+                devotional: "Jesus told a parable to show that they should always pray and not give up. The parable is about a widow who keeps coming to an unjust judge until he gives her justice — not because he cares, but because she won't stop. Jesus's point isn't that God is unjust and needs to be nagged. His point is: if even an unjust judge responds to persistence, how much more will a loving Father respond to His children who keep coming? Most men quit praying too early. They pray once, maybe twice, and when nothing visible changes, they assume God said no — or worse, that He's not listening. But perseverance in prayer isn't about wearing God down. It's about building your own faith. Every time you pray again, you're declaring: 'I still trust You.' That declaration matters.",
+                anchor: "What prayer have I stopped praying because I got tired of waiting? Does God's silence mean no, or does it mean keep going?",
+                arrow: "Resume one prayer you've abandoned. Pray it again today with fresh faith. Don't pray it as a formality — pray it like you believe God is still moving."),
+
+            DayData(week: 4, theme: "Praying for Others", scripture: "Ephesians 6:18b-19",
+                devotional: "Keep alert with all perseverance, making supplication for all the saints. Paul doesn't end the armor passage by telling you to pray for yourself. He tells you to pray for your brothers. Your armor isn't just for your survival — it's for the survival of the men fighting alongside you. When was the last time you prayed — really prayed — for another man by name? Not a generic 'bless everyone' prayer, but a specific, targeted prayer for a brother's marriage, his integrity, his faith, his battle? Intercessory prayer is one of the most powerful weapons in your arsenal, and most men never use it. You may never know the impact of praying for a brother at the exact moment he was being tempted, attacked, or discouraged. But God knows. And it matters.",
+                anchor: "When was the last time I specifically, intentionally prayed for another man's spiritual battle? Who needs my prayers right now?",
+                arrow: "Pray for three men by name today — their specific struggles, not generic blessings. Then text one of them and tell him you prayed."),
+
+            DayData(week: 4, theme: "Standing Firm Together", scripture: "Ecclesiastes 4:12",
+                devotional: "A cord of three strands is not easily broken. Solomon knew what every man discovers eventually: you were not designed for isolation. One man can be overpowered. Two can defend each other. Three are nearly unbreakable. This isn't about numbers — it's about genuine, accountable, honest brotherhood. Not surface friendships where you talk about sports and weather. Deep, I-know-your-real-struggles, I-will-call-you-out-in-love, I-will-fight-beside-you-when-it-costs-me relationships. Most men have many acquaintances and almost no brothers. They have men who know their wins but not their wars. Building the kind of relationship Solomon describes requires vulnerability, consistency, and mutual commitment. It's the hardest investment a man can make — and the one that pays the highest return.",
+                anchor: "Do I have the kind of brotherhood Solomon describes? If not, what's preventing me from building it?",
+                arrow: "Have one real, honest conversation with a man today — not about sports, not about work, but about where you actually are spiritually."),
+
+            DayData(week: 4, theme: "The Battle Belongs to the Lord", scripture: "2 Chronicles 20:15",
+                devotional: "Do not be afraid or discouraged because of this vast army. For the battle is not yours, but God's. Jehoshaphat was facing an overwhelming enemy. Three armies were converging on Israel. His response? He didn't strategize first — he prayed. He didn't rally troops first — he worshipped. And God said: 'Position yourselves, stand still, and see the salvation of the Lord.' Sometimes the bravest thing a man can do is stand still. Not because he's passive, but because he's trusting that the battle belongs to someone bigger. You've spent this journey putting on armor, sharpening your sword, strengthening your shield. But never forget: the armor is God's armor. The strength is God's strength. The victory is God's victory. You are invited to participate, not to carry the outcome.",
+                anchor: "What battle am I carrying that actually belongs to God? What would it look like to stand still and let Him fight?",
+                arrow: "Surrender one outcome you've been trying to control. Say out loud: 'This battle belongs to You, Lord.' Mean it. Rest in it."),
+
+            DayData(week: 4, theme: "Worship as Warfare", scripture: "2 Chronicles 20:21-22",
+                devotional: "Jehoshaphat appointed men to sing and praise as they went out before the army. And when they began to sing, the Lord set ambushes against the enemy. Read that again. They won the battle by worshipping. This isn't a prosperity trick or a spiritual hack. It's a profound truth: worship reorients your heart from fear to faith, from self to God, from the size of your problem to the size of your God. The enemy cannot operate effectively in an atmosphere of genuine worship. When you worship in the middle of your battle — not after the victory, but during the fight — you're declaring that God is bigger than what you're facing. That declaration has power. Sing in the storm. Praise in the pressure. Worship before the victory arrives.",
+                anchor: "Am I waiting for victory to worship, or am I worshipping as a weapon in the middle of the fight?",
+                arrow: "Put on worship music today during your hardest moment — the commute, the temptation window, the anxious hour. Let worship fight for you."),
+
+            DayData(week: 4, theme: "Week 4 Review", scripture: "Ephesians 6:13",
+                devotional: "Therefore put on the full armor of God, so that when the day of evil comes, you may be able to stand your ground, and after you have done everything, to stand. 'After you have done everything — stand.' That's the final word. Not advance. Not conquer. Not perform. Stand. There will be days when standing is all you can do — when you're exhausted, when the battle has been brutal, when you feel like you've given everything and you're barely holding on. On those days, standing is enough. God doesn't ask you to win every battle perfectly. He asks you to still be standing when the smoke clears. This whole journey — truth, righteousness, readiness, faith, salvation, the Word, and prayer — is about equipping you to stand. Not in your strength. In His. Stand firm, brother. The battle belongs to the Lord, and He's already won.",
+                anchor: "After everything I've learned this month about God's armor, where do I stand? What piece do I need to keep tightening?",
+                arrow: "Write your battle plan: which piece of armor needs the most attention going forward? Tell a brother your plan and ask him to hold you to it."),
+
+            // MARK: Days 29-30 — Completion
+
+            DayData(week: 4, theme: "Armored and Anchored", scripture: "Ephesians 6:10-11",
+                devotional: "Be strong in the Lord and in the strength of His might. Put on the full armor of God. You started this journey as a man who may have known about the armor of God. You're ending it as a man who has worn it — piece by piece, day by day, battle by battle. The belt of truth that demands integrity. The breastplate of righteousness that guards your heart. The shoes of readiness that give you footing on hard ground. The shield of faith that blocks every lie. The helmet of salvation that protects your identity. The sword of the Spirit that fights with truth. And prayer — the lifeline that connects you to the Commander. This armor isn't something you put on once. It's something you put on every morning for the rest of your life. The man who does that — consistently, humbly, in community — is a man the enemy cannot defeat.",
+                anchor: "How has this journey changed the way I understand spiritual battle and my role in it?",
+                arrow: "Share your single greatest breakthrough from this 30-day journey with your circle or a trusted brother. Do not keep it to yourself."),
+
+            DayData(week: 4, theme: "Send Another Man Into Battle", scripture: "2 Timothy 2:2",
+                devotional: "The things you have heard me say in the presence of many witnesses — entrust to reliable men who will be qualified to teach others. Paul didn't just wear the armor himself. He equipped others to wear it. That's your calling now. You've been through thirty days of truth, refining, and equipping. The question isn't just 'am I ready?' — it's 'who else needs this?' There is a man in your life right now who is fighting without armor. He's exposed, taking hits, wondering why the Christian life feels so hard. He doesn't need another book or podcast. He needs a brother who will walk with him through what you just walked through. The best warriors make more warriors. Don't hoard what God gave you. Deploy it. Sharpen another man. That's the mission.",
+                anchor: "Who in my life needs what I've received? What man is fighting without armor that I could help equip?",
+                arrow: "Identify one man and invite him to start this journey. Not someday — today. Send the message. Make the call. Extend the invitation."),
+
         ]
 
         return data.enumerated().map { index, item in

@@ -27,7 +27,34 @@ struct AppUser: Codable, Identifiable {
     var theme: AppTheme = .system
     var lastEntryDate: Date?
 
+    // Grace day: one free miss per 30-day period
+    var graceDayUsedDate: Date?         // when the grace day was burned
+    var graceDayPeriodStart: Date?      // start of the current 30-day grace period
+
+    // Multiple journeys
+    var journeySeries: String = JourneySeries.standFirm.rawValue
+    var completedJourneys: [String] = []  // series rawValues the user finished
+
     // MARK: - Computed
+
+    /// Whether a grace day is still available in the current 30-day period
+    var hasGraceDayAvailable: Bool {
+        guard isPremium else { return false }
+        guard let periodStart = graceDayPeriodStart else { return true } // never used
+        let daysSincePeriod = Calendar.current.dateComponents([.day], from: periodStart, to: Date()).day ?? 0
+        if daysSincePeriod >= 30 { return true } // period expired, new one available
+        return graceDayUsedDate == nil
+    }
+
+    /// Whether the grace day was already used in the current period
+    var graceDayWasUsed: Bool {
+        guard let periodStart = graceDayPeriodStart,
+              let usedDate = graceDayUsedDate else { return false }
+        let daysSincePeriod = Calendar.current.dateComponents([.day], from: periodStart, to: Date()).day ?? 0
+        if daysSincePeriod >= 30 { return false } // period reset
+        return usedDate >= periodStart
+    }
+
     var isStreakActive: Bool {
         guard let last = lastEntryDate else { return false }
         return Calendar.current.isDateInYesterday(last) ||
@@ -38,6 +65,35 @@ struct AppUser: Codable, Identifiable {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
         return formatter.string(from: joinDate)
+    }
+}
+
+// MARK: - JourneySeries
+enum JourneySeries: String, Codable, CaseIterable, Identifiable {
+    case standFirm = "stand_firm"
+    case armorOfGod = "armor_of_god"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .standFirm:  return "Stand Firm"
+        case .armorOfGod: return "Armor of God"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .standFirm:  return "30 Days in 1 Corinthians 16:13"
+        case .armorOfGod: return "30 Days in Ephesians 6"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .standFirm:  return "figure.stand.line.dotted.figure.stand"
+        case .armorOfGod: return "shield.checkered"
+        }
     }
 }
 

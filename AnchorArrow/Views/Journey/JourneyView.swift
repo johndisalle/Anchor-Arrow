@@ -6,10 +6,12 @@ import SwiftUI
 struct JourneyView: View {
     @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss
-    @State private var journeyDays = PromptLibrary.journeyDays()
+    @State private var journeyDays: [JourneyDay] = []
     @State private var showDayDetail: JourneyDay?
     @State private var showStartConfirm = false
     @State private var isStarting = false
+    @State private var selectedSeries: JourneySeries = .standFirm
+    @State private var showSeriesPicker = false
 
     var body: some View {
         NavigationStack {
@@ -21,6 +23,10 @@ struct JourneyView: View {
 
                     // Not started yet
                     if !(userStore.appUser?.journeyActive ?? false) {
+                        // Series picker for premium users or those who completed a journey
+                        if userStore.isPremium || !(userStore.appUser?.completedJourneys ?? []).isEmpty {
+                            seriesPickerSection
+                        }
                         startJourneyCTA
                     } else {
                         // Progress bar
@@ -36,7 +42,7 @@ struct JourneyView: View {
                 .padding(.top, 16)
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
-            .navigationTitle("Stand Firm Journey")
+            .navigationTitle(activeSeries.displayName + " Journey")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -52,7 +58,7 @@ struct JourneyView: View {
                 }
             }
             .confirmationDialog(
-                "Start the 30-day Stand Firm Journey?",
+                "Start the 30-day \(selectedSeries.displayName) Journey?",
                 isPresented: $showStartConfirm,
                 titleVisibility: .visible
             ) {
@@ -62,6 +68,11 @@ struct JourneyView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("Commit to 30 days of guided Scripture, daily anchoring, and purposeful action. One day at a time.")
+            }
+            .onAppear {
+                let series = userStore.currentJourneySeries
+                selectedSeries = series
+                journeyDays = PromptLibrary.journeyDays(for: series)
             }
         }
     }
@@ -79,7 +90,9 @@ struct JourneyView: View {
                     .foregroundColor(Color("BrandArrow"))
             }
 
-            Text("Four weeks of deep, sequential truth — from watchful rootedness to purposeful love. Each day unlocks the next.")
+            Text(activeSeries == .armorOfGod
+                 ? "Four weeks through Ephesians 6 — each piece of God's armor examined, applied, and worn into battle. Each day unlocks the next."
+                 : "Four weeks of deep, sequential truth — from watchful rootedness to purposeful love. Each day unlocks the next.")
                 .font(.system(size: 15))
                 .foregroundColor(Color("TextSecondary"))
                 .lineSpacing(4)
@@ -235,21 +248,112 @@ struct JourneyView: View {
         }
     }
 
+    // MARK: - Series Picker
+    private var seriesPickerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Choose Your Journey")
+                .font(.system(size: 18, weight: .bold))
+                .foregroundColor(Color("TextPrimary"))
+
+            ForEach(JourneySeries.allCases) { series in
+                let completed = (userStore.appUser?.completedJourneys ?? []).contains(series.rawValue)
+                let isAvailable = userStore.isPremium || series == .standFirm
+
+                Button {
+                    if isAvailable {
+                        selectedSeries = series
+                        journeyDays = PromptLibrary.journeyDays(for: series)
+                    }
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: series.icon)
+                            .font(.system(size: 22, weight: .semibold))
+                            .foregroundColor(selectedSeries == series
+                                             ? Color("BrandArrow") : Color("TextSecondary"))
+                            .frame(width: 40)
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            HStack {
+                                Text(series.displayName)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(isAvailable ? Color("TextPrimary") : Color("TextSecondary").opacity(0.5))
+                                if completed {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .font(.system(size: 13))
+                                        .foregroundColor(.green)
+                                }
+                                if !isAvailable {
+                                    Text("PREMIUM")
+                                        .font(.system(size: 9, weight: .heavy))
+                                        .foregroundColor(Color("BrandGold"))
+                                        .padding(.horizontal, 6).padding(.vertical, 2)
+                                        .background(Color("BrandGold").opacity(0.15))
+                                        .cornerRadius(4)
+                                }
+                            }
+                            Text(series.subtitle)
+                                .font(.system(size: 12))
+                                .foregroundColor(Color("TextSecondary"))
+                        }
+                        Spacer()
+
+                        if selectedSeries == series {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(Color("BrandArrow"))
+                        }
+                    }
+                    .padding(14)
+                    .background(selectedSeries == series
+                                ? Color("BrandArrow").opacity(0.07) : Color("CardBackground"))
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(selectedSeries == series
+                                    ? Color("BrandArrow").opacity(0.3) : Color.clear, lineWidth: 1.5)
+                    )
+                }
+                .buttonStyle(.plain)
+                .disabled(!isAvailable)
+            }
+        }
+        .padding(16)
+        .background(Color("CardBackground"))
+        .cornerRadius(20)
+    }
+
+    private var activeSeries: JourneySeries {
+        if userStore.appUser?.journeyActive ?? false {
+            return userStore.currentJourneySeries
+        }
+        return selectedSeries
+    }
+
     // MARK: - Actions
     private func startJourney() async {
         isStarting = true
-        await userStore.startJourney()
+        await userStore.startJourney(series: selectedSeries)
+        journeyDays = PromptLibrary.journeyDays(for: selectedSeries)
         isStarting = false
     }
 
     // MARK: - Week themes
     private var weekThemes: [(week: Int, title: String, color: Color)] {
-        [
-            (1, "Be Watchful", Color("BrandAnchor")),
-            (2, "Stand Firm", Color.blue),
-            (3, "Act Like Men", Color("BrandArrow")),
-            (4, "In Love", Color.red)
-        ]
+        switch activeSeries {
+        case .armorOfGod:
+            return [
+                (1, "Truth & Righteousness", Color("BrandAnchor")),
+                (2, "Gospel & Faith", Color.blue),
+                (3, "Salvation & Word", Color("BrandArrow")),
+                (4, "Prayer & Stand", Color.red)
+            ]
+        case .standFirm:
+            return [
+                (1, "Be Watchful", Color("BrandAnchor")),
+                (2, "Stand Firm", Color.blue),
+                (3, "Act Like Men", Color("BrandArrow")),
+                (4, "In Love", Color.red)
+            ]
+        }
     }
 }
 
