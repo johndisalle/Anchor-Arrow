@@ -92,20 +92,47 @@ struct OnboardingPage1: View {
         VStack(spacing: 32) {
             Spacer()
 
-            // Hero visual
+            // Hero visual — "Stand Firm" composition
             ZStack {
+                // Outer glow circle
                 SwiftUI.Circle()
-                    .fill(Color("BrandAnchor").opacity(0.12))
-                    .frame(width: 200, height: 200)
+                    .fill(Color("BrandAnchor").opacity(0.08))
+                    .frame(width: 240, height: 240)
 
-                VStack(spacing: 6) {
-                    CrossedArrowsView()
-                        .frame(width: 110, height: 68)
+                // Subtle ring border
+                SwiftUI.Circle()
+                    .strokeBorder(Color("BrandAnchor").opacity(0.2), lineWidth: 1.5)
+                    .frame(width: 220, height: 220)
+
+                // Large watermark anchor — the firm foundation in Christ
+                Image(systemName: "anchor")
+                    .renderingMode(.template)
+                    .font(.system(size: 115, weight: .ultraLight))
+                    .foregroundStyle(Color("BrandAnchor").opacity(0.18))
+
+                // Foreground: upward arrow → man standing → anchor base
+                VStack(spacing: 2) {
+                    // Arrow: aiming for God's calling
+                    Image(systemName: "arrow.up")
+                        .renderingMode(.template)
+                        .font(.system(size: 16, weight: .heavy))
+                        .foregroundStyle(Color("BrandArrow"))
+
+                    // Man standing firm
+                    Image(systemName: "figure.stand")
+                        .renderingMode(.template)
+                        .font(.system(size: 54, weight: .light))
+                        .foregroundStyle(Color("BrandAnchor"))
+
+                    // Anchor at his feet — grounded in Christ
                     Image(systemName: "anchor")
-                        .font(.system(size: 56, weight: .medium))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .renderingMode(.template)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(Color("BrandAnchor"))
                 }
+                .offset(y: 4)
             }
+            .frame(width: 240, height: 240)
             .scaleEffect(appeared ? 1.0 : 0.7)
             .opacity(appeared ? 1.0 : 0.0)
             .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.2), value: appeared)
@@ -208,6 +235,7 @@ struct ConceptCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: icon)
+                .renderingMode(.template)
                 .font(.system(size: 28, weight: .semibold))
                 .foregroundColor(Color(color))
 
