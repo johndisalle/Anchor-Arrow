@@ -1603,11 +1603,13 @@ struct CreateCircleView: View {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         guard isCircleNameValid else { return }
         isCreating = true
-        let newCircle = Circle.new(name: trimmedCircleName, creatorId: uid, isPublic: isPublic)
+        var newCircle = Circle.new(name: trimmedCircleName, creatorId: uid, isPublic: isPublic)
         do {
             let id = try await FirestoreService.shared.createCircle(circle: newCircle)
-            let saved = try await FirestoreService.shared.fetchCircle(circleId: id)
-            onCreate(saved)
+            // Use the local circle with the Firestore-assigned ID instead of re-fetching,
+            // which can fail due to Firestore read rules or propagation delay.
+            newCircle.id = id
+            onCreate(newCircle)
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
