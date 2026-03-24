@@ -116,45 +116,48 @@ struct DashboardView: View {
     private var todayStatusSection: some View {
         HStack(spacing: 14) {
             TodayStatusCard(
-                icon: "anchor",
                 title: "Anchor",
                 subtitle: "Morning",
                 isComplete: userStore.isAnchorDoneToday,
                 color: "BrandAnchor",
                 destination: AnyView(AnchorView())
-            )
+            ) {
+                AnchorSymbolView()
+                    .frame(width: 24, height: 30)
+            }
             TodayStatusCard(
-                icon: "arrow.up.right.circle.fill",
                 title: "Arrow",
                 subtitle: "Evening",
                 isComplete: userStore.isArrowDoneToday,
                 color: "BrandArrow",
                 destination: AnyView(ArrowView())
-            )
+            ) {
+                SingleArcheryArrowView(color: Color("BrandArrow"))
+                    .frame(width: 26, height: 26)
+            }
         }
         .padding(.horizontal, 24)
     }
 
     private var streakStatsSection: some View {
-        HStack(spacing: 14) {
-            StatPill(
-                value: "\(userStore.currentStreak)",
-                label: "Day Streak",
-                icon: "flame.fill",
-                color: userStore.currentStreak >= 7 ? "BrandGold" : "BrandAnchor"
-            )
-            StatPill(
-                value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
-                label: "Anchors",
-                icon: "anchor.circle.fill",
-                color: "BrandAnchor"
-            )
-            StatPill(
-                value: "\(userStore.appUser?.totalArrowDays ?? 0)",
-                label: "Arrows",
-                icon: "arrow.up.right",
-                color: "BrandArrow"
-            )
+        let streakColor = userStore.currentStreak >= 7 ? "BrandGold" : "BrandAnchor"
+        return HStack(spacing: 14) {
+            StatPill(value: "\(userStore.currentStreak)", label: "Day Streak",
+                     color: streakColor) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(Color(streakColor))
+            }
+            StatPill(value: "\(userStore.appUser?.totalAnchorDays ?? 0)", label: "Anchors",
+                     color: "BrandAnchor") {
+                AnchorSymbolView()
+                    .frame(width: 20, height: 25)
+            }
+            StatPill(value: "\(userStore.appUser?.totalArrowDays ?? 0)", label: "Arrows",
+                     color: "BrandArrow") {
+                SingleArcheryArrowView(color: Color("BrandArrow"))
+                    .frame(width: 20, height: 20)
+            }
         }
         .padding(.horizontal, 24)
     }
@@ -250,21 +253,25 @@ struct DashboardView: View {
 }
 
 // MARK: - TodayStatusCard
-struct TodayStatusCard: View {
-    let icon: String
+struct TodayStatusCard<IncompleteIcon: View>: View {
     let title: String
     let subtitle: String
     let isComplete: Bool
     let color: String
     let destination: AnyView
+    @ViewBuilder let incompleteIcon: () -> IncompleteIcon
 
     var body: some View {
         NavigationLink(destination: destination) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Image(systemName: isComplete ? "checkmark.circle.fill" : icon)
-                        .font(.system(size: 24, weight: .semibold))
-                        .foregroundColor(isComplete ? .green : Color(color))
+                    if isComplete {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 24, weight: .semibold))
+                            .foregroundColor(.green)
+                    } else {
+                        incompleteIcon()
+                    }
                     Spacer()
                     if isComplete {
                         Text("Done")
@@ -316,18 +323,15 @@ struct TodayStatusCard: View {
 }
 
 // MARK: - StatPill
-struct StatPill: View {
+struct StatPill<Icon: View>: View {
     let value: String
     let label: String
-    let icon: String
     let color: String
+    @ViewBuilder let iconView: () -> Icon
 
     var body: some View {
         VStack(spacing: 6) {
-            Image(systemName: icon)
-                .renderingMode(.template)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(color))
+            iconView()
             Text(value)
                 .font(.system(size: 22, weight: .heavy))
                 .foregroundColor(Color("TextPrimary"))

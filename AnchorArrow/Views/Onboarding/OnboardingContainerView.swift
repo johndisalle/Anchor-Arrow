@@ -213,56 +213,6 @@ struct OnboardingPage2: View {
     }
 }
 
-// Single archery arrow pointing up-right with shaft, head, and fletching.
-private struct SingleArcheryArrowView: View {
-    var color: Color
-
-    var body: some View {
-        Canvas { context, size in
-            let w = size.width, h = size.height
-            let tail = CGPoint(x: w * 0.15, y: h * 0.85)
-            let tip  = CGPoint(x: w * 0.85, y: h * 0.15)
-            let dx = tip.x - tail.x, dy = tip.y - tail.y
-            let len = sqrt(dx*dx + dy*dy)
-            let ux = dx/len, uy = dy/len
-            let px = -uy,    py =  ux
-            let lw       = max(w * 0.082, 1.2)
-            let headLen  = w * 0.30
-            let fletchLen = w * 0.19
-            let shading  = GraphicsContext.Shading.color(color)
-
-            var shaft = Path()
-            shaft.move(to: tail); shaft.addLine(to: tip)
-            context.stroke(shaft, with: shading,
-                           style: StrokeStyle(lineWidth: lw, lineCap: .round))
-
-            let angle = atan2(dy, dx), spread: CGFloat = .pi / 5
-            var head = Path()
-            head.move(to: tip)
-            head.addLine(to: CGPoint(x: tip.x - headLen * cos(angle - spread),
-                                     y: tip.y - headLen * sin(angle - spread)))
-            head.move(to: tip)
-            head.addLine(to: CGPoint(x: tip.x - headLen * cos(angle + spread),
-                                     y: tip.y - headLen * sin(angle + spread)))
-            context.stroke(head, with: shading,
-                           style: StrokeStyle(lineWidth: lw, lineCap: .round))
-
-            for t: CGFloat in [0.08, 0.18] {
-                let base = CGPoint(x: tail.x + ux * len * t,
-                                   y: tail.y + uy * len * t)
-                var fletch = Path()
-                fletch.move(to: CGPoint(x: base.x + px * fletchLen,
-                                        y: base.y + py * fletchLen))
-                fletch.addLine(to: base)
-                fletch.addLine(to: CGPoint(x: base.x - px * fletchLen,
-                                           y: base.y - py * fletchLen))
-                context.stroke(fletch, with: .color(color.opacity(0.55)),
-                               style: StrokeStyle(lineWidth: max(lw * 0.8, 1.0),
-                                                 lineCap: .round, lineJoin: .round))
-            }
-        }
-    }
-}
 
 struct ConceptCard<Icon: View>: View {
     let color: String
