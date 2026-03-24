@@ -14,7 +14,7 @@ struct NotificationPromptView: View {
 
             // Bell icon
             ZStack {
-                Circle()
+                SwiftUI.Circle()
                     .fill(Color("BrandAnchor").opacity(0.12))
                     .frame(width: 100, height: 100)
 
@@ -81,6 +81,35 @@ struct NotificationPromptView: View {
             .padding(.bottom, 40)
         }
         .background(Color("BackgroundPrimary").ignoresSafeArea())
+    }
+}
+
+// MARK: - NotificationCheckModifier
+/// Re-checks notification permission on each app foreground.
+/// If the user granted permission via System Settings after dismissing the prompt,
+/// this ensures reminders get scheduled automatically.
+struct NotificationCheckModifier: ViewModifier {
+    @StateObject private var notificationManager = NotificationManager()
+    @Environment(\.scenePhase) private var scenePhase
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active {
+                    Task {
+                        await notificationManager.checkPermission()
+                        if notificationManager.permissionGranted {
+                            await notificationManager.scheduleReminders(morningHour: 7, eveningHour: 20)
+                        }
+                    }
+                }
+            }
+    }
+}
+
+extension View {
+    func checkNotificationPermission() -> some View {
+        modifier(NotificationCheckModifier())
     }
 }
 

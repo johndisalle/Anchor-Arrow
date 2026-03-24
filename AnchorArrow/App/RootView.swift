@@ -144,6 +144,7 @@ struct MainTabView: View {
     @State private var showNotificationPrompt = false
     @State private var showErrorToast = false
     @State private var errorToastMessage = ""
+    @State private var errorToastId = UUID()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -200,6 +201,7 @@ struct MainTabView: View {
             NotificationPromptView(isPresented: $showNotificationPrompt)
                 .environmentObject(userStore)
         }
+        .checkNotificationPermission()
         .onAppear {
             let key = "hasSeenNotificationPrompt"
             if !UserDefaults.standard.bool(forKey: key) {
@@ -214,14 +216,19 @@ struct MainTabView: View {
             if let message = newValue, !message.isEmpty {
                 errorToastMessage = message
                 showErrorToast = true
+                // Rotate ID so identical consecutive messages still trigger animations
+                errorToastId = UUID()
                 userStore.errorMessage = nil
-                // Auto-dismiss after 4 seconds
+                let dismissId = errorToastId
+                // Auto-dismiss after 4 seconds (only if no newer toast replaced it)
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                    showErrorToast = false
+                    if errorToastId == dismissId {
+                        showErrorToast = false
+                    }
                 }
             }
         }
-        .overlay(alignment: .top) {
+        .safeAreaInset(edge: .top) {
             if showErrorToast {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -243,10 +250,10 @@ struct MainTabView: View {
                 .padding(14)
                 .background(Color("BrandDanger").cornerRadius(12))
                 .padding(.horizontal, 16)
-                .padding(.top, 8)
+                .padding(.top, 4)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .animation(.spring(response: 0.4), value: showErrorToast)
-                .zIndex(100)
+                .id(errorToastId)
             }
         }
     }

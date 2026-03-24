@@ -182,6 +182,7 @@ struct DashboardView: View {
                 }
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(Color("BrandAnchor"))
+                .accessibilityLabel("See all badges")
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -237,6 +238,11 @@ struct DashboardView: View {
             .padding(.horizontal, 24)
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(userStore.appUser?.journeyActive == true
+            ? "\(userStore.currentJourneySeries.displayName) Journey, Day \(userStore.appUser?.journeyDay ?? 0) of 30"
+            : "\(userStore.currentJourneySeries.displayName) Journey, 30-day guided plan")
+        .accessibilityHint("Double tap to open")
     }
 
     // MARK: - Helpers

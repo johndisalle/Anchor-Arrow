@@ -310,6 +310,7 @@ struct CircleDetailView: View {
     @State private var isLoading = false
     @State private var showNewPost = false
     @State private var showQuickRally = false
+    @State private var showRallyConfirm = false
     @State private var showPremiumUpsell = false
     @State private var showMemberList = false
     @State private var memberProfiles: [String: MemberProfile] = [:]
@@ -387,9 +388,9 @@ struct CircleDetailView: View {
                         }
                         .refreshable { await loadPosts() }
 
-                        // Quick Rally — one tap to send a struggle to the circle
+                        // Quick Rally — send a struggle to the circle
                         Button {
-                            if canPost { showQuickRally = true }
+                            if canPost { showRallyConfirm = true }
                             else { showPremiumUpsell = true }
                         } label: {
                             HStack(spacing: 8) {
@@ -481,6 +482,16 @@ struct CircleDetailView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("You'll need an invite code to rejoin \"\(circle.name)\".")
+            }
+            .confirmationDialog(
+                "Rally Your Brothers?",
+                isPresented: $showRallyConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Yes, I Need Them") { showQuickRally = true }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will share a drift moment with your circle so they can stand with you.")
             }
         }
         .task { await loadData() }
