@@ -76,74 +76,26 @@ struct CrossedArrowsView: View {
     var color: Color = Color("BrandArrow")
 
     var body: some View {
-        Canvas { context, size in
-            let cx = size.width / 2
-            let cy = size.height / 2
+        ZStack {
+            // Subtle background circle to frame the visual
+            Circle()
+                .fill(color.opacity(0.07))
+                .frame(width: 108, height: 108)
 
-            // Arrow 1: tip at top-left, tail at bottom-right
-            drawArcheryArrow(
-                in: context,
-                tip: CGPoint(x: cx - 52, y: cy - 30),
-                tail: CGPoint(x: cx + 52, y: cy + 30),
-                color: color
-            )
+            // ↗ arrow — bottom-left origin, pointing up-right
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: 46, weight: .thin))
+                .foregroundColor(color)
+                .offset(x: -16, y: 8)
 
-            // Arrow 2: tip at top-right, tail at bottom-left
-            drawArcheryArrow(
-                in: context,
-                tip: CGPoint(x: cx + 52, y: cy - 30),
-                tail: CGPoint(x: cx - 52, y: cy + 30),
-                color: color
-            )
+            // ↖ arrow — bottom-right origin, pointing up-left (mirrored)
+            Image(systemName: "arrow.up.right")
+                .font(.system(size: 46, weight: .thin))
+                .foregroundColor(color)
+                .scaleEffect(x: -1, y: 1)
+                .offset(x: 16, y: 8)
         }
-    }
-
-    private func drawArcheryArrow(in context: GraphicsContext, tip: CGPoint, tail: CGPoint, color: Color) {
-        let shading = GraphicsContext.Shading.color(color)
-
-        // Shaft
-        var shaft = Path()
-        shaft.move(to: tail)
-        shaft.addLine(to: tip)
-        context.stroke(shaft, with: shading, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-
-        // Arrowhead at tip
-        let angle = atan2(tip.y - tail.y, tip.x - tail.x)
-        let headLen: CGFloat = 13
-        let headSpread: CGFloat = .pi / 5
-
-        var head = Path()
-        head.move(to: tip)
-        head.addLine(to: CGPoint(
-            x: tip.x - headLen * cos(angle - headSpread),
-            y: tip.y - headLen * sin(angle - headSpread)
-        ))
-        head.move(to: tip)
-        head.addLine(to: CGPoint(
-            x: tip.x - headLen * cos(angle + headSpread),
-            y: tip.y - headLen * sin(angle + headSpread)
-        ))
-        context.stroke(head, with: shading, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-
-        // Fletching chevrons at tail (2 marks)
-        let dx = tip.x - tail.x
-        let dy = tip.y - tail.y
-        let len = sqrt(dx * dx + dy * dy)
-        let ux = dx / len  // unit vector toward tip
-        let uy = dy / len
-        let px = -uy    // perpendicular
-        let py = ux
-        let fletchLen: CGFloat = 7
-
-        for offset: CGFloat in [8, 17] {
-            let base = CGPoint(x: tail.x + offset * ux, y: tail.y + offset * uy)
-            var fletch = Path()
-            fletch.move(to: CGPoint(x: base.x - fletchLen * px, y: base.y - fletchLen * py))
-            fletch.addLine(to: base)
-            fletch.addLine(to: CGPoint(x: base.x + fletchLen * px, y: base.y + fletchLen * py))
-            context.stroke(fletch, with: .color(color.opacity(0.65)),
-                           style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-        }
+        .frame(width: 140, height: 88)
     }
 }
 

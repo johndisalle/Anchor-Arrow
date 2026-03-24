@@ -144,7 +144,7 @@ struct DashboardView: View {
             StatPill(
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 label: "Anchors",
-                icon: "anchor",
+                icon: "anchor.circle.fill",
                 color: "BrandAnchor"
             )
             StatPill(
