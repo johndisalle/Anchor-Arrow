@@ -74,6 +74,26 @@ struct SettingsView: View {
                     Text("Data")
                 }
 
+                // Blocked Users Section
+                if !(userStore.appUser?.blockedUserIds.isEmpty ?? true) {
+                    Section {
+                        NavigationLink {
+                            BlockedUsersView()
+                        } label: {
+                            HStack {
+                                Label("Blocked Users", systemImage: "hand.raised")
+                                    .foregroundColor(Color("TextPrimary"))
+                                Spacer()
+                                Text("\(userStore.appUser?.blockedUserIds.count ?? 0)")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(Color("TextSecondary"))
+                            }
+                        }
+                    } header: {
+                        Text("Privacy")
+                    }
+                }
+
                 // Account Section
                 Section {
                     Button(role: .destructive) {
@@ -366,6 +386,70 @@ struct SettingsView: View {
             lines.append("")
         }
         exportContent = lines.joined(separator: "\n")
+    }
+}
+
+// MARK: - BlockedUsersView
+struct BlockedUsersView: View {
+    @EnvironmentObject var userStore: UserStore
+    @State private var blockedNames: [String: String] = [:]
+    @State private var isLoading = true
+
+    var body: some View {
+        Group {
+            if isLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if (userStore.appUser?.blockedUserIds ?? []).isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "hand.raised.slash")
+                        .font(.system(size: 44))
+                        .foregroundColor(Color("TextSecondary").opacity(0.4))
+                    Text("No blocked users")
+                        .font(.system(size: 15))
+                        .foregroundColor(Color("TextSecondary"))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List {
+                    ForEach(userStore.appUser?.blockedUserIds ?? [], id: \.self) { uid in
+                        HStack {
+                            ZStack {
+                                SwiftUI.Circle()
+                                    .fill(Color("BrandAnchor").opacity(0.1))
+                                    .frame(width: 36, height: 36)
+                                Text(String((blockedNames[uid] ?? "?").prefix(1)).uppercased())
+                                    .font(.system(size: 14, weight: .heavy))
+                                    .foregroundColor(Color("BrandAnchor"))
+                            }
+                            Text(blockedNames[uid] ?? "User")
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(Color("TextPrimary"))
+                            Spacer()
+                            Button("Unblock") {
+                                Task { await userStore.unblockUser(uid) }
+                            }
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(Color("BrandAnchor"))
+                        }
+                        .listRowBackground(Color("CardBackground"))
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+            }
+        }
+        .background(Color("BackgroundPrimary").ignoresSafeArea())
+        .navigationTitle("Blocked Users")
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await loadNames() }
+    }
+
+    private func loadNames() async {
+        let ids = userStore.appUser?.blockedUserIds ?? []
+        guard !ids.isEmpty else { isLoading = false; return }
+        blockedNames = (try? await FirestoreService.shared.fetchUserNames(uids: ids)) ?? [:]
+        isLoading = false
     }
 }
 

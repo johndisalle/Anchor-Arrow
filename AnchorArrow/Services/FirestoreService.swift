@@ -547,6 +547,38 @@ class FirestoreService {
         try await userRef(uid).delete()
     }
 
+    // MARK: - Block / Unblock Users
+
+    func blockUser(uid: String, blockedUid: String) async throws {
+        try await updateUser(uid: uid, fields: [
+            "blockedUserIds": FieldValue.arrayUnion([blockedUid])
+        ])
+    }
+
+    func unblockUser(uid: String, blockedUid: String) async throws {
+        try await updateUser(uid: uid, fields: [
+            "blockedUserIds": FieldValue.arrayRemove([blockedUid])
+        ])
+    }
+
+    /// Fetch display names for a list of UIDs (used for Blocked Users list)
+    func fetchUserNames(uids: [String]) async throws -> [String: String] {
+        var names: [String: String] = [:]
+        try await withThrowingTaskGroup(of: (String, String).self) { group in
+            for uid in uids {
+                group.addTask {
+                    let doc = try await self.db.collection("users").document(uid).getDocument()
+                    let name = (doc.data()?["displayName"] as? String) ?? "Unknown"
+                    return (uid, name)
+                }
+            }
+            for try await (uid, name) in group {
+                names[uid] = name
+            }
+        }
+        return names
+    }
+
     // MARK: - Custom Drift Categories (Premium)
     func saveCustomDriftCategories(uid: String, categories: [String]) async throws {
         try await updateUser(uid: uid, fields: ["customDriftCategories": categories])

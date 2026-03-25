@@ -335,6 +335,8 @@ struct CircleDetailView: View {
     @State private var showReportConfirm = false
     @State private var selectedPostForComments: CirclePost?
     @State private var codeCopied = false
+    @State private var userToBlock: String?
+    @State private var showBlockConfirm = false
 
     private let service = FirestoreService.shared
     private let dailyPrompt = PromptLibrary.circlePromptForToday()
@@ -360,8 +362,9 @@ struct CircleDetailView: View {
                                 dailyPromptBanner
                                     .padding(.horizontal, 20)
 
-                                // Prayer Wall — pinned above feed
-                                let prayerPosts = posts.filter { $0.type == .prayer }
+                                // Prayer Wall — pinned above feed (exclude blocked)
+                                let blocked = userStore.blockedUserIds
+                                let prayerPosts = posts.filter { $0.type == .prayer && !blocked.contains($0.authorId) }
                                 if !prayerPosts.isEmpty {
                                     PrayerWallSection(
                                         posts: prayerPosts,
@@ -371,8 +374,8 @@ struct CircleDetailView: View {
                                     .padding(.horizontal, 20)
                                 }
 
-                                // Regular post feed (excludes prayer — shown above)
-                                let feedPosts = posts.filter { $0.type != .prayer }
+                                // Regular post feed (excludes prayer — shown above, and blocked users)
+                                let feedPosts = posts.filter { $0.type != .prayer && !blocked.contains($0.authorId) }
                                 let pinnedPosts = feedPosts.filter { $0.isPinned }
                                 let unpinnedPosts = feedPosts.filter { !$0.isPinned }
                                 let orderedFeed = pinnedPosts + unpinnedPosts
@@ -405,7 +408,11 @@ struct CircleDetailView: View {
                                                 postToReport = post
                                                 reportReason = ""
                                                 showReportSheet = true
-                                            }
+                                            },
+                                            onBlock: post.authorId != Auth.auth().currentUser?.uid ? {
+                                                userToBlock = post.authorId
+                                                showBlockConfirm = true
+                                            } : nil
                                         )
                                         .padding(.horizontal, 20)
                                     }
@@ -541,6 +548,16 @@ struct CircleDetailView: View {
                     },
                     onCancel: { showReportSheet = false }
                 )
+            }
+            .alert("Block User?", isPresented: $showBlockConfirm) {
+                Button("Block", role: .destructive) {
+                    if let uid = userToBlock {
+                        Task { await userStore.blockUser(uid) }
+                    }
+                }
+                Button("Cancel", role: .cancel) { userToBlock = nil }
+            } message: {
+                Text("You won't see their posts or comments in any circle. You can unblock them in Settings.")
             }
             .confirmationDialog(
                 "Rally Your Brothers?",
@@ -1038,6 +1055,7 @@ struct CirclePostRow: View {
     var onPin: (() -> Void)? = nil
     var onDelete: (() -> Void)? = nil
     var onReport: (() -> Void)? = nil
+    var onBlock: (() -> Void)? = nil
 
     private let reactionEmojis = ["🔥", "🙏", "🙌", "💪"]
 
@@ -1076,7 +1094,7 @@ struct CirclePostRow: View {
                     .foregroundColor(Color("TextSecondary"))
 
                 // Post actions menu
-                if isLeader || canModerate || onReport != nil {
+                if isLeader || canModerate || onReport != nil || onBlock != nil {
                     Menu {
                         if isLeader, let onPin {
                             Button {
@@ -1094,6 +1112,11 @@ struct CirclePostRow: View {
                         if let onReport {
                             Button { onReport() } label: {
                                 Label("Report Post", systemImage: "flag")
+                            }
+                        }
+                        if let onBlock {
+                            Button(role: .destructive) { onBlock() } label: {
+                                Label("Block User", systemImage: "hand.raised")
                             }
                         }
                     } label: {
@@ -1168,6 +1191,8 @@ struct CommentsSheet: View {
     @State private var isAnonymous = false
     @State private var commentToReport: CircleComment?
     @State private var showReportSheet = false
+    @State private var userToBlock: String?
+    @State private var showBlockConfirm = false
     @FocusState private var focused: Bool
 
     private let service = FirestoreService.shared
@@ -1211,7 +1236,8 @@ struct CommentsSheet: View {
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 24)
                         } else {
-                            ForEach(comments) { comment in
+                            let blocked = userStore.blockedUserIds
+                            ForEach(comments.filter { !blocked.contains($0.authorId) }) { comment in
                                 CommentRow(
                                     comment: comment,
                                     canModerate: canModerate,
@@ -1221,7 +1247,11 @@ struct CommentsSheet: View {
                                     onReport: {
                                         commentToReport = comment
                                         showReportSheet = true
-                                    }
+                                    },
+                                    onBlock: comment.authorId != Auth.auth().currentUser?.uid ? {
+                                        userToBlock = comment.authorId
+                                        showBlockConfirm = true
+                                    } : nil
                                 )
                                 .padding(.horizontal, 20)
                             }
@@ -1286,6 +1316,16 @@ struct CommentsSheet: View {
                 onCancel: { showReportSheet = false }
             )
         }
+        .alert("Block User?", isPresented: $showBlockConfirm) {
+            Button("Block", role: .destructive) {
+                if let uid = userToBlock {
+                    Task { await userStore.blockUser(uid) }
+                }
+            }
+            Button("Cancel", role: .cancel) { userToBlock = nil }
+        } message: {
+            Text("You won't see their posts or comments in any circle. You can unblock them in Settings.")
+        }
     }
 
     private func deleteComment(_ comment: CircleComment) async {
@@ -1349,6 +1389,7 @@ struct CommentRow: View {
     var canModerate: Bool = false
     var onDelete: (() -> Void)? = nil
     var onReport: (() -> Void)? = nil
+    var onBlock: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -1373,7 +1414,7 @@ struct CommentRow: View {
                     .foregroundColor(Color("TextSecondary").opacity(0.6))
             }
             Spacer()
-            if canModerate || onReport != nil {
+            if canModerate || onReport != nil || onBlock != nil {
                 Menu {
                     if canModerate, let onDelete {
                         Button(role: .destructive) { onDelete() } label: {
@@ -1383,6 +1424,11 @@ struct CommentRow: View {
                     if let onReport {
                         Button { onReport() } label: {
                             Label("Report Comment", systemImage: "flag")
+                        }
+                    }
+                    if let onBlock {
+                        Button(role: .destructive) { onBlock() } label: {
+                            Label("Block User", systemImage: "hand.raised")
                         }
                     }
                 } label: {

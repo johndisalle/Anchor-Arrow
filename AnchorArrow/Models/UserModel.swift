@@ -38,6 +38,9 @@ struct AppUser: Codable, Identifiable {
     // Custom drift categories (premium)
     var customDriftCategories: [String] = []
 
+    // Blocked users
+    var blockedUserIds: [String] = []
+
     // Moderation
     var isAdmin: Bool = false
 
@@ -69,6 +72,7 @@ struct AppUser: Codable, Identifiable {
         journeySeries        = try c.decodeIfPresent(String.self, forKey: .journeySeries) ?? JourneySeries.standFirm.rawValue
         completedJourneys    = try c.decodeIfPresent([String].self, forKey: .completedJourneys) ?? []
         customDriftCategories = try c.decodeIfPresent([String].self, forKey: .customDriftCategories) ?? []
+        blockedUserIds       = try c.decodeIfPresent([String].self, forKey: .blockedUserIds) ?? []
         isAdmin              = try c.decodeIfPresent(Bool.self, forKey: .isAdmin) ?? false
     }
 
@@ -85,6 +89,7 @@ struct AppUser: Codable, Identifiable {
          journeySeries: String = JourneySeries.standFirm.rawValue,
          completedJourneys: [String] = [],
          customDriftCategories: [String] = [],
+         blockedUserIds: [String] = [],
          isAdmin: Bool = false) {
         self.uid = uid
         self.email = email
@@ -110,6 +115,7 @@ struct AppUser: Codable, Identifiable {
         self.journeySeries = journeySeries
         self.completedJourneys = completedJourneys
         self.customDriftCategories = customDriftCategories
+        self.blockedUserIds = blockedUserIds
         self.isAdmin = isAdmin
     }
 

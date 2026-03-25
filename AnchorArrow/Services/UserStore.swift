@@ -287,6 +287,36 @@ class UserStore: ObservableObject {
         JourneySeries(rawValue: appUser?.journeySeries ?? "") ?? .standFirm
     }
 
+    // MARK: - Block / Unblock
+
+    var blockedUserIds: Set<String> {
+        Set(appUser?.blockedUserIds ?? [])
+    }
+
+    func isBlocked(_ uid: String) -> Bool {
+        blockedUserIds.contains(uid)
+    }
+
+    func blockUser(_ uid: String) async {
+        guard let myUid = Auth.auth().currentUser?.uid, uid != myUid else { return }
+        do {
+            try await firestoreService.blockUser(uid: myUid, blockedUid: uid)
+            appUser?.blockedUserIds.append(uid)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func unblockUser(_ uid: String) async {
+        guard let myUid = Auth.auth().currentUser?.uid else { return }
+        do {
+            try await firestoreService.unblockUser(uid: myUid, blockedUid: uid)
+            appUser?.blockedUserIds.removeAll { $0 == uid }
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     // MARK: - Helpers
     var isPremium: Bool { appUser?.isPremium ?? false }
     var isAdmin: Bool { appUser?.isAdmin ?? false }
