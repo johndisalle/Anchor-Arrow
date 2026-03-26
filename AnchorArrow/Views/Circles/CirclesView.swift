@@ -845,15 +845,15 @@ struct BattleFormationCard: View {
             HStack(spacing: 6) {
                 Image(systemName: "shield.fill")
                     .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                 Text("BATTLE FORMATION")
                     .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                     .tracking(0.5)
                 Spacer()
                 Text("\(activeToday)/\(memberIds.count) active today")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(activeToday == memberIds.count ? Color("BrandGold") : Color("TextSecondary"))
+                    .foregroundColor(activeToday == memberIds.count ? AATheme.warmGold : AATheme.secondaryText)
             }
 
             // Member dot row
@@ -869,18 +869,18 @@ struct BattleFormationCard: View {
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(Color("BrandWarning"))
+                        .foregroundColor(AATheme.warning)
                         .padding(.top, 1)
                     Text(isolated.count == 1
                          ? "\(isolated[0].displayName) hasn't checked in — your brother may need a call."
                          : "\(isolated.count) brothers haven't checked in. The lion circles the isolated.")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color("BrandWarning"))
+                        .foregroundColor(AATheme.warning)
                         .lineSpacing(3)
                 }
-                .padding(10)
-                .background(Color("BrandWarning").opacity(0.08))
-                .cornerRadius(8)
+                .padding(AATheme.cornerRadiusSmall)
+                .background(AATheme.warning.opacity(0.08))
+                .cornerRadius(AATheme.cornerRadiusSmall)
             }
         }
         .padding(16)
