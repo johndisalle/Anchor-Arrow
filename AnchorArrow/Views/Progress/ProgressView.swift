@@ -188,28 +188,28 @@ struct ProgressView: View {
                 value: "\(userStore.appUser?.totalAnchorDays ?? 0)",
                 subtitle: "Morning completions",
                 icon: "sunrise.circle.fill",
-                color: "BrandAnchor"
+                color: AATheme.steel
             )
             StatsCard(
                 title: "Total Arrows",
                 value: "\(userStore.appUser?.totalArrowDays ?? 0)",
                 subtitle: "Evening completions",
                 icon: "arrow.up.right.circle.fill",
-                color: "BrandArrow"
+                color: AATheme.amber
             )
             StatsCard(
                 title: "Drift Logs",
                 value: "\(userStore.driftLogs.count)",
                 subtitle: "Moments anchored",
                 icon: "exclamationmark.shield.fill",
-                color: "BrandWarning"
+                color: AATheme.warning
             )
             StatsCard(
                 title: "Badges",
                 value: "\(userStore.earnedBadges.count)",
                 subtitle: "of \(BadgeType.allCases.count) earned",
                 icon: "star.fill",
-                color: "BrandGold"
+                color: AATheme.warmGold
             )
         }
     }
@@ -231,7 +231,7 @@ struct ProgressView: View {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Journal History")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(AATheme.subheadlineFont)
                         .foregroundColor(AATheme.primaryText)
                     Text("Browse and search past reflections")
                         .font(.system(size: 12))
@@ -313,13 +313,13 @@ struct ProgressView: View {
 
             // Quick stats row
             HStack(spacing: 0) {
-                WeeklyReportStat(value: "\(anchors)/7", label: "Anchors", icon: "sunrise.fill", color: "BrandAnchor")
+                WeeklyReportStat(value: "\(anchors)/7", label: "Anchors", icon: "sunrise.fill", color: AATheme.steel)
                 Divider().frame(height: 36)
-                WeeklyReportStat(value: "\(arrows)/7", label: "Arrows", icon: "arrow.up.right", color: "BrandArrow")
+                WeeklyReportStat(value: "\(arrows)/7", label: "Arrows", icon: "arrow.up.right", color: AATheme.amber)
                 Divider().frame(height: 36)
-                WeeklyReportStat(value: "\(fullDays)/7", label: "Full Days", icon: "checkmark.circle.fill", color: "BrandGold")
+                WeeklyReportStat(value: "\(fullDays)/7", label: "Full Days", icon: "checkmark.circle.fill", color: AATheme.warmGold)
                 Divider().frame(height: 36)
-                WeeklyReportStat(value: "\(driftCount)", label: "Drifts", icon: "exclamationmark.shield.fill", color: "BrandWarning")
+                WeeklyReportStat(value: "\(driftCount)", label: "Drifts", icon: "exclamationmark.shield.fill", color: AATheme.warning)
             }
 
             // Encouragement
@@ -608,19 +608,19 @@ struct ProgressView: View {
                     value: weekEntries.filter { $0.1?.anchorCompleted ?? false }.count,
                     of: 7,
                     label: "Anchors",
-                    color: "BrandAnchor"
+                    color: AATheme.steel
                 )
                 WeekStatLabel(
                     value: weekEntries.filter { $0.1?.arrowCompleted ?? false }.count,
                     of: 7,
                     label: "Arrows",
-                    color: "BrandArrow"
+                    color: AATheme.amber
                 )
                 WeekStatLabel(
                     value: weekEntries.filter { $0.1?.bothCompleted ?? false }.count,
                     of: 7,
                     label: "Full Days",
-                    color: "BrandGold"
+                    color: AATheme.warmGold
                 )
             }
         }
@@ -636,7 +636,7 @@ struct ProgressView: View {
                 .font(.system(size: 28))
                 .foregroundColor(AATheme.amber.opacity(0.5))
             Text("No Drift Logs Yet")
-                .font(.system(size: 15, weight: .bold))
+                .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
             Text("When you feel yourself drifting, tap the shield button to log it and anchor back. Your drift history will appear here.")
                 .font(.system(size: 13))
@@ -749,13 +749,13 @@ struct StatsCard: View {
     let value: String
     let subtitle: String
     let icon: String
-    let color: String
+    let color: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Image(systemName: icon)
                 .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(Color(color))
+                .foregroundColor(color)
 
             Text(value)
                 .font(.system(size: 30, weight: .heavy))
@@ -948,13 +948,13 @@ struct WeekStatLabel: View {
     let value: Int
     let of: Int
     let label: String
-    let color: String
+    let color: Color
 
     var body: some View {
         VStack(spacing: 4) {
             Text("\(value)/\(of)")
                 .font(.system(size: 18, weight: .heavy))
-                .foregroundColor(Color(color))
+                .foregroundColor(color)
             Text(label)
                 .font(.system(size: 11))
                 .foregroundColor(AATheme.secondaryText)
@@ -1072,13 +1072,13 @@ struct WeeklyReportStat: View {
     let value: String
     let label: String
     let icon: String
-    let color: String
+    let color: Color
 
     var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color(color))
+                .foregroundColor(color)
             Text(value)
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundColor(AATheme.primaryText)
