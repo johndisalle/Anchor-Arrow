@@ -24,7 +24,7 @@ struct TreeArrowProgressView: View {
 
             // Ground line
             Rectangle()
-                .fill(Color("BrandEarth").opacity(0.25))
+                .fill(AATheme.warmGold.opacity(0.25))
                 .frame(height: 1.5)
                 .frame(maxWidth: 200)
                 .padding(.vertical, 5)
@@ -42,12 +42,12 @@ struct TreeArrowProgressView: View {
                         .font(.system(size: 11, weight: .bold))
                         .foregroundColor(.white)
                     Text("\(streak) day streak")
-                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .font(.system(size: 12, weight: .heavy, design: .serif))
                         .foregroundColor(.white)
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color("BrandAnchor"))
+                .background(AATheme.steel)
                 .cornerRadius(10)
                 .opacity(anchorRevealed ? 1 : 0)
                 .padding(.top, 10)
@@ -73,7 +73,7 @@ struct TreeArrowProgressView: View {
 
 // MARK: - Crossed Archery Arrows
 struct CrossedArrowsView: View {
-    var color: Color = Color("BrandArrow")
+    var color: Color = AATheme.amber
 
     var body: some View {
         Canvas { context, size in
