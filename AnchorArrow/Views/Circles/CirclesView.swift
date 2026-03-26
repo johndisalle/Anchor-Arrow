@@ -883,9 +883,10 @@ struct BattleFormationCard: View {
                 .cornerRadius(AATheme.cornerRadiusSmall)
             }
         }
-        .padding(16)
-        .background(Color("CardBackground"))
-        .cornerRadius(16)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     @ViewBuilder
@@ -897,7 +898,7 @@ struct BattleFormationCard: View {
                     .frame(width: 42, height: 42)
                     .overlay(
                         SwiftUI.Circle()
-                            .stroke(profile?.isActiveToday == true ? Color("BrandGold") : Color.clear,
+                            .stroke(profile?.isActiveToday == true ? AATheme.warmGold : Color.clear,
                                     lineWidth: 2.5)
                     )
                 Text(String((profile?.displayName ?? "?").prefix(1)).uppercased())
@@ -909,10 +910,10 @@ struct BattleFormationCard: View {
                 HStack(spacing: 2) {
                     Image(systemName: "flame.fill")
                         .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                        .foregroundColor(p.isStreakAlive ? AATheme.warmGold : AATheme.secondaryText.opacity(0.4))
                     Text("\(p.currentStreak)")
                         .font(.system(size: 9, weight: .heavy))
-                        .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                        .foregroundColor(p.isStreakAlive ? AATheme.warmGold : AATheme.secondaryText.opacity(0.4))
                 }
             } else {
                 // Placeholder so all dots align
