@@ -68,10 +68,10 @@ struct ProgressView: View {
                 await userStore.loadUserData(uid: uid)
                 loadCalendarEntries()
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Progress")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .onAppear { loadCalendarEntries() }
@@ -84,7 +84,7 @@ struct ProgressView: View {
         VStack(spacing: 24) {
             // Streak hero placeholder
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color("CardBackground"))
+                .fill(AATheme.cardBackground)
                 .frame(height: 160)
 
             // Stats grid
@@ -110,7 +110,7 @@ struct ProgressView: View {
     private var streakHeroSection: some View {
         ZStack {
             LinearGradient(
-                colors: [Color("BrandAnchor"), Color("BrandArrow")],
+                colors: [AATheme.steel, AATheme.amber],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
@@ -222,20 +222,20 @@ struct ProgressView: View {
             HStack(spacing: 14) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(Color("BrandAnchor").opacity(0.12))
+                        .fill(AATheme.steel.opacity(0.12))
                         .frame(width: 40, height: 40)
                     Image(systemName: "book.fill")
                         .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Journal History")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                     Text("Browse and search past reflections")
                         .font(.system(size: 12))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
 
                 Spacer()
@@ -243,14 +243,14 @@ struct ProgressView: View {
                 HStack(spacing: 4) {
                     Text("PREMIUM")
                         .font(.system(size: 9, weight: .heavy))
-                        .foregroundColor(Color("BrandGold"))
+                        .foregroundColor(AATheme.warmGold)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
             .padding(16)
-            .background(Color("CardBackground"))
+            .background(AATheme.cardBackground)
             .cornerRadius(16)
         }
         .buttonStyle(.plain)
@@ -285,17 +285,17 @@ struct ProgressView: View {
             HStack {
                 Image(systemName: "doc.text.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                 Text("Weekly Report")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 Text("PREMIUM")
                     .font(.system(size: 9, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color("BrandGold").opacity(0.15))
+                    .background(AATheme.warmGold.opacity(0.15))
                     .cornerRadius(6)
             }
 
@@ -303,12 +303,12 @@ struct ProgressView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text(weeklySummaryText(anchors: anchors, arrows: arrows, fullDays: fullDays, driftCount: driftCount, topDrift: topDrift, topRole: topRole))
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .lineSpacing(4)
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color("BrandAnchor").opacity(0.06))
+            .background(AATheme.steel.opacity(0.06))
             .cornerRadius(12)
 
             // Quick stats row
@@ -327,45 +327,45 @@ struct ProgressView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "crown.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandGold"))
+                        .foregroundColor(AATheme.warmGold)
                     Text("Perfect week. Every day anchored and aimed. Stand firm, brother.")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("BrandGold"))
+                        .foregroundColor(AATheme.warmGold)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandGold").opacity(0.08))
+                .background(AATheme.warmGold.opacity(0.08))
                 .cornerRadius(12)
             } else if fullDays >= 5 {
                 HStack(spacing: 8) {
                     Image(systemName: "hand.thumbsup.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                     Text("Strong week. \(7 - fullDays) day\(fullDays == 6 ? "" : "s") to sharpen. Keep pressing.")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandArrow").opacity(0.08))
+                .background(AATheme.amber.opacity(0.08))
                 .cornerRadius(12)
             } else if fullDays > 0 {
                 HStack(spacing: 8) {
                     Image(systemName: "figure.stand")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                     Text("You showed up \(fullDays) day\(fullDays == 1 ? "" : "s"). That's \(fullDays) more than quitting. Build on it.")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandAnchor").opacity(0.08))
+                .background(AATheme.steel.opacity(0.08))
                 .cornerRadius(12)
             }
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -398,17 +398,17 @@ struct ProgressView: View {
             HStack {
                 Image(systemName: "chart.bar.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color("BrandWarning"))
+                    .foregroundColor(AATheme.warning)
                 Text("Drift Insights")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 Text("PREMIUM")
                     .font(.system(size: 9, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(Color("BrandGold").opacity(0.15))
+                    .background(AATheme.warmGold.opacity(0.15))
                     .cornerRadius(6)
             }
 
@@ -417,14 +417,14 @@ struct ProgressView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.shield.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                     Text("No drift data yet. Insights will appear as you log drift moments.")
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandArrow").opacity(0.06))
+                .background(AATheme.amber.opacity(0.06))
                 .cornerRadius(12)
             }
 
@@ -434,26 +434,26 @@ struct ProgressView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Top Categories This Month")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
 
                     let maxCount = topCategories.first?.count ?? 1
                     ForEach(topCategories.prefix(5), id: \.tag) { item in
                         HStack(spacing: 10) {
                             Text(item.tag.displayName)
                                 .font(.system(size: 12, weight: .medium))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                                 .frame(width: 90, alignment: .leading)
 
                             GeometryReader { geo in
                                 RoundedRectangle(cornerRadius: 4)
-                                    .fill(Color("BrandWarning").opacity(0.7))
+                                    .fill(AATheme.warning.opacity(0.7))
                                     .frame(width: geo.size.width * CGFloat(item.count) / CGFloat(maxCount))
                             }
                             .frame(height: 16)
 
                             Text("\(item.count)")
                                 .font(.system(size: 12, weight: .bold))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                                 .frame(width: 24, alignment: .trailing)
                         }
                     }
@@ -465,14 +465,14 @@ struct ProgressView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandWarning"))
+                        .foregroundColor(AATheme.warning)
                     Text("You drift most on \(weakestDay)s")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandWarning").opacity(0.08))
+                .background(AATheme.warning.opacity(0.08))
                 .cornerRadius(12)
             }
 
@@ -485,7 +485,7 @@ struct ProgressView: View {
                         .foregroundColor(Color(trend.color))
                     Text("90-day drift trend: \(trend.label.lowercased())")
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                 }
             }
 
@@ -495,19 +495,19 @@ struct ProgressView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "checkmark.shield.fill")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                     Text("Accountable on \(best.tag.displayName) for \(best.weeks) weeks")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color("BrandArrow").opacity(0.08))
+                .background(AATheme.amber.opacity(0.08))
                 .cornerRadius(12)
             }
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -516,8 +516,8 @@ struct ProgressView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Streak Calendar")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 // Month navigation
                 HStack(spacing: 16) {
@@ -528,11 +528,11 @@ struct ProgressView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                     Text(selectedMonth.formatted(.dateTime.month(.wide).year()))
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                         .frame(width: 120, alignment: .center)
                     Button {
                         if let next = calendar.date(byAdding: .month, value: 1, to: selectedMonth),
@@ -542,7 +542,7 @@ struct ProgressView: View {
                     } label: {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                 }
             }
@@ -553,7 +553,7 @@ struct ProgressView: View {
             )
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -561,8 +561,8 @@ struct ProgressView: View {
     private var badgeGallerySection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Badge Gallery")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             LazyVGrid(
                 columns: Array(repeating: GridItem(.flexible()), count: 4),
@@ -576,11 +576,11 @@ struct ProgressView: View {
 
             Text("\(userStore.earnedBadges.count) of \(BadgeType.allCases.count) badges earned")
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -588,8 +588,8 @@ struct ProgressView: View {
     private var weeklySummarySection: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("This Week")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             let weekEntries = lastSevenDays
             HStack(spacing: 8) {
@@ -625,7 +625,7 @@ struct ProgressView: View {
             }
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -634,19 +634,19 @@ struct ProgressView: View {
         VStack(spacing: 10) {
             Image(systemName: "checkmark.shield.fill")
                 .font(.system(size: 28))
-                .foregroundColor(Color("BrandArrow").opacity(0.5))
+                .foregroundColor(AATheme.amber.opacity(0.5))
             Text("No Drift Logs Yet")
                 .font(.system(size: 15, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
             Text("When you feel yourself drifting, tap the shield button to log it and anchor back. Your drift history will appear here.")
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .multilineTextAlignment(.center)
                 .lineSpacing(3)
         }
         .padding(20)
         .frame(maxWidth: .infinity)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -655,12 +655,12 @@ struct ProgressView: View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Drift Timeline")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 Text("\(userStore.driftLogs.count) total")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
 
             ForEach(userStore.driftLogs.prefix(10)) { log in
@@ -668,10 +668,10 @@ struct ProgressView: View {
                     // Timeline dot + line
                     VStack(spacing: 0) {
                         SwiftUI.Circle()
-                            .fill(Color("BrandWarning"))
+                            .fill(AATheme.warning)
                             .frame(width: 10, height: 10)
                         Rectangle()
-                            .fill(Color("BrandWarning").opacity(0.2))
+                            .fill(AATheme.warning.opacity(0.2))
                             .frame(width: 2)
                     }
                     .frame(width: 10)
@@ -680,19 +680,19 @@ struct ProgressView: View {
                         HStack {
                             Image(systemName: log.displayIcon)
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color("BrandWarning"))
+                                .foregroundColor(AATheme.warning)
                             Text(log.displayName)
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                             Spacer()
                             Text(log.timestamp.timeAgo)
                                 .font(.system(size: 11))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                         }
                         if !log.note.isEmpty {
                             Text(log.note)
                                 .font(.system(size: 13))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                                 .lineLimit(2)
                         }
                     }
@@ -703,12 +703,12 @@ struct ProgressView: View {
             if userStore.driftLogs.count > 10 {
                 Text("\(userStore.driftLogs.count - 10) more entries")
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
         }
         .padding(20)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
     }
 
@@ -759,20 +759,20 @@ struct StatsCard: View {
 
             Text(value)
                 .font(.system(size: 30, weight: .heavy))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                 Text(subtitle)
                     .font(.system(size: 11))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(16)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title): \(value). \(subtitle)")
@@ -795,7 +795,7 @@ struct StreakCalendarGrid: View {
                 ForEach(dayLabels, id: \.self) { label in
                     Text(label)
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -854,11 +854,11 @@ struct CalendarDayCell: View {
     let isFuture: Bool
 
     private var bgColor: Color {
-        if isFuture { return Color("CardBackground") }
-        if anchorDone && arrowDone { return Color("BrandGold").opacity(0.8) }
-        if anchorDone { return Color("BrandAnchor").opacity(0.7) }
-        if arrowDone  { return Color("BrandArrow").opacity(0.7) }
-        return Color("CardBackground")
+        if isFuture { return AATheme.cardBackground }
+        if anchorDone && arrowDone { return AATheme.warmGold.opacity(0.8) }
+        if anchorDone { return AATheme.steel.opacity(0.7) }
+        if arrowDone  { return AATheme.amber.opacity(0.7) }
+        return AATheme.cardBackground
     }
 
     private var accessibilityDescription: String {
@@ -875,12 +875,12 @@ struct CalendarDayCell: View {
                 .fill(bgColor)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isToday ? Color("BrandAnchor") : Color.clear, lineWidth: 2)
+                        .stroke(isToday ? AATheme.steel : Color.clear, lineWidth: 2)
                 )
 
             Text("\(day)")
                 .font(.system(size: 12, weight: isToday ? .heavy : .medium))
-                .foregroundColor(isFuture ? Color("TextSecondary").opacity(0.3) : .white)
+                .foregroundColor(isFuture ? AATheme.secondaryText.opacity(0.3) : .white)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             // Small symbol in corner — gives colorblind users a non-color cue
@@ -909,18 +909,18 @@ struct WeekDayDot: View {
         VStack(spacing: 5) {
             Text(dayLetter)
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(isToday ? Color("BrandAnchor") : Color("TextSecondary"))
+                .foregroundColor(isToday ? AATheme.steel : AATheme.secondaryText)
 
             ZStack {
                 // Background
                 SwiftUI.Circle()
-                    .fill(anchorDone && arrowDone ? Color("BrandGold")
-                          : anchorDone ? Color("BrandAnchor")
-                          : arrowDone  ? Color("BrandArrow")
-                          : Color("CardBackground"))
+                    .fill(anchorDone && arrowDone ? AATheme.warmGold
+                          : anchorDone ? AATheme.steel
+                          : arrowDone  ? AATheme.amber
+                          : AATheme.cardBackground)
                     .frame(width: 30, height: 30)
                     .overlay(
-                        SwiftUI.Circle().stroke(isToday ? Color("BrandAnchor") : Color.clear, lineWidth: 2)
+                        SwiftUI.Circle().stroke(isToday ? AATheme.steel : Color.clear, lineWidth: 2)
                     )
 
                 if anchorDone || arrowDone {
@@ -957,7 +957,7 @@ struct WeekStatLabel: View {
                 .foregroundColor(Color(color))
             Text(label)
                 .font(.system(size: 11))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
         }
         .frame(maxWidth: .infinity)
     }
@@ -977,23 +977,23 @@ struct BadgeGridCell: View {
             VStack(spacing: 6) {
                 ZStack {
                     SwiftUI.Circle()
-                        .fill(isEarned ? badgeType.color.opacity(0.15) : Color("CardBackground"))
+                        .fill(isEarned ? badgeType.color.opacity(0.15) : AATheme.cardBackground)
                         .frame(width: 52, height: 52)
                     Image(systemName: badgeType.icon)
                         .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(isEarned ? badgeType.color : Color("TextSecondary").opacity(0.3))
+                        .foregroundColor(isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
 
                     if !isEarned {
                         Image(systemName: "lock.fill")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(Color("TextSecondary").opacity(0.4))
+                            .foregroundColor(AATheme.secondaryText.opacity(0.4))
                             .offset(x: 16, y: 16)
                     }
                 }
 
                 Text(badgeType.name)
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(isEarned ? Color("TextPrimary") : Color("TextSecondary").opacity(0.4))
+                    .foregroundColor(isEarned ? AATheme.primaryText : AATheme.secondaryText.opacity(0.4))
                     .lineLimit(2)
                     .multilineTextAlignment(.center)
                     .frame(height: 28)
@@ -1018,27 +1018,27 @@ struct BadgeDetailSheet: View {
     var body: some View {
         VStack(spacing: 24) {
             Capsule()
-                .fill(Color("TextSecondary").opacity(0.3))
+                .fill(AATheme.secondaryText.opacity(0.3))
                 .frame(width: 36, height: 4)
                 .padding(.top, 12)
 
             ZStack {
                 SwiftUI.Circle()
-                    .fill(isEarned ? badgeType.color.opacity(0.15) : Color("CardBackground"))
+                    .fill(isEarned ? badgeType.color.opacity(0.15) : AATheme.cardBackground)
                     .frame(width: 100, height: 100)
                 Image(systemName: badgeType.icon)
                     .font(.system(size: 44, weight: .semibold))
-                    .foregroundColor(isEarned ? badgeType.color : Color("TextSecondary").opacity(0.3))
+                    .foregroundColor(isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
             }
 
             VStack(spacing: 8) {
                 Text(badgeType.name)
-                    .font(.system(size: 24, weight: .heavy))
-                    .foregroundColor(isEarned ? Color("TextPrimary") : Color("TextSecondary"))
+                    .font(AATheme.headlineFont)
+                    .foregroundColor(isEarned ? AATheme.primaryText : AATheme.secondaryText)
 
                 Text(badgeType.description)
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
@@ -1046,10 +1046,10 @@ struct BadgeDetailSheet: View {
                 if !isEarned {
                     Text("Not yet earned")
                         .font(.system(size: 13, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 6)
-                        .background(Color("CardBackground"))
+                        .background(AATheme.cardBackground)
                         .cornerRadius(10)
                         .padding(.top, 4)
                 }
@@ -1057,11 +1057,11 @@ struct BadgeDetailSheet: View {
 
             Button("Close") { dismiss() }
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color("BrandAnchor"))
+                .foregroundColor(AATheme.steel)
                 .padding(.bottom, 20)
         }
         .frame(maxWidth: .infinity)
-        .background(Color("BackgroundPrimary"))
+        .background(AATheme.background)
         .presentationDetents([.medium])
         .presentationDragIndicator(.hidden)
     }
@@ -1081,10 +1081,10 @@ struct WeeklyReportStat: View {
                 .foregroundColor(Color(color))
             Text(value)
                 .font(.system(size: 16, weight: .heavy))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
             Text(label)
                 .font(.system(size: 10))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
         }
         .frame(maxWidth: .infinity)
     }
