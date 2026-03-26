@@ -18,7 +18,7 @@ struct DashboardView: View {
                 if userStore.isLoading && userStore.appUser == nil {
                     dashboardSkeleton
                 } else {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Greeting Header
                     headerSection
@@ -31,7 +31,7 @@ struct DashboardView: View {
                         animate: animateTree
                     )
                     .frame(height: 280)
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, AATheme.paddingLarge)
 
                     // Today's Status Cards
                     todayStatusSection
@@ -51,17 +51,17 @@ struct DashboardView: View {
 
                     Spacer(minLength: 100) // tab bar clearance
                 }
-                .padding(.top, 8)
+                .padding(.top, AATheme.paddingSmall)
                 }
             }
             .refreshable {
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 await userStore.loadUserData(uid: uid)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Anchor & Arrow")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -70,7 +70,7 @@ struct DashboardView: View {
                     } label: {
                         Image(systemName: "person.circle.fill")
                             .font(.system(size: 22))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                             .accessibilityLabel("Profile and Settings")
                     }
                 }
@@ -98,33 +98,34 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(greeting)
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                     Text(userStore.displayName)
-                        .font(.system(size: 26, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.headlineFont)
+                        .foregroundColor(AATheme.primaryText)
                 }
                 Spacer()
                 // Date chip
                 VStack(spacing: 2) {
                     Text(Date().formatted(.dateTime.weekday(.wide)))
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                     Text(Date().formatted(.dateTime.day()))
                         .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                     Text(Date().formatted(.dateTime.month(.abbreviated)))
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
                 .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(Color("CardBackground"))
-                .cornerRadius(12)
+                .padding(.vertical, AATheme.paddingSmall + 2)
+                .background(AATheme.cardBackground)
+                .cornerRadius(AATheme.cornerRadiusSmall + 2)
+                .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
                 .accessibilityElement(children: .combine)
                 .accessibilityLabel("Today is \(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))")
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AATheme.paddingLarge)
     }
 
     private var todayStatusSection: some View {
@@ -133,7 +134,7 @@ struct DashboardView: View {
                 title: "Anchor",
                 subtitle: "Morning",
                 isComplete: userStore.isAnchorDoneToday,
-                color: "BrandAnchor",
+                color: AATheme.steel,
                 destination: AnyView(AnchorView())
             ) {
                 AnchorSymbolView()
@@ -143,73 +144,74 @@ struct DashboardView: View {
                 title: "Arrow",
                 subtitle: "Evening",
                 isComplete: userStore.isArrowDoneToday,
-                color: "BrandArrow",
+                color: AATheme.amber,
                 destination: AnyView(ArrowView())
             ) {
-                SingleArcheryArrowView(color: Color("BrandArrow"))
+                SingleArcheryArrowView(color: AATheme.amber)
                     .frame(width: 26, height: 26)
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AATheme.paddingLarge)
     }
 
     private var streakStatsSection: some View {
-        let streakColor = userStore.currentStreak >= 7 ? "BrandGold" : "BrandAnchor"
+        let streakColor = userStore.currentStreak >= 7 ? AATheme.warmGold : AATheme.steel
         return HStack(spacing: 14) {
             StatPill(value: "\(userStore.currentStreak)", label: "Day Streak",
                      color: streakColor) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(streakColor))
+                    .foregroundColor(streakColor)
             }
             StatPill(value: "\(userStore.appUser?.totalAnchorDays ?? 0)", label: "Anchors",
-                     color: "BrandAnchor") {
+                     color: AATheme.steel) {
                 AnchorSymbolView()
                     .frame(width: 20, height: 25)
             }
             StatPill(value: "\(userStore.appUser?.totalArrowDays ?? 0)", label: "Arrows",
-                     color: "BrandArrow") {
-                SingleArcheryArrowView(color: Color("BrandArrow"))
+                     color: AATheme.amber) {
+                SingleArcheryArrowView(color: AATheme.amber)
                     .frame(width: 20, height: 20)
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AATheme.paddingLarge)
     }
 
     private var badgesEmptyState: some View {
         HStack(spacing: 12) {
             Image(systemName: "star.circle")
                 .font(.system(size: 28))
-                .foregroundColor(Color("BrandGold").opacity(0.5))
+                .foregroundColor(AATheme.warmGold.opacity(0.5))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Badges")
-                    .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Text("Complete your first Anchor and Arrow to earn your first badge.")
                     .font(.system(size: 13))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
         }
-        .padding(16)
+        .padding(AATheme.paddingMedium)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("CardBackground"))
-        .cornerRadius(16)
-        .padding(.horizontal, 24)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+        .padding(.horizontal, AATheme.paddingLarge)
     }
 
     private var recentBadgesSection: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Badges")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 NavigationLink("See All") {
                     ProgressView()
                 }
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color("BrandAnchor"))
+                .foregroundColor(AATheme.steel)
                 .accessibilityLabel("See all badges")
             }
 
@@ -221,7 +223,7 @@ struct DashboardView: View {
                 }
             }
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AATheme.paddingLarge)
     }
 
     private var journeyCTASection: some View {
@@ -233,37 +235,38 @@ struct DashboardView: View {
                 showPremiumUpsell = true
             }
         } label: {
-            HStack(spacing: 16) {
+            HStack(spacing: AATheme.paddingMedium) {
                 ZStack {
                     SwiftUI.Circle()
-                        .fill(Color("BrandArrow").opacity(0.15))
+                        .fill(AATheme.amber.opacity(0.15))
                         .frame(width: 48, height: 48)
                     Image(systemName: "map.fill")
                         .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(userStore.currentJourneySeries.displayName) Journey")
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                     Text(userStore.appUser?.journeyActive == true
                          ? "Day \(userStore.appUser?.journeyDay ?? 0) of \(kJourneyDays)"
                          : "\(kJourneyDays)-day guided plan — start today")
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
-            .padding(16)
-            .background(Color("CardBackground"))
-            .cornerRadius(16)
-            .padding(.horizontal, 24)
+            .padding(AATheme.paddingMedium)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+            .padding(.horizontal, AATheme.paddingLarge)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
@@ -275,36 +278,36 @@ struct DashboardView: View {
 
     // MARK: - Skeleton
     private var dashboardSkeleton: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: AATheme.paddingLarge) {
             // Header placeholder
             HStack {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(width: 100, height: 14)
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(width: 160, height: 24)
                 }
                 Spacer()
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color("CardBackground"))
+                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall + 2)
+                    .fill(AATheme.cardBackground)
                     .frame(width: 52, height: 60)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AATheme.paddingLarge)
 
             // Tree placeholder
             RoundedRectangle(cornerRadius: 20)
-                .fill(Color("CardBackground"))
+                .fill(AATheme.cardBackground)
                 .frame(height: 280)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AATheme.paddingLarge)
 
             // Status cards
             HStack(spacing: 14) {
                 SkeletonCard(height: 130)
                 SkeletonCard(height: 130)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AATheme.paddingLarge)
 
             // Stats row
             HStack(spacing: 14) {
@@ -312,15 +315,15 @@ struct DashboardView: View {
                 SkeletonCard(height: 80)
                 SkeletonCard(height: 80)
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AATheme.paddingLarge)
 
             // Journey CTA
             SkeletonCard(height: 80)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AATheme.paddingLarge)
 
             Spacer(minLength: 100)
         }
-        .padding(.top, 8)
+        .padding(.top, AATheme.paddingSmall)
         .shimmer()
     }
 
@@ -351,7 +354,7 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
     let title: String
     let subtitle: String
     let isComplete: Bool
-    let color: String
+    let color: Color
     let destination: AnyView
     @ViewBuilder let incompleteIcon: () -> IncompleteIcon
 
@@ -362,7 +365,7 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
                     if isComplete {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(.green)
+                            .foregroundColor(AATheme.success)
                     } else {
                         incompleteIcon()
                     }
@@ -370,46 +373,47 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
                     if isComplete {
                         Text("Done")
                             .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.green)
-                            .padding(.horizontal, 8)
+                            .foregroundColor(AATheme.success)
+                            .padding(.horizontal, AATheme.paddingSmall)
                             .padding(.vertical, 4)
-                            .background(Color.green.opacity(0.15))
-                            .cornerRadius(8)
+                            .background(AATheme.success.opacity(0.15))
+                            .cornerRadius(AATheme.paddingSmall)
                     }
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.subheadlineFont)
+                        .foregroundColor(AATheme.primaryText)
                     Text(subtitle)
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
 
                 HStack {
                     Text(isComplete ? "Completed" : "Tap to begin")
                         .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isComplete ? Color.green : Color(color))
+                        .foregroundColor(isComplete ? AATheme.success : color)
                     Image(systemName: "arrow.right")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(isComplete ? Color.green : Color(color))
+                        .foregroundColor(isComplete ? AATheme.success : color)
                 }
             }
-            .padding(16)
+            .padding(AATheme.paddingMedium)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 ZStack {
-                    Color("CardBackground")
+                    AATheme.cardBackground
                     if isComplete {
-                        Color.green.opacity(0.05)
+                        AATheme.success.opacity(0.05)
                     }
                 }
             )
-            .cornerRadius(16)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isComplete ? Color.green.opacity(0.3) : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                    .stroke(isComplete ? AATheme.success.opacity(0.3) : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -423,7 +427,7 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
 struct StatPill<Icon: View>: View {
     let value: String
     let label: String
-    let color: String
+    let color: Color
     @ViewBuilder let iconView: () -> Icon
 
     var body: some View {
@@ -431,15 +435,16 @@ struct StatPill<Icon: View>: View {
             iconView()
             Text(value)
                 .font(.system(size: 22, weight: .heavy))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
             Text(label)
                 .font(.system(size: 11, weight: .medium))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
-        .background(Color("CardBackground"))
-        .cornerRadius(14)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadiusSmall + 4)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(value) \(label)")
     }
@@ -461,7 +466,7 @@ struct BadgePill: View {
             }
             Text(badge.name)
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
                 .frame(width: 60)

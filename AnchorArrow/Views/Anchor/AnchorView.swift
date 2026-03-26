@@ -18,7 +18,7 @@ struct AnchorView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Already completed banner
                     if userStore.isAnchorDoneToday {
@@ -48,12 +48,12 @@ struct AnchorView: View {
                     Spacer(minLength: 80)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, AATheme.paddingMedium)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Morning Anchor")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {
@@ -75,76 +75,75 @@ struct AnchorView: View {
 
     // MARK: - Scripture Card
     private var scriptureCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: AATheme.paddingMedium) {
             HStack {
                 Label(prompt.theme.displayName, systemImage: "anchor")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(Color("BrandAnchor"))
-                    .padding(.horizontal, 10)
+                    .foregroundColor(AATheme.steel)
+                    .padding(.horizontal, AATheme.cornerRadiusSmall)
                     .padding(.vertical, 5)
-                    .background(Color("BrandAnchor").opacity(0.12))
-                    .cornerRadius(8)
+                    .background(AATheme.steel.opacity(0.12))
+                    .cornerRadius(AATheme.paddingSmall)
                 Spacer()
             }
 
             Text("\"\(prompt.scripture)\"")
-                .font(.system(size: 20, weight: .medium, design: .serif))
-                .italic()
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.scriptureFont)
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(6)
 
             Text("— \(prompt.reference)")
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color("BrandAnchor"))
+                .foregroundColor(AATheme.steel)
 
             Divider()
-                .background(Color("TextSecondary").opacity(0.2))
+                .background(AATheme.secondaryText.opacity(0.2))
 
             Text(prompt.reflectionQuestion)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(5)
         }
         .padding(20)
-        .background(Color("CardBackground"))
-        .cornerRadius(20)
-        .shadow(color: Color("BrandAnchor").opacity(0.08), radius: 12, x: 0, y: 4)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     // MARK: - Reflection Input
     private var reflectionSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             Text("Your Reflection")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             ZStack(alignment: .topLeading) {
                 if reflection.isEmpty {
                     Text("Write your honest response here...")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary").opacity(0.6))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.6))
                         .padding(.top, 14)
                         .padding(.leading, 5)
                 }
 
                 TextEditor(text: $reflection)
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .scrollContentBackground(.hidden)
                     .focused($reflectionFocused)
                     .frame(minHeight: 120)
             }
             .padding(14)
-            .background(Color("CardBackground"))
-            .cornerRadius(14)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadiusSmall)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(reflectionFocused ? Color("BrandAnchor") : Color("TextSecondary").opacity(0.2), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                    .stroke(reflectionFocused ? AATheme.steel : AATheme.steel.opacity(0.2), lineWidth: 1.5)
             )
 
             Text("\(reflection.count) / 500")
                 .font(.system(size: 12))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
@@ -153,14 +152,14 @@ struct AnchorView: View {
     private var tagSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Any drift pulling at you today?")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             Text("Select all that apply — this is honest, not shameful.")
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: AATheme.cornerRadiusSmall) {
                 ForEach(AnchorTag.allCases) { tag in
                     TagChip(
                         tag: tag,
@@ -181,13 +180,13 @@ struct AnchorView: View {
     private var prayerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Open in Prayer")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
                 Label("Pray this out loud", systemImage: "mouth.fill")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
 
                 Text("""
                     Lord Jesus, I anchor myself in You this morning.
@@ -199,14 +198,14 @@ struct AnchorView: View {
                     Let everything I do today be done for Your glory.
                     Amen.
                     """)
-                    .font(.system(size: 15, weight: .medium, design: .serif))
-                    .italic()
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.scriptureFont)
+                    .foregroundColor(AATheme.primaryText)
                     .lineSpacing(6)
             }
-            .padding(16)
-            .background(Color("CardBackground"))
-            .cornerRadius(16)
+            .padding(AATheme.paddingMedium)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         }
     }
 
@@ -231,9 +230,9 @@ struct AnchorView: View {
             .frame(maxWidth: .infinity)
             .frame(height: 54)
             .background(trimmed.isEmpty || isSubmitting
-                ? Color("TextSecondary").opacity(0.3)
-                : Color("BrandAnchor"))
-            .cornerRadius(16)
+                ? AATheme.secondaryText.opacity(0.3)
+                : AATheme.steel)
+            .cornerRadius(AATheme.cornerRadius)
         }
         .disabled(trimmed.isEmpty || isSubmitting)
         .accessibilityLabel("Mark Anchor Complete")
@@ -284,13 +283,13 @@ struct TagChip: View {
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 10)
-            .background(isSelected ? Color("BrandWarning").opacity(0.2) : Color("CardBackground"))
-            .foregroundColor(isSelected ? Color("BrandWarning") : Color("TextSecondary"))
+            .padding(.vertical, AATheme.cornerRadiusSmall)
+            .background(isSelected ? AATheme.warning.opacity(0.2) : AATheme.cardBackground)
+            .foregroundColor(isSelected ? AATheme.warning : AATheme.secondaryText)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
-                    .stroke(isSelected ? Color("BrandWarning") : Color.clear, lineWidth: 1.5)
+                    .stroke(isSelected ? AATheme.warning : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -312,7 +311,7 @@ struct CompletedBanner: View {
                 .foregroundColor(Color(color))
             Text(message)
                 .font(.system(size: 14, weight: .medium))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

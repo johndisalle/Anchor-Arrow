@@ -186,7 +186,7 @@ struct AnchorRootsShape: Shape {
 
 // MARK: - Single Upward Archery Arrow
 struct UpwardArcheryArrowView: View {
-    var color: Color = Color("BrandArrow")
+    var color: Color = AATheme.amber
 
     var body: some View {
         Canvas { context, size in
@@ -236,7 +236,7 @@ struct UpwardArcheryArrowView: View {
 
 // MARK: - Canvas-drawn Anchor Symbol
 struct AnchorSymbolView: View {
-    var color: Color = Color("BrandAnchor")
+    var color: Color = AATheme.steel
 
     var body: some View {
         Canvas { context, size in
@@ -299,7 +299,7 @@ struct AnchorSymbolView: View {
 /// One archery arrow pointing up-right: shaft + V-head + two fletching chevrons.
 /// Reusable icon for "Arrow" cards and stat pills anywhere in the app.
 struct SingleArcheryArrowView: View {
-    var color: Color = Color("BrandArrow")
+    var color: Color = AATheme.amber
 
     var body: some View {
         Canvas { context, size in

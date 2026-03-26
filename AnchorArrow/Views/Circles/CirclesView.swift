@@ -31,10 +31,10 @@ struct CirclesView: View {
                     circlesList
                 }
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Iron Sharpeners")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -61,7 +61,7 @@ struct CirclesView: View {
                     } label: {
                         Image(systemName: "plus")
                             .font(.system(size: 17, weight: .semibold))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                 }
             }
@@ -103,21 +103,21 @@ struct CirclesView: View {
             Spacer()
             Image(systemName: "person.3.fill")
                 .font(.system(size: 52))
-                .foregroundColor(Color("BrandAnchor").opacity(0.5))
+                .foregroundColor(AATheme.steel.opacity(0.5))
             VStack(spacing: 10) {
                 Text("No Circles Yet")
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.headlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Text("\"As iron sharpens iron, so one person sharpens another.\" — Proverbs 27:17")
                     .font(.system(size: 15, weight: .medium, design: .serif))
                     .italic()
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                     .padding(.horizontal, 32)
                 Text("Start or join a circle of 3–8 brothers to share wins, struggles, and accountability.")
                     .font(.system(size: 14))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
@@ -132,8 +132,8 @@ struct CirclesView: View {
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(Color("BrandAnchor"))
-                    .cornerRadius(14)
+                    .background(AATheme.steel)
+                    .cornerRadius(AATheme.cornerRadius)
                 }
                 Button { showJoinCircle = true } label: {
                     HStack {
@@ -141,10 +141,10 @@ struct CirclesView: View {
                         Text("Join with Invite Code")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(Color("BrandAnchor").opacity(0.1))
-                    .cornerRadius(14)
+                    .background(AATheme.steel.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadius)
                 }
                 Button { showBrowsePublic = true } label: {
                     HStack {
@@ -152,10 +152,10 @@ struct CirclesView: View {
                         Text("Browse Public Circles")
                             .font(.system(size: 16, weight: .semibold))
                     }
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(Color("BrandArrow").opacity(0.1))
-                    .cornerRadius(14)
+                    .background(AATheme.amber.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadius)
                 }
             }
             .padding(.horizontal, 32)
