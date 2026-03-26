@@ -9,10 +9,10 @@ struct PremiumWelcomeView: View {
 
     var body: some View {
         ZStack {
-            Color("BackgroundPrimary").ignoresSafeArea()
+            AATheme.background.ignoresSafeArea()
 
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 32) {
+                VStack(spacing: AATheme.paddingXLarge) {
 
                     Spacer(minLength: 20)
 
@@ -22,7 +22,7 @@ struct PremiumWelcomeView: View {
                         SwiftUI.Circle()
                             .fill(
                                 RadialGradient(
-                                    colors: [Color("BrandGold").opacity(0.25), Color.clear],
+                                    colors: [AATheme.warmGold.opacity(0.25), Color.clear],
                                     center: .center,
                                     startRadius: 30,
                                     endRadius: 80
@@ -33,13 +33,13 @@ struct PremiumWelcomeView: View {
                             .opacity(appeared ? 1 : 0)
 
                         SwiftUI.Circle()
-                            .fill(Color("BrandGold").opacity(0.12))
+                            .fill(AATheme.warmGold.opacity(0.12))
                             .frame(width: 100, height: 100)
                             .scaleEffect(appeared ? 1 : 0.5)
 
                         Image(systemName: "crown.fill")
                             .font(.system(size: 48))
-                            .foregroundColor(Color("BrandGold"))
+                            .foregroundColor(AATheme.warmGold)
                             .scaleEffect(appeared ? 1 : 0.3)
                             .opacity(appeared ? 1 : 0)
                     }
@@ -47,14 +47,14 @@ struct PremiumWelcomeView: View {
                     // Welcome text
                     VStack(spacing: 10) {
                         Text("Welcome to Premium")
-                            .font(.system(size: 30, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.titleFont)
+                            .foregroundColor(AATheme.primaryText)
                             .opacity(appeared ? 1 : 0)
                             .offset(y: appeared ? 0 : 12)
 
                         Text("Your subscription directly funds missions\nand service. Here's what's unlocked:")
                             .font(.system(size: 15))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .multilineTextAlignment(.center)
                             .lineSpacing(3)
                             .opacity(appeared ? 1 : 0)
@@ -65,7 +65,7 @@ struct PremiumWelcomeView: View {
                     VStack(spacing: 14) {
                         PremiumWelcomeCard(
                             icon: "map.fill",
-                            iconColor: "BrandArrow",
+                            iconColor: AATheme.amber,
                             title: "5 New Journeys",
                             description: "Armor of God, Surrender First, Prophet Priest King, Strength in Love, and Guard the Gates — 150 additional daily devotionals.",
                             delay: 0.15
@@ -73,7 +73,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "person.3.fill",
-                            iconColor: "BrandAnchor",
+                            iconColor: AATheme.steel,
                             title: "Full Circle Access",
                             description: "Create unlimited Iron Sharpeners circles. Post, comment, and rally your brothers.",
                             delay: 0.25
@@ -81,7 +81,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "book.fill",
-                            iconColor: "BrandAnchor",
+                            iconColor: AATheme.steel,
                             title: "Journal History",
                             description: "Browse and search your full reflection history. Revisit past entries and see how God has moved.",
                             delay: 0.35
@@ -89,7 +89,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "chart.bar.fill",
-                            iconColor: "BrandWarning",
+                            iconColor: AATheme.warning,
                             title: "Drift Insights & Weekly Report",
                             description: "See your drift patterns, weakest days, accountability streaks, and a weekly accountability summary.",
                             delay: 0.45
@@ -97,7 +97,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "tag.fill",
-                            iconColor: "BrandWarning",
+                            iconColor: AATheme.warning,
                             title: "Custom Drift Categories",
                             description: "Add your own drift categories beyond the defaults. Name your specific struggles for sharper accountability.",
                             delay: 0.55
@@ -105,7 +105,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "shield.fill",
-                            iconColor: "BrandGold",
+                            iconColor: AATheme.warmGold,
                             title: "Grace Day",
                             description: "Life happens. Save your streak once per month when you miss a day.",
                             delay: 0.65
@@ -113,7 +113,7 @@ struct PremiumWelcomeView: View {
 
                         PremiumWelcomeCard(
                             icon: "heart.fill",
-                            iconColor: "BrandDanger",
+                            iconColor: AATheme.destructive,
                             title: "Kingdom Funded",
                             description: "All profits go to missions and service. Your subscription makes a difference beyond this app.",
                             delay: 0.75
@@ -126,20 +126,11 @@ struct PremiumWelcomeView: View {
                         dismiss()
                     } label: {
                         Text("Let's Go")
-                            .font(.system(size: 18, weight: .heavy, design: .rounded))
-                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 56)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color("BrandGold"), Color("BrandArrow")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(16)
                     }
-                    .padding(.horizontal, 24)
+                    .buttonStyle(AAPremiumButtonStyle())
+                    .padding(.horizontal, AATheme.paddingLarge)
                     .opacity(appeared ? 1 : 0)
                     .offset(y: appeared ? 0 : 20)
 
@@ -159,7 +150,7 @@ struct PremiumWelcomeView: View {
 // MARK: - PremiumWelcomeCard
 private struct PremiumWelcomeCard: View {
     let icon: String
-    let iconColor: String
+    let iconColor: Color
     let title: String
     let description: String
     let delay: Double
@@ -169,23 +160,23 @@ private struct PremiumWelcomeCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(Color(iconColor).opacity(0.12))
+                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                    .fill(iconColor.opacity(0.12))
                     .frame(width: 40, height: 40)
 
                 Image(systemName: icon)
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Color(iconColor))
+                    .foregroundColor(iconColor)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(.system(size: 16, weight: .bold, design: .serif))
+                    .foregroundColor(AATheme.primaryText)
 
                 Text(description)
                     .font(.system(size: 13))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .lineSpacing(2)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -193,8 +184,9 @@ private struct PremiumWelcomeCard: View {
             Spacer(minLength: 0)
         }
         .padding(14)
-        .background(Color("CardBackground"))
-        .cornerRadius(14)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         .opacity(visible ? 1 : 0)
         .offset(x: visible ? 0 : 30)
         .onAppear {

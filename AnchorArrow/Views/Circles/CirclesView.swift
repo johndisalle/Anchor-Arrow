@@ -924,11 +924,11 @@ struct BattleFormationCard: View {
     }
 
     private func dotFill(_ profile: MemberProfile?) -> Color {
-        guard let p = profile else { return Color("TextSecondary").opacity(0.25) }
-        if p.isActiveToday   { return Color("BrandAnchor") }
-        if p.isStreakAlive   { return Color("BrandAnchor").opacity(0.45) }
-        if p.daysSinceActive < 7 { return Color("BrandWarning").opacity(0.55) }
-        return Color("TextSecondary").opacity(0.25)
+        guard let p = profile else { return AATheme.secondaryText.opacity(0.25) }
+        if p.isActiveToday   { return AATheme.steel }
+        if p.isStreakAlive   { return AATheme.steel.opacity(0.45) }
+        if p.daysSinceActive < 7 { return AATheme.warning.opacity(0.55) }
+        return AATheme.secondaryText.opacity(0.25)
     }
 }
 
@@ -946,16 +946,16 @@ struct PrayerWallSection: View {
             HStack(spacing: 6) {
                 Image(systemName: "hands.sparkles.fill")
                     .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                 Text("PRAYER WALL")
                     .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                     .tracking(0.5)
                 Spacer()
                 if !answered.isEmpty {
                     Label("\(answered.count) answered", systemImage: "checkmark.circle.fill")
                         .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(Color("BrandArrow"))
+                        .foregroundColor(AATheme.amber)
                 }
             }
 
@@ -974,10 +974,10 @@ struct PrayerWallSection: View {
                         HStack(spacing: 8) {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 14))
-                                .foregroundColor(Color("BrandArrow"))
+                                .foregroundColor(AATheme.amber)
                             Text(post.content)
                                 .font(.system(size: 13))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                                 .lineLimit(2)
                             Spacer()
                         }
@@ -985,12 +985,12 @@ struct PrayerWallSection: View {
                 }
             }
         }
-        .padding(16)
-        .background(Color("BrandGold").opacity(0.05))
-        .cornerRadius(16)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.warmGold.opacity(0.05))
+        .cornerRadius(AATheme.cornerRadius)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color("BrandGold").opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                .stroke(AATheme.warmGold.opacity(0.2), lineWidth: 1)
         )
     }
 }
@@ -1007,11 +1007,11 @@ struct PrayerCard: View {
         VStack(alignment: .leading, spacing: 10) {
             Text(post.isAnonymous ? "A brother asks for prayer:" : "\(post.authorName) asks for prayer:")
                 .font(.system(size: 11, weight: .semibold))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
 
             Text(post.content)
                 .font(.system(size: 14))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(4)
 
             HStack(spacing: 8) {
@@ -1021,9 +1021,9 @@ struct PrayerCard: View {
                         Text(prayingCount > 0 ? "\(prayingCount) praying" : "I'm praying for this")
                             .font(.system(size: 13, weight: .semibold))
                     }
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                     .padding(.horizontal, 14).padding(.vertical, 8)
-                    .background(Color("BrandGold").opacity(0.12))
+                    .background(AATheme.warmGold.opacity(0.12))
                     .cornerRadius(20)
                 }
                 .buttonStyle(.plain)
@@ -1036,14 +1036,14 @@ struct PrayerCard: View {
                         Text("Answered")
                     }
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(12)
-        .background(Color("CardBackground"))
-        .cornerRadius(12)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadiusSmall)
     }
 }
 
@@ -1071,9 +1071,9 @@ struct CirclePostRow: View {
                     Text("Pinned")
                         .font(.system(size: 10, weight: .bold))
                 }
-                .foregroundColor(Color("BrandGold"))
+                .foregroundColor(AATheme.warmGold)
                 .padding(.horizontal, 8).padding(.vertical, 3)
-                .background(Color("BrandGold").opacity(0.12))
+                .background(AATheme.warmGold.opacity(0.12))
                 .cornerRadius(6)
             }
 
@@ -1093,7 +1093,7 @@ struct CirclePostRow: View {
                 Spacer()
                 Text(post.timestamp.timeAgo)
                     .font(.system(size: 11))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
 
                 // Post actions menu
                 if isLeader || canModerate || onReport != nil || onBlock != nil {
@@ -1124,7 +1124,7 @@ struct CirclePostRow: View {
                     } label: {
                         Image(systemName: "ellipsis")
                             .font(.system(size: 13))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .padding(.leading, 4)
                     }
                 }
@@ -1132,11 +1132,11 @@ struct CirclePostRow: View {
             // Author
             Text(post.isAnonymous ? "A brother shared:" : post.authorName)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
             // Content
             Text(post.content)
                 .font(.system(size: 15))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(4)
             // Reactions + Reply row
             HStack(spacing: 6) {
@@ -1148,11 +1148,11 @@ struct CirclePostRow: View {
                             if count > 0 {
                                 Text("\(count)")
                                     .font(.system(size: 12, weight: .semibold))
-                                    .foregroundColor(Color("TextSecondary"))
+                                    .foregroundColor(AATheme.secondaryText)
                             }
                         }
                         .padding(.horizontal, 9).padding(.vertical, 5)
-                        .background(Color("BackgroundPrimary"))
+                        .background(AATheme.background)
                         .cornerRadius(20)
                     }
                     .buttonStyle(.plain)
@@ -1165,17 +1165,18 @@ struct CirclePostRow: View {
                         Text("Reply")
                             .font(.system(size: 12, weight: .semibold))
                     }
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                     .padding(.horizontal, 10).padding(.vertical, 5)
-                    .background(Color("BackgroundPrimary"))
+                    .background(AATheme.background)
                     .cornerRadius(20)
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(14)
-        .background(Color("CardBackground"))
-        .cornerRadius(14)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 }
 
@@ -1213,18 +1214,18 @@ struct CommentsSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(post.isAnonymous ? "A brother shared:" : post.authorName)
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                             Text(post.content)
                                 .font(.system(size: 15))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                                 .lineSpacing(4)
                         }
                         .padding(14)
-                        .background(Color("BrandAnchor").opacity(0.06))
-                        .cornerRadius(12)
+                        .background(AATheme.steel.opacity(0.06))
+                        .cornerRadius(AATheme.cornerRadiusSmall)
                         .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color("BrandAnchor").opacity(0.15), lineWidth: 1)
+                            RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                                .stroke(AATheme.steel.opacity(0.15), lineWidth: 1)
                         )
                         .padding(.horizontal, 20)
                         .padding(.top, 16)
@@ -1234,7 +1235,7 @@ struct CommentsSheet: View {
                         } else if comments.isEmpty {
                             Text("No replies yet. Encourage your brother.")
                                 .font(.system(size: 14))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                                 .frame(maxWidth: .infinity, alignment: .center)
                                 .padding(.top, 24)
                         } else {

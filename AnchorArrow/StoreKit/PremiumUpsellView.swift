@@ -20,23 +20,23 @@ struct PremiumUpsellView: View {
                     VStack(spacing: 12) {
                         ZStack {
                             SwiftUI.Circle()
-                                .fill(Color("BrandGold").opacity(0.15))
+                                .fill(AATheme.warmGold.opacity(0.15))
                                 .frame(width: 80, height: 80)
                             Image(systemName: "crown.fill")
                                 .font(.system(size: 36))
-                                .foregroundColor(Color("BrandGold"))
+                                .foregroundColor(AATheme.warmGold)
                         }
                         .padding(.top, 8)
 
                         Text("Anchor & Arrow\nPremium")
-                            .font(.system(size: 28, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.titleFont)
+                            .foregroundColor(AATheme.primaryText)
                             .multilineTextAlignment(.center)
 
                         if let reason {
                             Text("Unlock to: \(reason)")
                                 .font(.system(size: 14))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
                         }
@@ -44,15 +44,15 @@ struct PremiumUpsellView: View {
 
                     // Feature list
                     VStack(spacing: 12) {
-                        PremiumFeatureRow(icon: "heart.fill", color: "BrandDanger", text: "Kingdom Funded — All profits donated to missions & service")
-                        PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Post, comment & rally brothers in unlimited circles")
-                        PremiumFeatureRow(icon: "map.fill", color: "BrandArrow", text: "5 additional 30-day journeys (150 devotionals)")
-                        PremiumFeatureRow(icon: "book.fill", color: "BrandAnchor", text: "Journal History — search & revisit past reflections")
-                        PremiumFeatureRow(icon: "chart.bar.fill", color: "BrandWarning", text: "Drift Insights & Weekly Report — see your patterns")
-                        PremiumFeatureRow(icon: "tag.fill", color: "BrandWarning", text: "Custom Drift Categories — track your specific struggles")
-                        PremiumFeatureRow(icon: "shield.fill", color: "BrandArrow", text: "Grace Day — save your streak once per month")
+                        PremiumFeatureRow(icon: "heart.fill", color: AATheme.destructive, text: "Kingdom Funded — All profits donated to missions & service")
+                        PremiumFeatureRow(icon: "person.3.fill", color: AATheme.steel, text: "Post, comment & rally brothers in unlimited circles")
+                        PremiumFeatureRow(icon: "map.fill", color: AATheme.amber, text: "5 additional 30-day journeys (150 devotionals)")
+                        PremiumFeatureRow(icon: "book.fill", color: AATheme.steel, text: "Journal History — search & revisit past reflections")
+                        PremiumFeatureRow(icon: "chart.bar.fill", color: AATheme.warning, text: "Drift Insights & Weekly Report — see your patterns")
+                        PremiumFeatureRow(icon: "tag.fill", color: AATheme.warning, text: "Custom Drift Categories — track your specific struggles")
+                        PremiumFeatureRow(icon: "shield.fill", color: AATheme.amber, text: "Grace Day — save your streak once per month")
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, AATheme.paddingLarge)
 
                     // Product selection
                     VStack(spacing: 12) {
@@ -68,7 +68,7 @@ struct PremiumUpsellView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, AATheme.paddingLarge)
 
                     // Purchase button
                     VStack(spacing: 12) {
@@ -88,7 +88,7 @@ struct PremiumUpsellView: View {
                                 } else {
                                     VStack(spacing: 2) {
                                         Text("Subscribe Now")
-                                            .font(.system(size: 18, weight: .heavy))
+                                            .font(.system(size: 18, weight: .heavy, design: .serif))
                                         Text(priceSubtext)
                                             .font(.system(size: 12))
                                     }
@@ -97,22 +97,15 @@ struct PremiumUpsellView: View {
                             }
                             .frame(maxWidth: .infinity)
                             .frame(height: 58)
-                            .background(
-                                LinearGradient(
-                                    colors: [Color("BrandGold"), Color("BrandArrow")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .cornerRadius(16)
-                            .padding(.horizontal, 24)
                         }
+                        .buttonStyle(AAPremiumButtonStyle())
+                        .padding(.horizontal, AATheme.paddingLarge)
                         .disabled(storeKitManager.isPurchasing)
 
                         if let errorMessage = storeKitManager.purchaseError {
                             Text(errorMessage)
                                 .font(.system(size: 13))
-                                .foregroundColor(Color("BrandDanger"))
+                                .foregroundColor(AATheme.destructive)
                                 .multilineTextAlignment(.center)
                                 .padding(.horizontal, 32)
                         }
@@ -126,19 +119,19 @@ struct PremiumUpsellView: View {
                             }
                         }
                         .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
 
                         // Legal
                         VStack(spacing: 4) {
                             Text("Subscription renews automatically. Cancel anytime in App Store settings.")
                                 .font(.system(size: 10))
-                                .foregroundColor(Color("TextSecondary").opacity(0.6))
+                                .foregroundColor(AATheme.secondaryText.opacity(0.6))
                                 .multilineTextAlignment(.center)
 
                             HStack(spacing: 4) {
                                 Link("Terms of Use", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!)
                                 Text("&")
-                                    .foregroundColor(Color("TextSecondary").opacity(0.6))
+                                    .foregroundColor(AATheme.secondaryText.opacity(0.6))
                                 Link("Privacy Policy", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!)
                             }
                             .font(.system(size: 10, weight: .medium))
@@ -149,14 +142,14 @@ struct PremiumUpsellView: View {
                     Spacer(minLength: 20)
                 }
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Maybe Later") { dismiss() }
                         .font(.system(size: 14))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
             .fullScreenCover(isPresented: $showWelcome) {
@@ -178,25 +171,25 @@ struct PremiumUpsellView: View {
 // MARK: - PremiumFeatureRow
 struct PremiumFeatureRow: View {
     let icon: String
-    let color: String
+    let color: Color
     let text: String
 
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(color))
+                .foregroundColor(color)
                 .frame(width: 24)
 
             Text(text)
                 .font(.system(size: 15))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
 
             Spacer()
 
             Image(systemName: "checkmark")
                 .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.green)
+                .foregroundColor(AATheme.success)
         }
     }
 }
@@ -214,8 +207,8 @@ struct SubscriptionOptionCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Text(subscription.displayName)
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(.system(size: 16, weight: .bold, design: .serif))
+                            .foregroundColor(AATheme.primaryText)
 
                         if let savings = subscription.savingsNote {
                             Text(savings)
@@ -223,40 +216,41 @@ struct SubscriptionOptionCard: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 3)
-                                .background(Color("BrandArrow"))
-                                .cornerRadius(8)
+                                .background(AATheme.amber)
+                                .cornerRadius(AATheme.cornerRadiusSmall)
                         }
                     }
 
                     Text(product?.displayPrice ?? subscription.priceString)
                         .font(.system(size: 14))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
 
                 Spacer()
 
                 ZStack {
                     SwiftUI.Circle()
-                        .stroke(isSelected ? Color("BrandGold") : Color("TextSecondary").opacity(0.3), lineWidth: 2)
+                        .stroke(isSelected ? AATheme.warmGold : AATheme.secondaryText.opacity(0.3), lineWidth: 2)
                         .frame(width: 22, height: 22)
                     if isSelected {
                         SwiftUI.Circle()
-                            .fill(Color("BrandGold"))
+                            .fill(AATheme.warmGold)
                             .frame(width: 14, height: 14)
                     }
                 }
             }
-            .padding(16)
+            .padding(AATheme.paddingMedium)
             .background(
                 isSelected
-                ? Color("BrandGold").opacity(0.08)
-                : Color("CardBackground")
+                ? AATheme.warmGold.opacity(0.08)
+                : AATheme.cardBackground
             )
-            .cornerRadius(14)
+            .cornerRadius(AATheme.cornerRadius)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color("BrandGold") : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                    .stroke(isSelected ? AATheme.warmGold : Color.clear, lineWidth: 2)
             )
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         }
         .buttonStyle(.plain)
         .animation(.spring(response: 0.3), value: isSelected)
