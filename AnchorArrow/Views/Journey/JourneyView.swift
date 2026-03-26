@@ -17,7 +17,7 @@ struct JourneyView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Header
                     journeyHeader
@@ -40,15 +40,15 @@ struct JourneyView: View {
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, AATheme.paddingMedium)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle(activeSeries.displayName + " Journey")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") { dismiss() }
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                 }
                 if userStore.isPremium && (userStore.appUser?.journeyActive ?? false) {
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -61,7 +61,7 @@ struct JourneyView: View {
                         } label: {
                             Image(systemName: "ellipsis")
                                 .font(.system(size: 16))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                         }
                     }
                 }
@@ -128,21 +128,21 @@ struct JourneyView: View {
             HStack {
                 Image(systemName: "map.fill")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                 Text("30-Day Guided Plan")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
             }
 
             Text(activeSeries == .armorOfGod
                  ? "Four weeks through Ephesians 6 — each piece of God's armor examined, applied, and worn into battle. Each day unlocks the next."
                  : "Four weeks of deep, sequential truth — from watchful rootedness to purposeful love. Each day unlocks the next.")
                 .font(.system(size: 15))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
 
             // Week themes
-            HStack(spacing: 8) {
+            HStack(spacing: AATheme.paddingSmall) {
                 ForEach(weekThemes, id: \.week) { theme in
                     VStack(spacing: 4) {
                         Text("Wk \(theme.week)")
@@ -150,39 +150,40 @@ struct JourneyView: View {
                             .foregroundColor(theme.color)
                         Text(theme.title)
                             .font(.system(size: 9, weight: .medium))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .lineLimit(2)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, AATheme.paddingSmall + 2)
                     .background(theme.color.opacity(0.1))
-                    .cornerRadius(10)
+                    .cornerRadius(AATheme.cornerRadiusSmall)
                 }
             }
         }
-        .padding(16)
-        .background(Color("CardBackground"))
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     private var startJourneyCTA: some View {
         VStack(spacing: 20) {
             Image(systemName: "figure.stand.line.dotted.figure.stand")
                 .font(.system(size: 52))
-                .foregroundColor(Color("BrandArrow"))
+                .foregroundColor(AATheme.amber)
 
-            VStack(spacing: 8) {
+            VStack(spacing: AATheme.paddingSmall) {
                 Text("Ready to Commit?")
-                    .font(.system(size: 22, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.headlineFont)
+                    .foregroundColor(AATheme.primaryText)
 
                 Text("This journey is free to start. \(kJourneyDays) days, one day at a time. No skipping ahead — each day builds on the last.")
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
-                    .padding(.horizontal, 24)
+                    .padding(.horizontal, AATheme.paddingLarge)
             }
 
             Button {
@@ -202,39 +203,39 @@ struct JourneyView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
-                .background(Color("BrandArrow"))
-                .cornerRadius(16)
+                .background(AATheme.amber)
+                .cornerRadius(AATheme.cornerRadius)
             }
             .disabled(isStarting)
-            .padding(.horizontal, 32)
+            .padding(.horizontal, AATheme.paddingXLarge)
         }
-        .padding(.vertical, 32)
+        .padding(.vertical, AATheme.paddingXLarge)
     }
 
     private var journeyProgressBar: some View {
         let currentDay = userStore.appUser?.journeyDay ?? 0
         let progress = Double(currentDay) / Double(kJourneyDays)
 
-        return VStack(alignment: .leading, spacing: 10) {
+        return VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
             HStack {
                 Text("Day \(currentDay) of \(kJourneyDays)")
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 Text("\(Int(progress * 100))%")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
             }
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(height: 10)
                     RoundedRectangle(cornerRadius: 6)
                         .fill(
                             LinearGradient(
-                                colors: [Color("BrandAnchor"), Color("BrandArrow")],
+                                colors: [AATheme.steel, AATheme.amber],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             )
@@ -245,9 +246,10 @@ struct JourneyView: View {
             }
             .frame(height: 10)
         }
-        .padding(16)
-        .background(Color("CardBackground"))
-        .cornerRadius(16)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     private var dayListSection: some View {
@@ -266,10 +268,10 @@ struct JourneyView: View {
                             .foregroundColor(weekThemes[week - 1].color)
                         Text("— \(weekThemes[week - 1].title)")
                             .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                     }
                     .padding(.horizontal, 4)
-                    .padding(.top, 16)
+                    .padding(.top, AATheme.paddingMedium)
 
                     ForEach(weekDays) { day in
                         let isUnlocked = day.id <= currentDay + 1  // can do next day
@@ -296,8 +298,8 @@ struct JourneyView: View {
     private var seriesPickerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Choose Your Journey")
-                .font(.system(size: 18, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             ForEach(JourneySeries.allCases) { series in
                 let completed = (userStore.appUser?.completedJourneys ?? []).contains(series.rawValue)
@@ -313,14 +315,14 @@ struct JourneyView: View {
                         Image(systemName: series.icon)
                             .font(.system(size: 22, weight: .semibold))
                             .foregroundColor(selectedSeries == series
-                                             ? Color("BrandArrow") : Color("TextSecondary"))
+                                             ? AATheme.amber : AATheme.secondaryText)
                             .frame(width: 40)
 
                         VStack(alignment: .leading, spacing: 3) {
                             HStack {
                                 Text(series.displayName)
                                     .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(isAvailable ? Color("TextPrimary") : Color("TextSecondary").opacity(0.5))
+                                    .foregroundColor(isAvailable ? AATheme.primaryText : AATheme.secondaryText.opacity(0.5))
                                 if completed {
                                     Image(systemName: "checkmark.circle.fill")
                                         .font(.system(size: 13))
@@ -329,40 +331,41 @@ struct JourneyView: View {
                                 if !isAvailable {
                                     Text("PREMIUM")
                                         .font(.system(size: 9, weight: .heavy))
-                                        .foregroundColor(Color("BrandGold"))
+                                        .foregroundColor(AATheme.warmGold)
                                         .padding(.horizontal, 6).padding(.vertical, 2)
-                                        .background(Color("BrandGold").opacity(0.15))
+                                        .background(AATheme.warmGold.opacity(0.15))
                                         .cornerRadius(4)
                                 }
                             }
                             Text(series.subtitle)
                                 .font(.system(size: 12))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                         }
                         Spacer()
 
                         if selectedSeries == series {
                             Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(Color("BrandArrow"))
+                                .foregroundColor(AATheme.amber)
                         }
                     }
                     .padding(14)
                     .background(selectedSeries == series
-                                ? Color("BrandArrow").opacity(0.07) : Color("CardBackground"))
+                                ? AATheme.amber.opacity(0.07) : AATheme.cardBackground)
                     .cornerRadius(14)
                     .overlay(
                         RoundedRectangle(cornerRadius: 14)
                             .stroke(selectedSeries == series
-                                    ? Color("BrandArrow").opacity(0.3) : Color.clear, lineWidth: 1.5)
+                                    ? AATheme.amber.opacity(0.3) : Color.clear, lineWidth: 1.5)
                     )
                 }
                 .buttonStyle(.plain)
                 .disabled(!isAvailable)
             }
         }
-        .padding(16)
-        .background(Color("CardBackground"))
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
         .cornerRadius(20)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     private var activeSeries: JourneySeries {
@@ -385,44 +388,44 @@ struct JourneyView: View {
         switch activeSeries {
         case .armorOfGod:
             return [
-                (1, "Truth & Righteousness", Color("BrandAnchor")),
+                (1, "Truth & Righteousness", AATheme.steel),
                 (2, "Gospel & Faith", Color.blue),
-                (3, "Salvation & Word", Color("BrandArrow")),
+                (3, "Salvation & Word", AATheme.amber),
                 (4, "Prayer & Stand", Color.red)
             ]
         case .standFirm:
             return [
-                (1, "Be Watchful", Color("BrandAnchor")),
+                (1, "Be Watchful", AATheme.steel),
                 (2, "Stand Firm", Color.blue),
-                (3, "Act Like Men", Color("BrandArrow")),
+                (3, "Act Like Men", AATheme.amber),
                 (4, "In Love", Color.red)
             ]
         case .surrenderFirst:
             return [
-                (1, "Bow the Knee", Color("BrandAnchor")),
+                (1, "Bow the Knee", AATheme.steel),
                 (2, "Die to Self", Color.blue),
-                (3, "Receive Your Identity", Color("BrandArrow")),
+                (3, "Receive Your Identity", AATheme.amber),
                 (4, "Rise to Serve", Color.red)
             ]
         case .prophetPriestKing:
             return [
-                (1, "Prophet", Color("BrandAnchor")),
+                (1, "Prophet", AATheme.steel),
                 (2, "Priest", Color.blue),
-                (3, "King", Color("BrandArrow")),
+                (3, "King", AATheme.amber),
                 (4, "The Whole Man", Color.red)
             ]
         case .strengthInLove:
             return [
-                (1, "Redefine Strength", Color("BrandAnchor")),
+                (1, "Redefine Strength", AATheme.steel),
                 (2, "Strength to Serve", Color.blue),
-                (3, "Strength to Endure", Color("BrandArrow")),
+                (3, "Strength to Endure", AATheme.amber),
                 (4, "All in Love", Color.red)
             ]
         case .guardTheGates:
             return [
-                (1, "Guard Your Heart", Color("BrandAnchor")),
+                (1, "Guard Your Heart", AATheme.steel),
                 (2, "Guard Your Home", Color.blue),
-                (3, "Guard Your Brothers", Color("BrandArrow")),
+                (3, "Guard Your Brothers", AATheme.amber),
                 (4, "Guard the Mission", Color.red)
             ]
         }
@@ -466,25 +469,25 @@ struct JourneyDayRow: View {
                     HStack {
                         Text("Day \(day.id)")
                             .font(.system(size: 13, weight: .bold))
-                            .foregroundColor(isUnlocked ? Color("TextPrimary") : Color("TextSecondary").opacity(0.5))
+                            .foregroundColor(isUnlocked ? AATheme.primaryText : AATheme.secondaryText.opacity(0.5))
                         if isCurrent {
                             Text("TODAY")
                                 .font(.system(size: 9, weight: .heavy))
-                                .foregroundColor(Color("BrandArrow"))
+                                .foregroundColor(AATheme.amber)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(Color("BrandArrow").opacity(0.15))
+                                .background(AATheme.amber.opacity(0.15))
                                 .cornerRadius(4)
                         }
                     }
                     Text(day.theme)
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(isUnlocked ? Color("TextPrimary") : Color("TextSecondary").opacity(0.4))
+                        .foregroundColor(isUnlocked ? AATheme.primaryText : AATheme.secondaryText.opacity(0.4))
 
                     if isUnlocked {
                         Text(day.scripture)
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
+                            .font(.system(size: 12, design: .serif))
+                            .foregroundColor(AATheme.secondaryText)
                             .lineLimit(1)
                     }
                 }
@@ -494,19 +497,19 @@ struct JourneyDayRow: View {
                 if isUnlocked {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
             .padding(14)
             .background(
                 isCurrent
-                ? Color("BrandArrow").opacity(0.07)
-                : Color("CardBackground")
+                ? AATheme.amber.opacity(0.07)
+                : AATheme.cardBackground
             )
             .cornerRadius(14)
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(isCurrent ? Color("BrandArrow").opacity(0.3) : Color.clear, lineWidth: 1.5)
+                    .stroke(isCurrent ? AATheme.amber.opacity(0.3) : Color.clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
@@ -518,9 +521,9 @@ struct JourneyDayRow: View {
 
     private var circleColor: Color {
         if isCompleted { return .green }
-        if isCurrent { return Color("BrandArrow") }
-        if isUnlocked { return Color("BrandAnchor") }
-        return Color("TextSecondary").opacity(0.25)
+        if isCurrent { return AATheme.amber }
+        if isUnlocked { return AATheme.steel }
+        return AATheme.secondaryText.opacity(0.25)
     }
 }
 
@@ -540,53 +543,54 @@ struct JourneyDayDetailView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Day chip
                     HStack {
                         Label("Day \(day.id) of \(kJourneyDays) — Week \(day.week)", systemImage: "map")
                             .font(.system(size: 13, weight: .semibold))
-                            .foregroundColor(Color("BrandArrow"))
+                            .foregroundColor(AATheme.amber)
                         Spacer()
                     }
 
                     // Theme + Scripture
                     VStack(alignment: .leading, spacing: 12) {
                         Text(day.theme)
-                            .font(.system(size: 24, weight: .heavy, design: .rounded))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.headlineFont)
+                            .foregroundColor(AATheme.primaryText)
 
                         Text("\"\(day.scripture)\"")
-                            .font(.system(size: 17, weight: .medium, design: .serif))
-                            .italic()
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.scriptureFont)
+                            .foregroundColor(AATheme.primaryText)
                             .lineSpacing(5)
                     }
                     .padding(20)
-                    .background(Color("CardBackground"))
+                    .background(AATheme.cardBackground)
                     .cornerRadius(20)
+                    .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
 
                     // Devotional
                     if !day.devotional.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
                             Label("Today's Devotional", systemImage: "book.fill")
                                 .font(.system(size: 14, weight: .bold))
-                                .foregroundColor(Color("BrandAnchor"))
+                                .foregroundColor(AATheme.steel)
                             Text(day.devotional)
                                 .font(.system(size: 15))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                                 .lineSpacing(6)
                         }
                         .padding(20)
-                        .background(Color("CardBackground"))
+                        .background(AATheme.cardBackground)
                         .cornerRadius(20)
+                        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
                     }
 
                     // Anchor prompt
                     journeyReflectionField(
                         icon: "anchor",
                         title: "Anchor Reflection",
-                        color: "BrandAnchor",
+                        color: AATheme.steel,
                         prompt: day.anchorPrompt,
                         text: $anchorReflection,
                         field: .anchor
@@ -596,7 +600,7 @@ struct JourneyDayDetailView: View {
                     journeyReflectionField(
                         icon: "arrow.up.right.circle.fill",
                         title: "Arrow Reflection",
-                        color: "BrandArrow",
+                        color: AATheme.amber,
                         prompt: day.arrowPrompt,
                         text: $arrowReflection,
                         field: .arrow
@@ -616,25 +620,25 @@ struct JourneyDayDetailView: View {
                         .frame(height: 54)
                         .background(
                             (anchorReflection.isEmpty || arrowReflection.isEmpty)
-                            ? Color("TextSecondary").opacity(0.3)
-                            : Color("BrandArrow")
+                            ? AATheme.secondaryText.opacity(0.3)
+                            : AATheme.amber
                         )
-                        .cornerRadius(16)
+                        .cornerRadius(AATheme.cornerRadius)
                     }
                     .disabled(anchorReflection.isEmpty || arrowReflection.isEmpty)
 
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, AATheme.paddingMedium)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Day \(day.id)")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Close") { dismiss() }
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
@@ -649,7 +653,7 @@ struct JourneyDayDetailView: View {
     private func journeyReflectionField(
         icon: String,
         title: String,
-        color: String,
+        color: Color,
         prompt: String,
         text: Binding<String>,
         field: JourneyField
@@ -658,46 +662,47 @@ struct JourneyDayDetailView: View {
             HStack {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color(color))
+                    .foregroundColor(color)
                 Text(title)
                     .font(.system(size: 15, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
             }
 
             Text(prompt)
                 .font(.system(size: 15))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
 
             ZStack(alignment: .topLeading) {
                 if text.wrappedValue.isEmpty {
                     Text("Write your honest response...")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("TextSecondary").opacity(0.5))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.5))
                         .padding(.top, 12)
                         .padding(.leading, 5)
                 }
                 TextEditor(text: text)
                     .font(.system(size: 14))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .scrollContentBackground(.hidden)
                     .focused($focusedField, equals: field)
                     .frame(minHeight: 90)
             }
             .padding(12)
-            .background(Color("CardBackground"))
+            .background(AATheme.cardBackground)
             .cornerRadius(12)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        focusedField == field ? Color(color) : Color("TextSecondary").opacity(0.2),
+                        focusedField == field ? color : AATheme.secondaryText.opacity(0.2),
                         lineWidth: 1.5
                     )
             )
         }
-        .padding(16)
-        .background(Color("CardBackground"))
-        .cornerRadius(16)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 }
 
@@ -712,7 +717,7 @@ struct JourneyCompletionView: View {
 
     var body: some View {
         ZStack {
-            Color("BackgroundPrimary").ignoresSafeArea()
+            AATheme.background.ignoresSafeArea()
 
             // Confetti layer
             ForEach(confettiParticles) { particle in
@@ -733,32 +738,32 @@ struct JourneyCompletionView: View {
                 // Trophy icon
                 ZStack {
                     SwiftUI.Circle()
-                        .fill(Color("BrandGold").opacity(0.15))
+                        .fill(AATheme.warmGold.opacity(0.15))
                         .frame(width: 120, height: 120)
                         .scaleEffect(appeared ? 1.0 : 0.3)
 
                     Image(systemName: "trophy.fill")
                         .font(.system(size: 56))
-                        .foregroundColor(Color("BrandGold"))
+                        .foregroundColor(AATheme.warmGold)
                         .scaleEffect(appeared ? 1.0 : 0.1)
                 }
                 .animation(.spring(response: 0.6, dampingFraction: 0.5).delay(0.2), value: appeared)
 
                 VStack(spacing: 12) {
                     Text("Journey Complete")
-                        .font(.system(size: 32, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.titleFont)
+                        .foregroundColor(AATheme.primaryText)
 
                     Text("You finished the \(series.displayName) journey.")
                         .font(.system(size: 17))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
 
                     Text("\(kJourneyDays) days of anchoring in truth, standing firm, and sharpening your faith. That's not nothing — that's war won.")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .multilineTextAlignment(.center)
                         .lineSpacing(5)
-                        .padding(.horizontal, 32)
+                        .padding(.horizontal, AATheme.paddingXLarge)
                         .padding(.top, 4)
                 }
                 .opacity(appeared ? 1 : 0)
@@ -781,8 +786,8 @@ struct JourneyCompletionView: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
-                            .background(Color("BrandArrow"))
-                            .cornerRadius(16)
+                            .background(AATheme.amber)
+                            .cornerRadius(AATheme.cornerRadius)
                         }
                     }
 
@@ -795,19 +800,19 @@ struct JourneyCompletionView: View {
                             Text("Restart \(series.displayName)")
                                 .font(.system(size: 16, weight: .semibold))
                         }
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color("BrandAnchor").opacity(0.1))
+                        .background(AATheme.steel.opacity(0.1))
                         .cornerRadius(14)
                     }
 
                     Button("Done") { onDismiss() }
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .padding(.top, 4)
                 }
-                .padding(.horizontal, 32)
+                .padding(.horizontal, AATheme.paddingXLarge)
                 .opacity(appeared ? 1 : 0)
                 .animation(.easeOut(duration: 0.5).delay(0.8), value: appeared)
 
@@ -827,13 +832,13 @@ struct JourneyCompletionView: View {
 
     private func generateConfetti() {
         let colors: [Color] = [
-            Color("BrandGold"), Color("BrandAnchor"), Color("BrandArrow"),
+            AATheme.warmGold, AATheme.steel, AATheme.amber,
             .orange, .yellow, .green, .blue
         ]
         let screenWidth = UIScreen.main.bounds.width
         confettiParticles = (0..<60).map { _ in
             ConfettiParticle(
-                color: colors.randomElement() ?? Color("BrandGold"),
+                color: colors.randomElement() ?? AATheme.warmGold,
                 size: CGFloat.random(in: 4...10),
                 position: CGPoint(
                     x: CGFloat.random(in: 0...screenWidth),

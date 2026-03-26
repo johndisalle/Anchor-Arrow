@@ -764,34 +764,34 @@ struct MemberListSheet: View {
                         ZStack {
                             SwiftUI.Circle()
                                 .fill(profile?.isActiveToday == true
-                                      ? Color("BrandAnchor")
-                                      : Color("BrandAnchor").opacity(0.15))
+                                      ? AATheme.steel
+                                      : AATheme.steel.opacity(0.15))
                                 .frame(width: 40, height: 40)
                                 .overlay(
                                     SwiftUI.Circle()
-                                        .stroke(profile?.isActiveToday == true ? Color("BrandGold") : Color.clear,
+                                        .stroke(profile?.isActiveToday == true ? AATheme.warmGold : Color.clear,
                                                 lineWidth: 2)
                                 )
                             Text(String(name.prefix(1)).uppercased())
                                 .font(.system(size: 16, weight: .heavy))
-                                .foregroundColor(profile?.isActiveToday == true ? .white : Color("BrandAnchor"))
+                                .foregroundColor(profile?.isActiveToday == true ? .white : AATheme.steel)
                         }
                         VStack(alignment: .leading, spacing: 2) {
                             Text(name)
                                 .font(.system(size: 15, weight: .semibold))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                             if uid == circle.creatorId {
                                 Text("Circle Leader")
                                     .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(Color("BrandGold"))
+                                    .foregroundColor(AATheme.warmGold)
                             } else if profile?.isActiveToday == true {
                                 Text("Active today")
                                     .font(.system(size: 11))
-                                    .foregroundColor(Color("BrandAnchor"))
+                                    .foregroundColor(AATheme.steel)
                             } else if let days = profile?.daysSinceActive, days >= 2 {
                                 Text("Last seen \(days) day\(days == 1 ? "" : "s") ago")
                                     .font(.system(size: 11))
-                                    .foregroundColor(Color("BrandWarning"))
+                                    .foregroundColor(AATheme.warning)
                             }
                         }
                         Spacer()
@@ -799,24 +799,24 @@ struct MemberListSheet: View {
                             HStack(spacing: 3) {
                                 Image(systemName: "flame.fill")
                                     .font(.system(size: 11))
-                                    .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                                    .foregroundColor(profile?.isStreakAlive == true ? AATheme.warmGold : AATheme.secondaryText.opacity(0.4))
                                 Text("\(streak)")
                                     .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                                    .foregroundColor(profile?.isStreakAlive == true ? AATheme.warmGold : AATheme.secondaryText.opacity(0.4))
                             }
                         }
                     }
-                    .listRowBackground(Color("CardBackground"))
+                    .listRowBackground(AATheme.cardBackground)
                 }
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Brothers (\(circle.memberCount))")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }.foregroundColor(Color("BrandAnchor"))
+                    Button("Done") { dismiss() }.foregroundColor(AATheme.steel)
                 }
             }
         }
@@ -1398,23 +1398,23 @@ struct CommentRow: View {
         HStack(alignment: .top, spacing: 10) {
             ZStack {
                 SwiftUI.Circle()
-                    .fill(Color("BrandAnchor").opacity(0.1))
+                    .fill(AATheme.steel.opacity(0.1))
                     .frame(width: 30, height: 30)
                 Text(comment.isAnonymous ? "?" : String(comment.authorName.prefix(1)).uppercased())
                     .font(.system(size: 12, weight: .heavy))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
             }
             VStack(alignment: .leading, spacing: 4) {
                 Text(comment.isAnonymous ? "A brother" : comment.authorName)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                 Text(comment.content)
                     .font(.system(size: 14))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .lineSpacing(3)
                 Text(comment.timestamp.timeAgo)
                     .font(.system(size: 11))
-                    .foregroundColor(Color("TextSecondary").opacity(0.6))
+                    .foregroundColor(AATheme.secondaryText.opacity(0.6))
             }
             Spacer()
             if canModerate || onReport != nil || onBlock != nil {
@@ -1437,7 +1437,7 @@ struct CommentRow: View {
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(.system(size: 11))
-                        .foregroundColor(Color("TextSecondary").opacity(0.4))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.4))
                         .padding(6)
                 }
             }
@@ -1466,8 +1466,8 @@ struct ReportSheet: View {
         NavigationStack {
             VStack(spacing: 20) {
                 Text("Why are you reporting this?")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                     .padding(.top, 8)
 
                 VStack(spacing: 10) {
@@ -1478,16 +1478,16 @@ struct ReportSheet: View {
                             HStack {
                                 Text(r)
                                     .font(.system(size: 15))
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .foregroundColor(AATheme.primaryText)
                                 Spacer()
                                 if reason == r {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(Color("BrandAnchor"))
+                                        .foregroundColor(AATheme.steel)
                                 }
                             }
                             .padding(14)
-                            .background(reason == r ? Color("BrandAnchor").opacity(0.08) : Color("CardBackground"))
-                            .cornerRadius(12)
+                            .background(reason == r ? AATheme.steel.opacity(0.08) : AATheme.cardBackground)
+                            .cornerRadius(AATheme.cornerRadiusSmall)
                         }
                         .buttonStyle(.plain)
                     }
@@ -1502,27 +1502,27 @@ struct ReportSheet: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(reason.isEmpty ? Color("TextSecondary").opacity(0.3) : Color("BrandDanger"))
-                        .cornerRadius(14)
+                        .background(reason.isEmpty ? AATheme.secondaryText.opacity(0.3) : AATheme.destructive)
+                        .cornerRadius(AATheme.cornerRadius)
                 }
                 .disabled(reason.isEmpty)
                 .padding(.horizontal, 20)
 
                 Text("Reports are reviewed by our team. Thank you for helping keep this community safe.")
                     .font(.system(size: 12))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
 
                 Spacer()
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Report")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { onCancel() }
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
         }
@@ -1545,7 +1545,7 @@ struct CreateCircleView: View {
             VStack(spacing: 24) {
                 Text("Name your circle — something that represents your brotherhood.")
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .padding(.top, 24)
@@ -1560,33 +1560,33 @@ struct CreateCircleView: View {
                         HStack(spacing: 10) {
                             Image(systemName: isPublic ? "globe" : "lock.fill")
                                 .font(.system(size: 16, weight: .medium))
-                                .foregroundColor(isPublic ? Color("BrandArrow") : Color("BrandAnchor"))
+                                .foregroundColor(isPublic ? AATheme.amber : AATheme.steel)
                                 .frame(width: 22)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(isPublic ? "Public Circle" : "Private Circle")
                                     .font(.system(size: 15, weight: .semibold))
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .foregroundColor(AATheme.primaryText)
                             }
                         }
                     }
-                    .tint(Color("BrandArrow"))
+                    .tint(AATheme.amber)
 
                     // Contextual explanation
                     HStack(alignment: .top, spacing: 10) {
                         Image(systemName: "info.circle.fill")
                             .font(.system(size: 14))
-                            .foregroundColor(Color("TextSecondary").opacity(0.6))
+                            .foregroundColor(AATheme.secondaryText.opacity(0.6))
                             .padding(.top, 1)
                         Text(isPublic
                              ? "Anyone can find and join this circle. All users (free or premium) can read posts. Great for open communities."
                              : "Only people with the invite code can join. Best for close accountability groups.")
                             .font(.system(size: 13))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .lineSpacing(3)
                     }
                     .padding(12)
-                    .background(Color("CardBackground"))
-                    .cornerRadius(10)
+                    .background(AATheme.cardBackground)
+                    .cornerRadius(AATheme.cornerRadiusSmall)
                     .animation(.easeInOut(duration: 0.2), value: isPublic)
                 }
                 .padding(.horizontal, 24)
@@ -1594,14 +1594,14 @@ struct CreateCircleView: View {
                 if let nameError = circleNameError {
                     Text(nameError)
                         .font(.system(size: 13))
-                        .foregroundColor(Color("BrandWarning"))
+                        .foregroundColor(AATheme.warning)
                         .padding(.horizontal, 24)
                 }
 
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandDanger"))
+                        .foregroundColor(AATheme.destructive)
                 }
 
                 Button {
@@ -1616,20 +1616,20 @@ struct CreateCircleView: View {
                         }
                     }
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(!isCircleNameValid ? Color("TextSecondary").opacity(0.3) : Color("BrandAnchor"))
-                    .cornerRadius(14)
+                    .background(!isCircleNameValid ? AATheme.secondaryText.opacity(0.3) : AATheme.steel)
+                    .cornerRadius(AATheme.cornerRadius)
                     .padding(.horizontal, 24)
                 }
                 .disabled(!isCircleNameValid || isCreating)
 
                 Spacer()
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Create a Circle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }.foregroundColor(Color("TextSecondary"))
+                    Button("Cancel") { dismiss() }.foregroundColor(AATheme.secondaryText)
                 }
             }
             .onAppear { focused = true }
@@ -1684,7 +1684,7 @@ struct JoinCircleView: View {
             VStack(spacing: 24) {
                 Text("Enter the 6-character invite code shared by a brother.")
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
                     .padding(.top, 24)
@@ -1695,8 +1695,8 @@ struct JoinCircleView: View {
                     .textInputAutocapitalization(.characters)
                     .autocorrectionDisabled()
                     .padding(20)
-                    .background(Color("CardBackground"))
-                    .cornerRadius(14)
+                    .background(AATheme.cardBackground)
+                    .cornerRadius(AATheme.cornerRadius)
                     .padding(.horizontal, 24)
                     .focused($focused)
                     .onChange(of: code) { code = String(code.prefix(6).uppercased()) }
@@ -1704,7 +1704,7 @@ struct JoinCircleView: View {
                 if !errorMessage.isEmpty {
                     Text(errorMessage)
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandDanger"))
+                        .foregroundColor(AATheme.destructive)
                 }
 
                 Button {
@@ -1719,20 +1719,20 @@ struct JoinCircleView: View {
                         }
                     }
                     .frame(maxWidth: .infinity).frame(height: 52)
-                    .background(code.count < 6 ? Color("TextSecondary").opacity(0.3) : Color("BrandAnchor"))
-                    .cornerRadius(14)
+                    .background(code.count < 6 ? AATheme.secondaryText.opacity(0.3) : AATheme.steel)
+                    .cornerRadius(AATheme.cornerRadius)
                     .padding(.horizontal, 24)
                 }
                 .disabled(code.count < 6 || isJoining)
 
                 Spacer()
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Join a Circle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }.foregroundColor(Color("TextSecondary"))
+                    Button("Cancel") { dismiss() }.foregroundColor(AATheme.secondaryText)
                 }
             }
             .onAppear { focused = true }
@@ -1788,8 +1788,8 @@ struct NewCirclePostView: View {
                                 }
                                 .font(.system(size: 13, weight: .semibold))
                                 .padding(.horizontal, 12).padding(.vertical, 8)
-                                .background(selectedType == type ? Color(type.color) : Color("CardBackground"))
-                                .foregroundColor(selectedType == type ? .white : Color("TextSecondary"))
+                                .background(selectedType == type ? Color(type.color) : AATheme.cardBackground)
+                                .foregroundColor(selectedType == type ? .white : AATheme.secondaryText)
                                 .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
@@ -1805,7 +1805,7 @@ struct NewCirclePostView: View {
                         .foregroundColor(Color(selectedType.color))
                     Text(selectedType.postHint)
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .lineSpacing(2)
                 }
                 .padding(.horizontal, 20)
@@ -1816,48 +1816,48 @@ struct NewCirclePostView: View {
                     if content.isEmpty {
                         Text("Share with your brothers...")
                             .font(.system(size: 15))
-                            .foregroundColor(Color("TextSecondary").opacity(0.5))
+                            .foregroundColor(AATheme.secondaryText.opacity(0.5))
                             .padding(.top, 12).padding(.leading, 5)
                     }
                     TextEditor(text: $content)
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                         .scrollContentBackground(.hidden)
                         .focused($focused)
                         .frame(minHeight: 120)
                 }
                 .padding(14)
-                .background(Color("CardBackground"))
-                .cornerRadius(14)
+                .background(AATheme.cardBackground)
+                .cornerRadius(AATheme.cornerRadius)
                 .padding(.horizontal, 20)
 
                 Toggle(isOn: $isAnonymous) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Post anonymously")
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .foregroundColor(AATheme.primaryText)
                         Text("Your name won't be shown")
                             .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                     }
                 }
-                .tint(Color("BrandAnchor"))
+                .tint(AATheme.steel)
                 .padding(.horizontal, 20)
 
                 Spacer()
             }
             .padding(.top, 20)
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Share with Circle")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") { dismiss() }.foregroundColor(Color("TextSecondary"))
+                    Button("Cancel") { dismiss() }.foregroundColor(AATheme.secondaryText)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Post") { Task { await submitPost() } }
                         .font(.system(size: 16, weight: .bold))
-                        .foregroundColor(content.isEmpty ? Color("TextSecondary") : Color("BrandAnchor"))
+                        .foregroundColor(content.isEmpty ? AATheme.secondaryText : AATheme.steel)
                         .disabled(content.isEmpty || isPosting)
                 }
             }
@@ -1907,13 +1907,13 @@ struct BrowsePublicCirclesView: View {
                         Spacer()
                         Image(systemName: "globe")
                             .font(.system(size: 44))
-                            .foregroundColor(Color("TextSecondary").opacity(0.4))
+                            .foregroundColor(AATheme.secondaryText.opacity(0.4))
                         Text("No Public Circles Yet")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.headlineFont)
+                            .foregroundColor(AATheme.primaryText)
                         Text("Be the first to create one — tap Create a Circle and set it to Public.")
                             .font(.system(size: 14))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
                         Spacer()
@@ -1925,21 +1925,21 @@ struct BrowsePublicCirclesView: View {
                             HStack(spacing: 10) {
                                 Image(systemName: "globe")
                                     .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(Color("BrandArrow"))
+                                    .foregroundColor(AATheme.amber)
                                 Text("Public circles are open to all. Join to read posts, share, and find brotherhood.")
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color("TextSecondary"))
+                                    .foregroundColor(AATheme.secondaryText)
                                     .lineSpacing(3)
                             }
                             .padding(14)
-                            .background(Color("BrandArrow").opacity(0.08))
-                            .cornerRadius(12)
+                            .background(AATheme.amber.opacity(0.08))
+                            .cornerRadius(AATheme.cornerRadiusSmall)
                             .padding(.horizontal, 20)
 
                             if !errorMessage.isEmpty {
                                 Text(errorMessage)
                                     .font(.system(size: 13))
-                                    .foregroundColor(Color("BrandDanger"))
+                                    .foregroundColor(AATheme.destructive)
                                     .padding(.horizontal, 20)
                             }
 
@@ -1958,13 +1958,13 @@ struct BrowsePublicCirclesView: View {
                     }
                 }
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Public Circles")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") { dismiss() }
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
             .task { await loadPublicCircles() }
@@ -2004,25 +2004,25 @@ private struct PublicCircleRow: View {
         HStack(spacing: 14) {
             ZStack {
                 SwiftUI.Circle()
-                    .fill(Color("BrandArrow").opacity(0.15))
+                    .fill(AATheme.amber.opacity(0.15))
                     .frame(width: 48, height: 48)
                 Text(String(circle.name.prefix(2)).uppercased())
                     .font(.system(size: 16, weight: .heavy))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(circle.name)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 HStack(spacing: 6) {
                     Label("\(circle.memberCount)/8", systemImage: "person.2.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                     if circle.memberCount >= 7 {
                         Text("Almost full")
                             .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(Color("BrandWarning"))
+                            .foregroundColor(AATheme.warning)
                     }
                 }
             }
@@ -2033,23 +2033,24 @@ private struct PublicCircleRow: View {
                 Group {
                     if isJoining {
                         ProgressView()
-                            .tint(Color("BrandArrow"))
+                            .tint(AATheme.amber)
                     } else {
                         Text("Join")
                             .font(.system(size: 14, weight: .bold))
                     }
                 }
-                .foregroundColor(Color("BrandArrow"))
+                .foregroundColor(AATheme.amber)
                 .padding(.horizontal, 18)
                 .padding(.vertical, 8)
-                .background(Color("BrandArrow").opacity(0.12))
-                .cornerRadius(10)
+                .background(AATheme.amber.opacity(0.12))
+                .cornerRadius(AATheme.cornerRadiusSmall)
             }
             .disabled(isJoining || circle.memberCount >= 8)
         }
         .padding(14)
-        .background(Color("CardBackground"))
-        .cornerRadius(14)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 }
 
