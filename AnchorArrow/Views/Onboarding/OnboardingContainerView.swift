@@ -12,7 +12,7 @@ struct OnboardingContainerView: View {
 
     var body: some View {
         ZStack {
-            Color("BackgroundPrimary").ignoresSafeArea()
+            AATheme.background.ignoresSafeArea()
 
             if showAuth {
                 AuthView(isSignUp: $isSignUp)
@@ -44,7 +44,7 @@ struct OnboardingContainerView: View {
                         HStack(spacing: 8) {
                             ForEach(0..<4) { i in
                                 Capsule()
-                                    .fill(i == currentPage ? Color("BrandAnchor") : Color("TextSecondary").opacity(0.3))
+                                    .fill(i == currentPage ? AATheme.steel : AATheme.secondaryText.opacity(0.3))
                                     .frame(width: i == currentPage ? 24 : 8, height: 8)
                                     .animation(.spring(response: 0.3), value: currentPage)
                             }
@@ -56,16 +56,12 @@ struct OnboardingContainerView: View {
                             } label: {
                                 HStack {
                                     Text("Continue")
-                                        .font(.system(size: 17, weight: .semibold))
                                     Image(systemName: "arrow.right")
                                 }
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(Color("BrandAnchor"))
-                                .foregroundColor(.white)
-                                .cornerRadius(14)
-                                .padding(.horizontal, 32)
                             }
+                            .buttonStyle(AAPrimaryButtonStyle())
+                            .padding(.horizontal, 32)
 
                             if currentPage == 0 {
                                 Button("Already have an account? Sign In") {
@@ -73,7 +69,7 @@ struct OnboardingContainerView: View {
                                     withAnimation(.spring()) { showAuth = true }
                                 }
                                 .font(.system(size: 14))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                             }
                         }
                     }
@@ -98,7 +94,7 @@ struct OnboardingPage1: View {
                 SwiftUI.Circle()
                     .fill(
                         RadialGradient(
-                            colors: [Color("BrandAnchor").opacity(0.11), Color.clear],
+                            colors: [AATheme.steel.opacity(0.11), Color.clear],
                             center: .center,
                             startRadius: 10,
                             endRadius: 148
@@ -126,12 +122,12 @@ struct OnboardingPage1: View {
 
             VStack(spacing: 16) {
                 Text("Welcome, Brother.")
-                    .font(.system(size: 32, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.titleFont)
+                    .foregroundColor(AATheme.primaryText)
 
                 Text("Anchor & Arrow is a daily habit journal built for men who are done drifting and ready to stand firm in Christ.")
                     .font(.system(size: 17))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
                     .padding(.horizontal, 32)
@@ -158,8 +154,8 @@ struct OnboardingPage2: View {
 
             VStack(spacing: 6) {
                 Text("One verse. Two callings.")
-                    .font(.system(size: 26, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.headlineFont)
+                    .foregroundColor(AATheme.primaryText)
             }
             .opacity(appeared ? 1.0 : 0.0)
             .animation(.easeOut(duration: 0.4).delay(0.1), value: appeared)
@@ -169,38 +165,37 @@ struct OnboardingPage2: View {
                 Text("\"Be watchful, stand firm in the faith, act like men, be strong. Let all that you do be done in love.\"")
                     .font(.system(size: 18, weight: .medium, design: .serif))
                     .italic()
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(6)
 
                 Text("— 1 Corinthians 16:13-14")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .font(.system(size: 14, weight: .semibold, design: .serif))
+                    .foregroundColor(AATheme.steel)
             }
-            .padding(24)
-            .background(Color("CardBackground"))
-            .cornerRadius(18)
-            .padding(.horizontal, 24)
+            .aaCard()
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+            .padding(.horizontal, AATheme.paddingLarge)
             .opacity(appeared ? 1.0 : 0.0)
             .offset(y: appeared ? 0 : 16)
             .animation(.easeOut(duration: 0.5).delay(0.2), value: appeared)
 
             // Two concepts
             HStack(spacing: 16) {
-                ConceptCard(color: "BrandAnchor",
+                ConceptCard(color: AATheme.steel,
                             title: "The Anchor",
                             description: "Be watchful. Stand firm. Root yourself in Christ daily.") {
                     AnchorSymbolView()
                         .frame(width: 28, height: 35)
                 }
-                ConceptCard(color: "BrandArrow",
+                ConceptCard(color: AATheme.amber,
                             title: "The Arrow",
                             description: "Act like men. Be strong in love. Pursue God's purpose.") {
-                    SingleArcheryArrowView(color: Color("BrandArrow"))
+                    SingleArcheryArrowView(color: AATheme.amber)
                         .frame(width: 26, height: 26)
                 }
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AATheme.paddingLarge)
             .opacity(appeared ? 1.0 : 0.0)
             .offset(y: appeared ? 0 : 16)
             .animation(.easeOut(duration: 0.5).delay(0.35), value: appeared)
@@ -215,33 +210,34 @@ struct OnboardingPage2: View {
 
 
 struct ConceptCard<Icon: View>: View {
-    let color: String
+    let color: Color
     let title: String
     let description: String
     @ViewBuilder let icon: () -> Icon
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
             ZStack {
                 SwiftUI.Circle()
-                    .fill(Color(color).opacity(0.15))
+                    .fill(color.opacity(0.15))
                     .frame(width: 48, height: 48)
                 icon()
             }
 
             Text(title)
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             Text(description)
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(3)
         }
-        .padding(16)
+        .padding(AATheme.paddingMedium)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color("CardBackground"))
-        .cornerRadius(16)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 }
 
@@ -250,41 +246,41 @@ struct OnboardingPage3: View {
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: AATheme.paddingLarge) {
             Spacer()
 
             Text("How it works")
-                .font(.system(size: 26, weight: .heavy, design: .rounded))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.headlineFont)
+                .foregroundColor(AATheme.primaryText)
                 .opacity(appeared ? 1.0 : 0.0)
 
             VStack(spacing: 16) {
                 HowItWorksRow(
                     number: "1",
-                    color: "BrandAnchor",
+                    color: AATheme.steel,
                     title: "Morning Anchor",
                     description: "Start your day grounded — scripture, reflection, reject the drift."
                 )
                 HowItWorksRow(
                     number: "2",
-                    color: "BrandArrow",
+                    color: AATheme.amber,
                     title: "Evening Arrow",
                     description: "End your day purposeful — log one action that advanced God's kingdom."
                 )
                 HowItWorksRow(
                     number: "3",
-                    color: "BrandWarning",
+                    color: AATheme.warning,
                     title: "Drift Log",
                     description: "Any moment you slip? Tap the shield. Hear a prayer. Anchor back fast."
                 )
                 HowItWorksRow(
                     number: "4",
-                    color: "BrandGold",
+                    color: AATheme.warmGold,
                     title: "Iron Sharpeners",
                     description: "Join a private circle of brothers. Sharpen each other. Stay accountable."
                 )
             }
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AATheme.paddingLarge)
             .opacity(appeared ? 1.0 : 0.0)
             .offset(y: appeared ? 0 : 20)
             .animation(.easeOut(duration: 0.5).delay(0.2), value: appeared)
@@ -299,7 +295,7 @@ struct OnboardingPage3: View {
 
 struct HowItWorksRow: View {
     let number: String
-    let color: String
+    let color: Color
     let title: String
     let description: String
 
@@ -307,20 +303,20 @@ struct HowItWorksRow: View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
                 SwiftUI.Circle()
-                    .fill(Color(color).opacity(0.15))
+                    .fill(color.opacity(0.15))
                     .frame(width: 40, height: 40)
                 Text(number)
                     .font(.system(size: 18, weight: .heavy))
-                    .foregroundColor(Color(color))
+                    .foregroundColor(color)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Text(description)
                     .font(.system(size: 14))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .lineSpacing(3)
             }
         }
@@ -334,24 +330,24 @@ struct OnboardingPage4: View {
     @State private var appeared = false
 
     var body: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: AATheme.paddingXLarge) {
             Spacer()
 
             Image(systemName: "figure.stand")
                 .font(.system(size: 72, weight: .light))
-                .foregroundColor(Color("BrandAnchor"))
+                .foregroundColor(AATheme.steel)
                 .scaleEffect(appeared ? 1.0 : 0.5)
                 .opacity(appeared ? 1.0 : 0.0)
                 .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1), value: appeared)
 
             VStack(spacing: 14) {
                 Text("Ready to stand firm?")
-                    .font(.system(size: 28, weight: .heavy, design: .rounded))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.titleFont)
+                    .foregroundColor(AATheme.primaryText)
 
                 Text("No fluff. No performance. Just daily faithfulness — one anchor, one arrow, one day at a time.")
                     .font(.system(size: 16))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                     .padding(.horizontal, 32)
@@ -363,29 +359,19 @@ struct OnboardingPage4: View {
             Button(action: onGetStarted) {
                 HStack {
                     Text("Create My Account")
-                        .font(.system(size: 18, weight: .bold))
                     Image(systemName: "arrow.right")
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    LinearGradient(
-                        colors: [Color("BrandAnchor"), Color("BrandArrow")],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .foregroundColor(.white)
-                .cornerRadius(16)
-                .padding(.horizontal, 32)
             }
+            .buttonStyle(AAPrimaryButtonStyle())
+            .padding(.horizontal, 32)
             .opacity(appeared ? 1.0 : 0.0)
             .offset(y: appeared ? 0 : 16)
             .animation(.easeOut(duration: 0.5).delay(0.45), value: appeared)
 
             Text("Free to start. No credit card required.")
                 .font(.system(size: 12))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .opacity(appeared ? 1.0 : 0.0)
                 .animation(.easeOut(duration: 0.5).delay(0.55), value: appeared)
 

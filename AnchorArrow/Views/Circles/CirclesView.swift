@@ -580,24 +580,24 @@ struct CircleDetailView: View {
             HStack(spacing: 6) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                 Text("TODAY'S CIRCLE PROMPT")
                     .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                     .tracking(0.5)
                 Spacer()
             }
             Text(dailyPrompt)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundColor(Color("TextPrimary"))
+                .font(.system(size: 15, weight: .medium, design: .serif))
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(4)
         }
-        .padding(16)
-        .background(Color("BrandGold").opacity(0.08))
-        .cornerRadius(14)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.warmGold.opacity(0.08))
+        .cornerRadius(AATheme.cornerRadius)
         .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color("BrandGold").opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                .stroke(AATheme.warmGold.opacity(0.2), lineWidth: 1)
         )
     }
 
@@ -607,17 +607,17 @@ struct CircleDetailView: View {
             Spacer(minLength: 60)
             Image(systemName: "bubble.left.and.bubble.right")
                 .font(.system(size: 44))
-                .foregroundColor(Color("TextSecondary").opacity(0.4))
+                .foregroundColor(AATheme.secondaryText.opacity(0.4))
             Text("No posts yet. Be the first to share.")
                 .font(.system(size: 15))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
             if !canPost {
                 Button { showPremiumUpsell = true } label: {
                     Text("Upgrade to Post")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.horizontal, 20).padding(.vertical, 10)
-                        .background(Color("BrandGold"))
+                        .background(AATheme.warmGold)
                         .cornerRadius(20)
                 }
             }

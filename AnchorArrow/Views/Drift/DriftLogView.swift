@@ -23,7 +23,7 @@ struct DriftLogView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Header card
                     headerSection
@@ -57,17 +57,17 @@ struct DriftLogView: View {
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, AATheme.paddingMedium)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCategory)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCustomCategory)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Drift Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
                 ToolbarItem(placement: .keyboard) {
                     HStack {
@@ -93,32 +93,32 @@ struct DriftLogView: View {
     // MARK: - Subviews
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             HStack(spacing: 12) {
                 Image(systemName: "exclamationmark.shield.fill")
                     .font(.system(size: 24))
-                    .foregroundColor(Color("BrandWarning"))
+                    .foregroundColor(AATheme.warning)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Drift Detected")
-                        .font(.system(size: 18, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.headlineFont)
+                        .foregroundColor(AATheme.primaryText)
                     Text("Name it. Anchor back fast.")
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
             }
 
             Text("Honesty is strength, not weakness. Naming what's pulling at you is the first step to standing firm.")
                 .font(.system(size: 14))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
         }
-        .padding(16)
-        .background(Color("BrandWarning").opacity(0.08))
-        .cornerRadius(16)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.warning.opacity(0.08))
+        .cornerRadius(AATheme.cornerRadius)
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color("BrandWarning").opacity(0.25), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                .stroke(AATheme.warning.opacity(0.25), lineWidth: 1)
         )
     }
 
@@ -126,13 +126,13 @@ struct DriftLogView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("What pulled at you?")
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Spacer()
                 if selectedCategory == nil {
                     Text("Select one to continue")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(Color("BrandWarning").opacity(0.8))
+                        .foregroundColor(AATheme.warning.opacity(0.8))
                 }
             }
 
@@ -160,32 +160,32 @@ struct DriftLogView: View {
     }
 
     private var noteSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             Text("Brief note (optional)")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
 
             ZStack(alignment: .topLeading) {
                 if note.isEmpty {
                     Text("What triggered it? What's the context?")
                         .font(.system(size: 14))
-                        .foregroundColor(Color("TextSecondary").opacity(0.6))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.6))
                         .padding(.top, 12)
                         .padding(.leading, 5)
                 }
                 TextEditor(text: $note)
                     .font(.system(size: 14))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .scrollContentBackground(.hidden)
                     .focused($noteFocused)
                     .frame(minHeight: 80, maxHeight: 120)
             }
             .padding(12)
-            .background(Color("CardBackground"))
-            .cornerRadius(12)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadiusSmall)
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(noteFocused ? Color("BrandWarning") : Color("TextSecondary").opacity(0.2), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                    .stroke(noteFocused ? AATheme.warning : AATheme.steel.opacity(0.2), lineWidth: 1.5)
             )
         }
     }
@@ -193,23 +193,23 @@ struct DriftLogView: View {
     private func anchorPrayerSection(for category: AnchorTag) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Anchor Prayer")
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
                 Label("Pray this out loud", systemImage: "mouth.fill")
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
 
                 Text(driftPrayerText(for: category))
-                    .font(.system(size: 14, weight: .medium, design: .serif))
-                    .italic()
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.scriptureFont)
+                    .foregroundColor(AATheme.primaryText)
                     .lineSpacing(5)
             }
             .padding(14)
-            .background(Color("BrandAnchor").opacity(0.06))
+            .background(AATheme.steel.opacity(0.06))
             .cornerRadius(12)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         }
     }
 
@@ -231,8 +231,8 @@ struct DriftLogView: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 54)
-            .background(Color("BrandWarning"))
-            .cornerRadius(16)
+            .background(AATheme.warning)
+            .cornerRadius(AATheme.cornerRadius)
         }
         .disabled(isLogging)
     }
@@ -245,19 +245,19 @@ struct DriftLogView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         Text("My Categories")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(Color("TextPrimary"))
+                            .font(AATheme.subheadlineFont)
+                            .foregroundColor(AATheme.primaryText)
                         Spacer()
                         Text("PREMIUM")
                             .font(.system(size: 9, weight: .heavy))
-                            .foregroundColor(Color("BrandGold"))
-                            .padding(.horizontal, 8)
+                            .foregroundColor(AATheme.warmGold)
+                            .padding(.horizontal, AATheme.paddingSmall)
                             .padding(.vertical, 3)
-                            .background(Color("BrandGold").opacity(0.15))
+                            .background(AATheme.warmGold.opacity(0.15))
                             .cornerRadius(6)
                     }
 
-                    FlowLayout(spacing: 8) {
+                    FlowLayout(spacing: AATheme.paddingSmall) {
                         ForEach(customs, id: \.self) { name in
                             Button {
                                 withAnimation(.spring(response: 0.3)) {
@@ -275,14 +275,14 @@ struct DriftLogView: View {
                                     Text(name)
                                         .font(.system(size: 13, weight: .semibold))
                                 }
-                                .foregroundColor(selectedCustomCategory == name ? .white : Color("TextSecondary"))
+                                .foregroundColor(selectedCustomCategory == name ? .white : AATheme.secondaryText)
                                 .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(selectedCustomCategory == name ? Color("BrandWarning") : Color("CardBackground"))
+                                .padding(.vertical, AATheme.paddingSmall)
+                                .background(selectedCustomCategory == name ? AATheme.warning : AATheme.cardBackground)
                                 .cornerRadius(20)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 20)
-                                        .stroke(selectedCustomCategory == name ? Color("BrandWarning") : Color("TextSecondary").opacity(0.2), lineWidth: 1)
+                                        .stroke(selectedCustomCategory == name ? AATheme.warning : AATheme.secondaryText.opacity(0.2), lineWidth: 1)
                                 )
                             }
                             .buttonStyle(.plain)
@@ -305,10 +305,10 @@ struct DriftLogView: View {
                                 Text("Add")
                                     .font(.system(size: 13, weight: .semibold))
                             }
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                             .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color("BrandAnchor").opacity(0.1))
+                            .padding(.vertical, AATheme.paddingSmall)
+                            .background(AATheme.steel.opacity(0.1))
                             .cornerRadius(20)
                         }
                         .buttonStyle(.plain)
@@ -377,26 +377,27 @@ struct DriftCategoryButton: View {
             VStack(spacing: 6) {
                 ZStack {
                     SwiftUI.Circle()
-                        .fill(isSelected ? Color("BrandWarning").opacity(0.2) : Color("CardBackground"))
+                        .fill(isSelected ? AATheme.warning.opacity(0.2) : AATheme.cardBackground)
                         .frame(width: 46, height: 46)
                     Image(systemName: tag.icon)
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(isSelected ? Color("BrandWarning") : Color("TextSecondary"))
+                        .foregroundColor(isSelected ? AATheme.warning : AATheme.secondaryText)
                 }
                 Text(tag.displayName)
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(isSelected ? Color("BrandWarning") : Color("TextSecondary"))
+                    .foregroundColor(isSelected ? AATheme.warning : AATheme.secondaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(isSelected ? Color("BrandWarning").opacity(0.08) : Color("CardBackground"))
+            .background(isSelected ? AATheme.warning.opacity(0.08) : AATheme.cardBackground)
             .cornerRadius(14)
             .overlay(
                 RoundedRectangle(cornerRadius: 14)
-                    .stroke(isSelected ? Color("BrandWarning") : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? AATheme.warning : Color.clear, lineWidth: 2)
             )
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
             .scaleEffect(isSelected ? 0.96 : 1.0)
             .animation(.spring(response: 0.2), value: isSelected)
         }
@@ -418,7 +419,7 @@ struct DriftSuccessOverlay: View {
             Color.black.opacity(0.7).ignoresSafeArea()
 
             VStack(spacing: 20) {
-                AnchorSymbolView(color: Color("BrandAnchor"))
+                AnchorSymbolView(color: AATheme.steel)
                     .frame(width: 64, height: 80)
                     .scaleEffect(appeared ? 1.0 : 0.3)
 
@@ -437,10 +438,10 @@ struct DriftSuccessOverlay: View {
                         .font(.system(size: 16, weight: .bold))
                         .foregroundColor(.white)
                         .frame(width: 160, height: 46)
-                        .background(Color("BrandAnchor"))
+                        .background(AATheme.steel)
                         .cornerRadius(23)
                 }
-                .padding(.top, 8)
+                .padding(.top, AATheme.paddingSmall)
             }
             .opacity(appeared ? 1.0 : 0.0)
             .scaleEffect(appeared ? 1.0 : 0.8)
