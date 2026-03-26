@@ -68,7 +68,7 @@ struct SettingsView: View {
                         showExportSheet = true
                     } label: {
                         Label("Export Journal Data", systemImage: "square.and.arrow.up")
-                            .foregroundColor(Color("TextPrimary"))
+                            .foregroundColor(AATheme.primaryText)
                     }
                 } header: {
                     Text("Data")
@@ -82,11 +82,11 @@ struct SettingsView: View {
                         } label: {
                             HStack {
                                 Label("Blocked Users", systemImage: "hand.raised")
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .foregroundColor(AATheme.primaryText)
                                 Spacer()
                                 Text("\(userStore.appUser?.blockedUserIds.count ?? 0)")
                                     .font(.system(size: 14))
-                                    .foregroundColor(Color("TextSecondary"))
+                                    .foregroundColor(AATheme.secondaryText)
                             }
                         }
                     } header: {
@@ -111,7 +111,7 @@ struct SettingsView: View {
                             if isDeleting {
                                 Spacer()
                                 ProgressView()
-                                    .tint(Color("BrandDanger"))
+                                    .tint(AATheme.destructive)
                             }
                         }
                     }
@@ -125,13 +125,13 @@ struct SettingsView: View {
                     if let url = URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html") {
                         Link(destination: url) {
                             Label("Terms of Use", systemImage: "doc.text")
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                         }
                     }
                     if let url = URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html") {
                         Link(destination: url) {
                             Label("Privacy Policy", systemImage: "hand.raised")
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                         }
                     }
                 } header: {
@@ -148,7 +148,7 @@ struct SettingsView: View {
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Profile & Settings")
             .navigationBarTitleDisplayMode(.large)
             .confirmationDialog("Sign Out?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
@@ -191,27 +191,27 @@ struct SettingsView: View {
                 SwiftUI.Circle()
                     .fill(
                         LinearGradient(
-                            colors: [Color("BrandAnchor"), Color("BrandArrow")],
+                            colors: [AATheme.steel, AATheme.amber],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
                     .frame(width: 60, height: 60)
                 Text(String(userStore.displayName.prefix(2)).uppercased())
-                    .font(.system(size: 22, weight: .heavy))
+                    .font(.system(size: 22, weight: .heavy, design: .serif))
                     .foregroundColor(.white)
             }
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(userStore.displayName)
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(Color("TextPrimary"))
+                    .font(AATheme.subheadlineFont)
+                    .foregroundColor(AATheme.primaryText)
                 Text(authManager.userEmail)
                     .font(.system(size: 13))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
                 Text("Member since \(userStore.appUser?.memberSince ?? "")")
                     .font(.system(size: 12))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
         }
         .padding(.vertical, 4)
@@ -223,12 +223,12 @@ struct SettingsView: View {
             if userStore.isPremium {
                 HStack {
                     Label("Premium Active", systemImage: "crown.fill")
-                        .foregroundColor(Color("BrandGold"))
+                        .foregroundColor(AATheme.warmGold)
                     Spacer()
                     if let expiry = userStore.appUser?.premiumExpiry {
                         Text("Renews \(expiry.displayShort)")
                             .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                     }
                 }
                 Button("Manage Subscription") {
@@ -236,7 +236,7 @@ struct SettingsView: View {
                         UIApplication.shared.open(url)
                     }
                 }
-                .foregroundColor(Color("BrandAnchor"))
+                .foregroundColor(AATheme.steel)
             } else {
                 Button {
                     showPremiumUpsell = true
@@ -245,19 +245,19 @@ struct SettingsView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack(spacing: 6) {
                                 Image(systemName: "crown.fill")
-                                    .foregroundColor(Color("BrandGold"))
+                                    .foregroundColor(AATheme.warmGold)
                                 Text("Upgrade to Premium")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundColor(Color("TextPrimary"))
+                                    .font(.system(size: 16, weight: .bold, design: .serif))
+                                    .foregroundColor(AATheme.primaryText)
                             }
                             Text("Circles • Drift Insights • Grace Day • Journeys")
                                 .font(.system(size: 12))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                         }
                         Spacer()
                         Text("$6.99/mo")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(Color("BrandGold"))
+                            .font(.system(size: 14, weight: .bold, design: .serif))
+                            .foregroundColor(AATheme.warmGold)
                     }
                 }
                 .buttonStyle(.plain)
@@ -289,7 +289,7 @@ struct SettingsView: View {
             )) {
                 Label("Daily Reminders", systemImage: "bell.fill")
             }
-            .tint(Color("BrandAnchor"))
+            .tint(AATheme.steel)
 
             if userStore.appUser?.notificationsEnabled ?? true {
                 DatePicker(
@@ -404,10 +404,10 @@ struct BlockedUsersView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "hand.raised.slash")
                         .font(.system(size: 44))
-                        .foregroundColor(Color("TextSecondary").opacity(0.4))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.4))
                     Text("No blocked users")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
@@ -416,30 +416,30 @@ struct BlockedUsersView: View {
                         HStack {
                             ZStack {
                                 SwiftUI.Circle()
-                                    .fill(Color("BrandAnchor").opacity(0.1))
+                                    .fill(AATheme.steel.opacity(0.1))
                                     .frame(width: 36, height: 36)
                                 Text(String((blockedNames[uid] ?? "?").prefix(1)).uppercased())
                                     .font(.system(size: 14, weight: .heavy))
-                                    .foregroundColor(Color("BrandAnchor"))
+                                    .foregroundColor(AATheme.steel)
                             }
                             Text(blockedNames[uid] ?? "User")
                                 .font(.system(size: 15, weight: .medium))
-                                .foregroundColor(Color("TextPrimary"))
+                                .foregroundColor(AATheme.primaryText)
                             Spacer()
                             Button("Unblock") {
                                 Task { await userStore.unblockUser(uid) }
                             }
                             .font(.system(size: 14, weight: .semibold))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                         }
-                        .listRowBackground(Color("CardBackground"))
+                        .listRowBackground(AATheme.cardBackground)
                     }
                 }
                 .listStyle(.insetGrouped)
                 .scrollContentBackground(.hidden)
             }
         }
-        .background(Color("BackgroundPrimary").ignoresSafeArea())
+        .aaScreenBackground()
         .navigationTitle("Blocked Users")
         .navigationBarTitleDisplayMode(.inline)
         .task { await loadNames() }

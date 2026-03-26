@@ -170,18 +170,18 @@ struct CirclesView: View {
                 if !userStore.isPremium && circles.count >= 1 {
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
-                            .foregroundColor(Color("BrandGold"))
+                            .foregroundColor(AATheme.warmGold)
                         Text("Free plan: react only. Upgrade to post and comment.")
                             .font(.system(size: 13))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                         Spacer()
                         Button("Upgrade") { showPremiumUpsell = true }
                             .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(Color("BrandGold"))
+                            .foregroundColor(AATheme.warmGold)
                     }
                     .padding(14)
-                    .background(Color("BrandGold").opacity(0.1))
-                    .cornerRadius(12)
+                    .background(AATheme.warmGold.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadiusSmall)
                     .padding(.horizontal, 20)
                 }
                 ForEach(circles) { circle in
@@ -226,22 +226,22 @@ struct CircleCard: View {
             HStack(spacing: 16) {
                 ZStack {
                     SwiftUI.Circle()
-                        .fill(Color("BrandAnchor").opacity(0.15))
+                        .fill(AATheme.steel.opacity(0.15))
                         .frame(width: 52, height: 52)
                     Text(String(circle.name.prefix(2)).uppercased())
                         .font(.system(size: 18, weight: .heavy))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(circle.name)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.subheadlineFont)
+                        .foregroundColor(AATheme.primaryText)
                         .lineLimit(1)
 
                     HStack(spacing: 8) {
                         Label("\(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers")", systemImage: "person.2.fill")
                             .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                             .lineLimit(1)
                             .fixedSize(horizontal: true, vertical: false)
 
@@ -252,19 +252,19 @@ struct CircleCard: View {
                             Text(circle.isPublic ? "Public" : "Private")
                                 .font(.system(size: 11, weight: .semibold))
                         }
-                        .foregroundColor(circle.isPublic ? Color("BrandArrow") : Color("TextSecondary"))
+                        .foregroundColor(circle.isPublic ? AATheme.amber : AATheme.secondaryText)
                         .fixedSize(horizontal: true, vertical: false)
 
                         // Weekly health badge
                         if let active = activeThisWeek {
                             HStack(spacing: 3) {
                                 SwiftUI.Circle()
-                                    .fill(active == circle.memberCount ? Color("BrandArrow") : Color("BrandWarning"))
+                                    .fill(active == circle.memberCount ? AATheme.amber : AATheme.warning)
                                     .frame(width: 6, height: 6)
                                 Text("\(active)/\(circle.memberCount) active")
                                     .font(.system(size: 11, weight: .semibold))
                                     .foregroundColor(active == circle.memberCount
-                                                     ? Color("BrandArrow") : Color("BrandWarning"))
+                                                     ? AATheme.amber : AATheme.warning)
                             }
                             .fixedSize(horizontal: true, vertical: false)
                         }
@@ -286,10 +286,10 @@ struct CircleCard: View {
                         Text(showCopiedToast ? "Copied!" : circle.inviteCode)
                             .font(.system(size: 12, weight: .bold, design: .monospaced))
                     }
-                    .foregroundColor(showCopiedToast ? Color("BrandArrow") : Color("BrandAnchor"))
+                    .foregroundColor(showCopiedToast ? AATheme.amber : AATheme.steel)
                     .padding(.horizontal, 8).padding(.vertical, 5)
-                    .background(Color("BrandAnchor").opacity(0.1))
-                    .cornerRadius(8)
+                    .background(AATheme.steel.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadiusSmall)
                 }
                 .buttonStyle(.plain)
                 .fixedSize(horizontal: true, vertical: false)
@@ -297,11 +297,12 @@ struct CircleCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
-            .padding(16)
-            .background(Color("CardBackground"))
-            .cornerRadius(16)
+            .padding(AATheme.paddingMedium)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
@@ -437,24 +438,24 @@ struct CircleDetailView: View {
                             .padding(.horizontal, 22).padding(.vertical, 13)
                             .background(
                                 LinearGradient(
-                                    colors: [Color("BrandWarning"), Color("BrandWarning").opacity(0.8)],
+                                    colors: [AATheme.warning, AATheme.warning.opacity(0.8)],
                                     startPoint: .leading, endPoint: .trailing
                                 )
                             )
                             .cornerRadius(28)
-                            .shadow(color: Color("BrandWarning").opacity(0.4), radius: 10, y: 4)
+                            .shadow(color: AATheme.warning.opacity(0.4), radius: 10, y: 4)
                         }
                         .buttonStyle(.plain)
                         .padding(.bottom, 20)
                     }
                 }
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle(circle.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") { dismiss() }.foregroundColor(Color("BrandAnchor"))
+                    Button("Done") { dismiss() }.foregroundColor(AATheme.steel)
                 }
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     ShareLink(
@@ -464,12 +465,12 @@ struct CircleDetailView: View {
                     ) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 16))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                     Button { showMemberList = true } label: {
                         Image(systemName: "person.2")
                             .font(.system(size: 16))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                     Button {
                         if canPost { showNewPost = true }
@@ -477,7 +478,7 @@ struct CircleDetailView: View {
                     } label: {
                         Image(systemName: "square.and.pencil")
                             .font(.system(size: 17))
-                            .foregroundColor(Color("BrandAnchor"))
+                            .foregroundColor(AATheme.steel)
                     }
                     Menu {
                         if circle.creatorId == Auth.auth().currentUser?.uid {
@@ -492,7 +493,7 @@ struct CircleDetailView: View {
                     } label: {
                         Image(systemName: "ellipsis")
                             .font(.system(size: 16))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                     }
                 }
             }

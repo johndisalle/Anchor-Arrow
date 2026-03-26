@@ -17,7 +17,7 @@ struct ArrowView: View {
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
+                VStack(spacing: AATheme.paddingLarge) {
 
                     // Completed banner
                     if userStore.isArrowDoneToday {
@@ -50,12 +50,12 @@ struct ArrowView: View {
                     Spacer(minLength: 80)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, 16)
+                .padding(.top, AATheme.paddingMedium)
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Evening Arrow")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(Color("BackgroundPrimary"), for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {
@@ -85,26 +85,26 @@ struct ArrowView: View {
         HStack {
             Image(systemName: "book.fill")
                 .font(.system(size: 13))
-                .foregroundColor(Color("BrandArrow"))
+                .foregroundColor(AATheme.amber)
             Text("\"Let all that you do be done in love.\" — 1 Cor 16:14")
-                .font(.system(size: 13, weight: .medium, design: .serif))
-                .italic()
-                .foregroundColor(Color("TextSecondary"))
+                .font(AATheme.scriptureFont)
+                .foregroundColor(AATheme.secondaryText)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(Color("CardBackground"))
+        .background(AATheme.cardBackground)
         .cornerRadius(12)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
     }
 
     private var roleSelectorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Which role did God call you into today?")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
+                HStack(spacing: AATheme.cornerRadiusSmall) {
                     ForEach(ArrowRole.allCases) { role in
                         RoleChip(
                             role: role,
@@ -129,60 +129,60 @@ struct ArrowView: View {
             HStack {
                 Image(systemName: selectedRole.icon)
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                 Text(selectedRole.displayName)
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                 Spacer()
                 Text(matchingPrompt.verseReference)
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
 
             Text(matchingPrompt.question)
                 .font(.system(size: 17, weight: .medium))
-                .foregroundColor(Color("TextPrimary"))
+                .foregroundColor(AATheme.primaryText)
                 .lineSpacing(5)
 
             Text(selectedRole.description)
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
         }
         .padding(20)
-        .background(Color("CardBackground"))
-        .cornerRadius(20)
-        .shadow(color: Color("BrandArrow").opacity(0.08), radius: 12, x: 0, y: 4)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
     }
 
     private var reflectionSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             Text("Your Response")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(Color("TextPrimary"))
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
 
             ZStack(alignment: .topLeading) {
                 if reflection.isEmpty {
                     Text("What did you do? Be specific — even small acts count.")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary").opacity(0.6))
+                        .foregroundColor(AATheme.secondaryText.opacity(0.6))
                         .padding(.top, 14)
                         .padding(.leading, 5)
                 }
                 TextEditor(text: $reflection)
                     .font(.system(size: 15))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .scrollContentBackground(.hidden)
                     .focused($reflectionFocused)
                     .frame(minHeight: 110)
             }
             .padding(14)
-            .background(Color("CardBackground"))
-            .cornerRadius(14)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadiusSmall)
             .overlay(
-                RoundedRectangle(cornerRadius: 14)
-                    .stroke(reflectionFocused ? Color("BrandArrow") : Color("TextSecondary").opacity(0.2), lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                    .stroke(reflectionFocused ? AATheme.amber : AATheme.steel.opacity(0.2), lineWidth: 1.5)
             )
         }
     }
@@ -191,23 +191,23 @@ struct ArrowView: View {
         let matchingPrompt = PromptLibrary.arrowPrompts.first { $0.role == selectedRole }
             ?? PromptLibrary.arrowPromptForToday()
 
-        return VStack(alignment: .leading, spacing: 8) {
+        return VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
             HStack {
                 Image(systemName: "lightbulb.fill")
                     .font(.system(size: 13))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
                 Text("Examples")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color("BrandGold"))
+                    .foregroundColor(AATheme.warmGold)
             }
 
             Text(matchingPrompt.example)
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
         }
         .padding(14)
-        .background(Color("BrandGold").opacity(0.08))
+        .background(AATheme.warmGold.opacity(0.08))
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
     }
@@ -217,9 +217,9 @@ struct ArrowView: View {
             // Quick one-tap options
             Text("Or log a quick win:")
                 .font(.system(size: 13))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
 
-            HStack(spacing: 10) {
+            HStack(spacing: AATheme.cornerRadiusSmall) {
                 QuickWinButton(label: "Prayed", icon: "hands.sparkles.fill") {
                     reflection = "I stopped and prayed intentionally today."
                     Task { await submit() }
@@ -242,7 +242,7 @@ struct ArrowView: View {
                     if isSubmitting {
                         ProgressView().tint(.white)
                     } else {
-                        HStack(spacing: 10) {
+                        HStack(spacing: AATheme.cornerRadiusSmall) {
                             CrossedArrowsView(color: .white)
                                 .frame(width: 28, height: 18)
                             Text("Loose the Arrow")
@@ -255,10 +255,10 @@ struct ArrowView: View {
                 .frame(height: 54)
                 .background(
                     reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting
-                    ? Color("TextSecondary").opacity(0.3)
-                    : Color("BrandArrow")
+                    ? AATheme.secondaryText.opacity(0.3)
+                    : AATheme.amber
                 )
-                .cornerRadius(16)
+                .cornerRadius(AATheme.cornerRadius)
             }
             .disabled(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting)
             .accessibilityLabel("Loose the Arrow")
@@ -305,12 +305,12 @@ struct RoleChip: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
-            .background(isSelected ? Color("BrandArrow") : Color("CardBackground"))
-            .foregroundColor(isSelected ? .white : Color("TextSecondary"))
+            .background(isSelected ? AATheme.amber : AATheme.cardBackground)
+            .foregroundColor(isSelected ? .white : AATheme.secondaryText)
             .cornerRadius(20)
             .overlay(
                 Capsule()
-                    .stroke(isSelected ? Color.clear : Color("TextSecondary").opacity(0.2), lineWidth: 1)
+                    .stroke(isSelected ? Color.clear : AATheme.secondaryText.opacity(0.2), lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -331,15 +331,16 @@ struct QuickWinButton: View {
             VStack(spacing: 5) {
                 Image(systemName: icon)
                     .font(.system(size: 16))
-                    .foregroundColor(Color("BrandArrow"))
+                    .foregroundColor(AATheme.amber)
                 Text(label)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    .foregroundColor(AATheme.secondaryText)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(Color("CardBackground"))
+            .background(AATheme.cardBackground)
             .cornerRadius(12)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Quick win: \(label)")

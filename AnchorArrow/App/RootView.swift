@@ -58,7 +58,7 @@ struct SplashView: View {
 
     var body: some View {
         ZStack {
-            Color("BackgroundPrimary").ignoresSafeArea()
+            AATheme.background.ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()
@@ -71,7 +71,7 @@ struct SplashView: View {
                     SwiftUI.Circle()
                         .fill(
                             RadialGradient(
-                                colors: [Color("BrandAnchor").opacity(0.11), Color.clear],
+                                colors: [AATheme.steel.opacity(0.11), Color.clear],
                                 center: .center,
                                 startRadius: 10,
                                 endRadius: 148
@@ -99,20 +99,20 @@ struct SplashView: View {
                 // Wordmark
                 VStack(spacing: 12) {
                     Text("ANCHOR & ARROW")
-                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .font(AATheme.titleFont)
                         .tracking(3)
-                        .foregroundColor(Color("TextPrimary"))
+                        .foregroundColor(AATheme.primaryText)
                         .opacity(titleOpacity)
 
                     Rectangle()
-                        .fill(Color("BrandAnchor").opacity(0.3))
+                        .fill(AATheme.steel.opacity(0.3))
                         .frame(width: 40, height: 1.5)
                         .opacity(titleOpacity)
 
                     Text("Stand Firm Edition")
                         .font(.system(size: 14, weight: .medium, design: .rounded))
                         .tracking(1.5)
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .opacity(subtitleOpacity)
                 }
 
@@ -178,13 +178,13 @@ struct MainTabView: View {
                             SwiftUI.Circle()
                                 .fill(
                                     LinearGradient(
-                                        colors: [Color("BrandWarning"), Color("BrandDanger")],
+                                        colors: [AATheme.warning, AATheme.destructive],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
                                     )
                                 )
                                 .frame(width: 52, height: 52)
-                                .shadow(color: Color("BrandDanger").opacity(0.4), radius: 8, x: 0, y: 4)
+                                .shadow(color: AATheme.destructive.opacity(0.4), radius: 8, x: 0, y: 4)
 
                             Image(systemName: "exclamationmark.shield.fill")
                                 .font(.system(size: 22, weight: .semibold))
@@ -200,16 +200,16 @@ struct MainTabView: View {
             // Offline banner
             if !networkMonitor.isConnected {
                 VStack {
-                    HStack(spacing: 8) {
+                    HStack(spacing: AATheme.paddingSmall) {
                         Image(systemName: "wifi.slash")
                             .font(.system(size: 13, weight: .semibold))
                         Text("No internet connection")
                             .font(.system(size: 13, weight: .semibold))
                     }
                     .foregroundColor(.white)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, AATheme.paddingSmall)
                     .frame(maxWidth: .infinity)
-                    .background(Color("TextSecondary").opacity(0.85))
+                    .background(AATheme.secondaryText.opacity(0.85))
                     Spacer()
                 }
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -283,7 +283,7 @@ struct MainTabView: View {
         }
         .safeAreaInset(edge: .top) {
             if showErrorToast {
-                HStack(spacing: 10) {
+                HStack(spacing: AATheme.paddingSmall + 2) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.white)
@@ -301,8 +301,8 @@ struct MainTabView: View {
                     }
                 }
                 .padding(14)
-                .background(Color("BrandDanger").cornerRadius(12))
-                .padding(.horizontal, 16)
+                .background(AATheme.destructive.cornerRadius(AATheme.cornerRadiusSmall + 2))
+                .padding(.horizontal, AATheme.paddingMedium)
                 .padding(.top, 4)
                 .transition(.move(edge: .top).combined(with: .opacity))
                 .animation(.spring(response: 0.4), value: showErrorToast)
@@ -336,11 +336,11 @@ private struct CustomTabBar: View {
                         }
                         .foregroundColor(
                             selectedTab == tab.tag
-                                ? Color("BrandAnchor")
-                                : Color("TextSecondary")
+                                ? AATheme.steel
+                                : AATheme.secondaryText
                         )
                         .frame(maxWidth: .infinity)
-                        .padding(.top, 10)
+                        .padding(.top, AATheme.paddingSmall + 2)
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel("\(tab.label) tab")
@@ -348,14 +348,14 @@ private struct CustomTabBar: View {
                     .accessibilityAddTraits(selectedTab == tab.tag ? .isSelected : [])
                 }
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, AATheme.paddingSmall)
         }
-        .background(Color("CardBackground").ignoresSafeArea(edges: .bottom))
+        .background(AATheme.cardBackground.ignoresSafeArea(edges: .bottom))
     }
 
     @ViewBuilder
     private func tabIcon(tag: Int) -> some View {
-        let tint = selectedTab == tag ? Color("BrandAnchor") : Color("TextSecondary")
+        let tint = selectedTab == tag ? AATheme.steel : AATheme.secondaryText
         switch tag {
         case 0:
             Image(systemName: selectedTab == 0 ? "house.fill" : "house")
@@ -408,8 +408,8 @@ struct SkeletonCard: View {
     var height: CGFloat = 80
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .fill(Color("CardBackground"))
+        RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+            .fill(AATheme.cardBackground)
             .frame(height: height)
             .shimmer()
     }
@@ -417,30 +417,30 @@ struct SkeletonCard: View {
 
 struct SkeletonCirclesList: View {
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: AATheme.paddingMedium) {
             ForEach(0..<3, id: \.self) { _ in
-                HStack(spacing: 16) {
+                HStack(spacing: AATheme.paddingMedium) {
                     SwiftUI.Circle()
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(width: 52, height: 52)
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(Color("CardBackground"))
+                            .fill(AATheme.cardBackground)
                             .frame(width: 140, height: 14)
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(Color("CardBackground"))
+                            .fill(AATheme.cardBackground)
                             .frame(width: 90, height: 10)
                     }
                     Spacer()
                 }
-                .padding(16)
-                .background(Color("CardBackground").opacity(0.5))
-                .cornerRadius(16)
+                .padding(AATheme.paddingMedium)
+                .background(AATheme.cardBackground.opacity(0.5))
+                .cornerRadius(AATheme.cornerRadius)
             }
         }
         .shimmer()
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, AATheme.paddingMedium)
     }
 }
 
@@ -449,30 +449,30 @@ struct SkeletonPostFeed: View {
         VStack(spacing: 12) {
             SkeletonCard(height: 100)
             ForEach(0..<3, id: \.self) { _ in
-                VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
                     HStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(Color("CardBackground"))
+                        RoundedRectangle(cornerRadius: AATheme.paddingSmall)
+                            .fill(AATheme.cardBackground)
                             .frame(width: 70, height: 22)
                         Spacer()
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(Color("CardBackground"))
+                            .fill(AATheme.cardBackground)
                             .frame(width: 40, height: 10)
                     }
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(height: 12)
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(Color("CardBackground"))
+                        .fill(AATheme.cardBackground)
                         .frame(width: 200, height: 12)
                 }
                 .padding(14)
-                .background(Color("CardBackground").opacity(0.5))
-                .cornerRadius(14)
+                .background(AATheme.cardBackground.opacity(0.5))
+                .cornerRadius(AATheme.cornerRadiusSmall + 4)
             }
         }
         .shimmer()
         .padding(.horizontal, 20)
-        .padding(.top, 16)
+        .padding(.top, AATheme.paddingMedium)
     }
 }

@@ -27,18 +27,18 @@ struct AuthView: View {
                 VStack(spacing: 12) {
                     Image(systemName: isSignUp ? "person.badge.plus" : "anchor")
                         .font(.system(size: 48, weight: .medium))
-                        .foregroundColor(Color("BrandAnchor"))
+                        .foregroundColor(AATheme.steel)
                         .padding(.top, 60)
 
                     Text(isSignUp ? "Join the Brotherhood" : "Welcome Back")
-                        .font(.system(size: 28, weight: .heavy, design: .rounded))
-                        .foregroundColor(Color("TextPrimary"))
+                        .font(AATheme.titleFont)
+                        .foregroundColor(AATheme.primaryText)
 
                     Text(isSignUp
                          ? "Create your account to begin standing firm."
                          : "Sign in to continue your journey.")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .padding(.bottom, 40)
@@ -93,13 +93,13 @@ struct AuthView: View {
                         .onSubmit { Task { await submitAuth() } }
                     }
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AATheme.paddingLarge)
 
                 // Error
                 if showError {
                     Text(errorMessage)
                         .font(.system(size: 14))
-                        .foregroundColor(Color("BrandDanger"))
+                        .foregroundColor(AATheme.destructive)
                         .padding(.horizontal, 32)
                         .padding(.top, 12)
                         .multilineTextAlignment(.center)
@@ -115,29 +115,26 @@ struct AuthView: View {
                                 .tint(.white)
                         } else {
                             Text(isSignUp ? "Create Account" : "Sign In")
-                                .font(.system(size: 17, weight: .bold))
-                                .foregroundColor(.white)
                         }
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 54)
-                    .background(Color("BrandAnchor"))
-                    .cornerRadius(14)
-                    .padding(.horizontal, 24)
                 }
+                .buttonStyle(AAPrimaryButtonStyle())
                 .disabled(isLoading)
-                .padding(.top, 24)
+                .padding(.top, AATheme.paddingLarge)
+                .padding(.horizontal, AATheme.paddingLarge)
 
                 // Divider
                 HStack {
-                    Rectangle().fill(Color("TextSecondary").opacity(0.2)).frame(height: 1)
+                    Rectangle().fill(AATheme.secondaryText.opacity(0.2)).frame(height: 1)
                     Text("or")
                         .font(.system(size: 13))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .padding(.horizontal, 12)
-                    Rectangle().fill(Color("TextSecondary").opacity(0.2)).frame(height: 1)
+                    Rectangle().fill(AATheme.secondaryText.opacity(0.2)).frame(height: 1)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AATheme.paddingLarge)
                 .padding(.vertical, 20)
 
                 // Apple Sign-In
@@ -166,8 +163,8 @@ struct AuthView: View {
                 )
                 .signInWithAppleButtonStyle(.whiteOutline)
                 .frame(height: 54)
-                .cornerRadius(14)
-                .padding(.horizontal, 24)
+                .cornerRadius(AATheme.cornerRadius)
+                .padding(.horizontal, AATheme.paddingLarge)
 
                 // Toggle sign in / sign up
                 Button {
@@ -181,9 +178,9 @@ struct AuthView: View {
                          ? "Already have an account? **Sign In**"
                          : "New here? **Create an account**")
                         .font(.system(size: 15))
-                        .foregroundColor(Color("TextSecondary"))
+                        .foregroundColor(AATheme.secondaryText)
                         .multilineTextAlignment(.center)
-                        .padding(.top, 24)
+                        .padding(.top, AATheme.paddingLarge)
                         .padding(.horizontal, 32)
                 }
 
@@ -192,14 +189,14 @@ struct AuthView: View {
                         Task { await resetPassword() }
                     }
                     .font(.system(size: 14))
-                    .foregroundColor(Color("BrandAnchor"))
+                    .foregroundColor(AATheme.steel)
                     .padding(.top, 12)
                 }
 
                 Spacer().frame(height: 60)
             }
         }
-        .background(Color("BackgroundPrimary").ignoresSafeArea())
+        .aaScreenBackground()
     }
 
     // MARK: - Actions
@@ -276,27 +273,27 @@ struct AuthTextField: View {
         HStack(spacing: 14) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .medium))
-                .foregroundColor(Color("TextSecondary"))
+                .foregroundColor(AATheme.secondaryText)
                 .frame(width: 20)
 
             if isSecure {
                 SecureField(placeholder, text: $text)
                     .font(.system(size: 16))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
             } else {
                 TextField(placeholder, text: $text)
                     .font(.system(size: 16))
-                    .foregroundColor(Color("TextPrimary"))
+                    .foregroundColor(AATheme.primaryText)
                     .keyboardType(keyboardType)
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, AATheme.paddingMedium)
         .padding(.vertical, 15)
-        .background(Color("CardBackground"))
-        .cornerRadius(12)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadiusSmall)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color("TextSecondary").opacity(0.2), lineWidth: 1)
+            RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
+                .stroke(AATheme.secondaryText.opacity(0.2), lineWidth: 1)
         )
     }
 }
