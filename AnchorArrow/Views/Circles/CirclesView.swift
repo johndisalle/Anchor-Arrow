@@ -1270,9 +1270,9 @@ struct CommentsSheet: View {
                         Toggle(isOn: $isAnonymous) {
                             Text("Reply anonymously")
                                 .font(.system(size: 13))
-                                .foregroundColor(Color("TextSecondary"))
+                                .foregroundColor(AATheme.secondaryText)
                         }
-                        .tint(Color("BrandAnchor"))
+                        .tint(AATheme.steel)
 
                         HStack(spacing: 10) {
                             TextField("Reply to your brother...", text: $newComment, axis: .vertical)
@@ -1280,30 +1280,30 @@ struct CommentsSheet: View {
                                 .focused($focused)
                                 .lineLimit(1...4)
                                 .padding(10)
-                                .background(Color("CardBackground"))
-                                .cornerRadius(12)
+                                .background(AATheme.cardBackground)
+                                .cornerRadius(AATheme.cornerRadiusSmall)
 
                             Button { Task { await submitComment() } } label: {
                                 Image(systemName: isPosting ? "hourglass" : "arrow.up.circle.fill")
                                     .font(.system(size: 32))
                                     .foregroundColor(newComment.trimmingCharacters(in: .whitespaces).isEmpty
-                                        ? Color("TextSecondary").opacity(0.3)
-                                        : Color("BrandAnchor"))
+                                        ? AATheme.secondaryText.opacity(0.3)
+                                        : AATheme.steel)
                             }
                             .disabled(newComment.trimmingCharacters(in: .whitespaces).isEmpty || isPosting)
                         }
                     }
                     .padding(.horizontal, 16)
                     .padding(.vertical, 12)
-                    .background(Color("BackgroundPrimary"))
+                    .background(AATheme.background)
                 }
             }
-            .background(Color("BackgroundPrimary").ignoresSafeArea())
+            .aaScreenBackground()
             .navigationTitle("Replies")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") { dismiss() }.foregroundColor(Color("BrandAnchor"))
+                    Button("Done") { dismiss() }.foregroundColor(AATheme.steel)
                 }
             }
         }
