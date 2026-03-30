@@ -130,6 +130,16 @@ class AuthManager: NSObject, ObservableObject {
         try await user.delete()
     }
 
+    /// Re-authenticate with password then delete (required when session is stale)
+    func reauthenticateAndDelete(password: String) async throws {
+        guard let user = Auth.auth().currentUser,
+              let email = user.email else { throw AuthError.notSignedIn }
+        let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+        try await user.reauthenticate(with: credential)
+        try await FirestoreService.shared.deleteUserData(uid: user.uid)
+        try await user.delete()
+    }
+
     // MARK: - Helpers
     var currentUser: User? { Auth.auth().currentUser }
     var userDisplayName: String { Auth.auth().currentUser?.displayName ?? "Warrior" }

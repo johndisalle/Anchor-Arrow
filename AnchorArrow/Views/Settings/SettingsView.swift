@@ -19,6 +19,9 @@ struct SettingsView: View {
     @State private var showExportSheet = false
     @State private var exportContent = ""
     @State private var isDeleting = false
+    @State private var showReauthAlert = false
+    @State private var reauthPassword = ""
+    @State private var deleteError: String?
 
     var body: some View {
         NavigationStack {
@@ -167,13 +170,41 @@ struct SettingsView: View {
                 Button("Delete Permanently", role: .destructive) {
                     Task {
                         isDeleting = true
-                        try? await authManager.deleteAccount()
+                        deleteError = nil
+                        do {
+                            try await authManager.deleteAccount()
+                        } catch {
+                            let nsError = error as NSError
+                            if nsError.code == AuthErrorCode.requiresRecentLogin.rawValue {
+                                showReauthAlert = true
+                            } else {
+                                deleteError = error.localizedDescription
+                            }
+                        }
                         isDeleting = false
                     }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This will permanently delete your account and all data. This cannot be undone.")
+            }
+            .alert("Re-enter Password", isPresented: $showReauthAlert) {
+                SecureField("Password", text: $reauthPassword)
+                Button("Delete Account", role: .destructive) {
+                    Task {
+                        isDeleting = true
+                        do {
+                            try await authManager.reauthenticateAndDelete(password: reauthPassword)
+                        } catch {
+                            deleteError = error.localizedDescription
+                        }
+                        isDeleting = false
+                        reauthPassword = ""
+                    }
+                }
+                Button("Cancel", role: .cancel) { reauthPassword = "" }
+            } message: {
+                Text("For security, please re-enter your password to delete your account.")
             }
             .sheet(isPresented: $showPremiumUpsell) {
                 PremiumUpsellView(reason: nil)
