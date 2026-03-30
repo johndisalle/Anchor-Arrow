@@ -514,6 +514,19 @@ class FirestoreService {
         try await db.collection("reports").addDocument(data: data)
     }
 
+    /// Report a user block event to the developer (Apple Guideline 1.2)
+    func submitBlockReport(reporterId: String, blockedUid: String) async throws {
+        let data: [String: Any] = [
+            "reporterId": reporterId,
+            "blockedUserId": blockedUid,
+            "reason": "User blocked — content hidden from reporter's feed",
+            "type": "block",
+            "status": "pending",
+            "timestamp": Timestamp(date: Date())
+        ]
+        try await db.collection("reports").addDocument(data: data)
+    }
+
     // MARK: - Account Deletion (cascade)
 
     /// Deletes all user data from Firestore before the Auth account is removed.

@@ -41,6 +41,9 @@ struct AppUser: Codable, Identifiable {
     // Blocked users
     var blockedUserIds: [String] = []
 
+    // Terms acceptance (required before accessing UGC/circles)
+    var acceptedTerms: Bool = false
+
     // Moderation
     var isAdmin: Bool = false
 
@@ -73,6 +76,7 @@ struct AppUser: Codable, Identifiable {
         completedJourneys    = try c.decodeIfPresent([String].self, forKey: .completedJourneys) ?? []
         customDriftCategories = try c.decodeIfPresent([String].self, forKey: .customDriftCategories) ?? []
         blockedUserIds       = try c.decodeIfPresent([String].self, forKey: .blockedUserIds) ?? []
+        acceptedTerms        = try c.decodeIfPresent(Bool.self, forKey: .acceptedTerms) ?? false
         isAdmin              = try c.decodeIfPresent(Bool.self, forKey: .isAdmin) ?? false
     }
 
@@ -90,6 +94,7 @@ struct AppUser: Codable, Identifiable {
          completedJourneys: [String] = [],
          customDriftCategories: [String] = [],
          blockedUserIds: [String] = [],
+         acceptedTerms: Bool = false,
          isAdmin: Bool = false) {
         self.uid = uid
         self.email = email
@@ -116,6 +121,7 @@ struct AppUser: Codable, Identifiable {
         self.completedJourneys = completedJourneys
         self.customDriftCategories = customDriftCategories
         self.blockedUserIds = blockedUserIds
+        self.acceptedTerms = acceptedTerms
         self.isAdmin = isAdmin
     }
 

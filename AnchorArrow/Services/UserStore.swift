@@ -287,6 +287,20 @@ class UserStore: ObservableObject {
         JourneySeries(rawValue: appUser?.journeySeries ?? "") ?? .standFirm
     }
 
+    // MARK: - Terms Acceptance
+
+    var hasAcceptedTerms: Bool { appUser?.acceptedTerms ?? false }
+
+    func acceptTerms() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        do {
+            try await firestoreService.updateUser(uid: uid, fields: ["acceptedTerms": true])
+            appUser?.acceptedTerms = true
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     // MARK: - Block / Unblock
 
     var blockedUserIds: Set<String> {
@@ -302,6 +316,8 @@ class UserStore: ObservableObject {
         do {
             try await firestoreService.blockUser(uid: myUid, blockedUid: uid)
             appUser?.blockedUserIds.append(uid)
+            // Auto-report blocked user to developer for review (Apple Guideline 1.2)
+            try? await firestoreService.submitBlockReport(reporterId: myUid, blockedUid: uid)
         } catch {
             errorMessage = error.localizedDescription
         }

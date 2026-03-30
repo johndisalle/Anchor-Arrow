@@ -21,6 +21,14 @@ struct CirclesView: View {
     private let firestoreService = FirestoreService.shared
 
     var body: some View {
+        if !userStore.hasAcceptedTerms {
+            TermsAcceptanceView()
+        } else {
+            circlesContent
+        }
+    }
+
+    private var circlesContent: some View {
         NavigationStack {
             Group {
                 if isLoading {
@@ -1443,6 +1451,106 @@ struct CommentRow: View {
             }
         }
         .padding(.vertical, 6)
+    }
+}
+
+// MARK: - TermsAcceptanceView
+/// Shown once before a user can access circles/UGC (Apple Guideline 1.2)
+struct TermsAcceptanceView: View {
+    @EnvironmentObject var userStore: UserStore
+    @State private var isAccepting = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: AATheme.paddingLarge) {
+                    Spacer().frame(height: AATheme.paddingMedium)
+
+                    Image(systemName: "doc.text.fill")
+                        .font(.system(size: 48))
+                        .foregroundColor(AATheme.steel)
+
+                    Text("Community Guidelines")
+                        .font(AATheme.headlineFont)
+                        .foregroundColor(AATheme.primaryText)
+
+                    Text("Before joining Iron Sharpeners circles, please review and accept our Terms of Use.")
+                        .font(.system(size: 15))
+                        .foregroundColor(AATheme.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, AATheme.paddingXLarge)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        guidelineRow(icon: "checkmark.shield.fill",
+                                     text: "No objectionable, offensive, or abusive content")
+                        guidelineRow(icon: "hand.raised.fill",
+                                     text: "Users who violate these terms will be removed")
+                        guidelineRow(icon: "flag.fill",
+                                     text: "Report inappropriate content — we review within 24 hours")
+                        guidelineRow(icon: "person.crop.circle.badge.minus",
+                                     text: "Block users to instantly hide their content from your feed")
+                    }
+                    .padding(AATheme.paddingMedium)
+                    .background(AATheme.cardBackground)
+                    .cornerRadius(AATheme.cornerRadius)
+                    .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+                    .padding(.horizontal, AATheme.paddingLarge)
+
+                    if let url = URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html") {
+                        Link(destination: url) {
+                            HStack(spacing: 6) {
+                                Text("Read Full Terms of Use")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Image(systemName: "arrow.up.right.square")
+                                    .font(.system(size: 13))
+                            }
+                            .foregroundColor(AATheme.steel)
+                        }
+                    }
+
+                    Button {
+                        isAccepting = true
+                        Task {
+                            await userStore.acceptTerms()
+                            isAccepting = false
+                        }
+                    } label: {
+                        if isAccepting {
+                            ProgressView().tint(.white)
+                        } else {
+                            Text("I Agree to the Terms of Use")
+                        }
+                    }
+                    .buttonStyle(AAPrimaryButtonStyle())
+                    .disabled(isAccepting)
+                    .padding(.horizontal, AATheme.paddingLarge)
+
+                    Text("By tapping above, you agree to abide by the community guidelines and Terms of Use. Violations may result in removal from circles.")
+                        .font(.system(size: 11))
+                        .foregroundColor(AATheme.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, AATheme.paddingXLarge)
+
+                    Spacer(minLength: 40)
+                }
+            }
+            .aaScreenBackground()
+            .navigationTitle("Iron Sharpeners")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    private func guidelineRow(icon: String, text: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16))
+                .foregroundColor(AATheme.steel)
+                .frame(width: 22)
+            Text(text)
+                .font(.system(size: 14))
+                .foregroundColor(AATheme.primaryText)
+                .lineSpacing(3)
+        }
     }
 }
 
