@@ -232,8 +232,11 @@ struct SettingsView: View {
                     }
                 }
                 Button("Manage Subscription") {
-                    if let url = URL(string: "itms-apps://apps.apple.com/account/subscriptions") {
-                        UIApplication.shared.open(url)
+                    Task {
+                        if let scene = UIApplication.shared.connectedScenes
+                            .compactMap({ $0 as? UIWindowScene }).first {
+                            try? await AppStore.showManageSubscriptions(in: scene)
+                        }
                     }
                 }
                 .foregroundColor(AATheme.steel)
