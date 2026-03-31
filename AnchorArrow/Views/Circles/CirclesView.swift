@@ -197,8 +197,8 @@ struct CirclesView: View {
                                activeThisWeek: circleActivity[circle.id ?? ""]) {
                         selectedCircle = circle
                     }
+                    .padding(.horizontal, AATheme.paddingLarge)
                 }
-                .padding(.horizontal, AATheme.paddingLarge)
                 Spacer(minLength: 100)
             }
             .padding(.top, 16)
