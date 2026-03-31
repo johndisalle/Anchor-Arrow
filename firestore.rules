@@ -101,5 +101,10 @@ service cloud.firestore {
         }
       }
     }
+
+    // ─── Reports ──────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow create: if isAuthenticated();
+    }
   }
 }

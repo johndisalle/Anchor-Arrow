@@ -646,29 +646,36 @@ class FirestoreService {
 
     /// Ensures the Global Brotherhood circle exists and the user is a member.
     /// Creates it on first-ever call; adds the user if not already a member.
-    func ensureGlobalCircleMembership(uid: String) async throws {
+    func ensureGlobalCircleMembership(uid: String) async {
         let ref = circlesRef().document(Self.globalCircleId)
-        let doc = try await ref.getDocument()
+        do {
+            let doc = try await ref.getDocument()
 
-        if doc.exists {
-            let circle = try doc.data(as: Circle.self)
-            if !circle.memberIds.contains(uid) {
-                try await ref.updateData([
-                    "memberIds": FieldValue.arrayUnion([uid])
-                ])
+            if doc.exists {
+                // Circle exists — add user if not already a member
+                let memberIds = (doc.data()?["memberIds"] as? [String]) ?? []
+                if !memberIds.contains(uid) {
+                    try await ref.updateData([
+                        "memberIds": FieldValue.arrayUnion([uid])
+                    ])
+                }
+            } else {
+                // Create the Global Brotherhood circle using raw data
+                // (avoids Codable encoding issues with @DocumentID)
+                let data: [String: Any] = [
+                    "name": "The Global Brotherhood",
+                    "inviteCode": "GLOBAL",
+                    "creatorId": uid,
+                    "memberIds": [uid],
+                    "createdAt": Timestamp(date: Date()),
+                    "isPublic": true
+                ]
+                try await ref.setData(data)
             }
-        } else {
-            // Create the Global Brotherhood circle (first user ever)
-            // creatorId must be the actual user to satisfy Firestore security rules
-            let circle = Circle(
-                name: "The Global Brotherhood",
-                inviteCode: "GLOBAL",
-                creatorId: uid,
-                memberIds: [uid],
-                createdAt: Date(),
-                isPublic: true
-            )
-            try ref.setData(from: circle)
+        } catch {
+            #if DEBUG
+            print("[GlobalBrotherhood] Failed: \(error.localizedDescription)")
+            #endif
         }
     }
 }
