@@ -11,6 +11,9 @@ struct DashboardView: View {
     @State private var animateTree = false
     @State private var showPremiumUpsell = false
     @State private var greeting = ""
+    @State private var heroCardPulsing = false
+    @State private var showShareSheet = false
+    @State private var shareImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -82,6 +85,11 @@ struct DashboardView: View {
         .sheet(isPresented: $showPremiumUpsell) {
             PremiumUpsellView(reason: "Unlock all guided journeys")
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let image = shareImage {
+                ImageShareSheet(image: image)
+            }
+        }
         .onAppear {
             updateGreeting()
             withAnimation(.easeOut(duration: 1.2).delay(0.3)) {
@@ -128,50 +136,169 @@ struct DashboardView: View {
         .padding(.horizontal, AATheme.paddingLarge)
     }
 
-    private var todayStatusSection: some View {
-        HStack(spacing: 14) {
-            TodayStatusCard(
-                title: "Anchor",
-                subtitle: "Morning",
-                isComplete: userStore.isAnchorDoneToday,
-                color: AATheme.steel,
-                destination: AnyView(AnchorView())
-            ) {
-                AnchorSymbolView()
-                    .frame(width: 24, height: 30)
-            }
-            TodayStatusCard(
-                title: "Arrow",
-                subtitle: "Evening",
-                isComplete: userStore.isArrowDoneToday,
-                color: AATheme.amber,
-                destination: AnyView(ArrowView())
-            ) {
-                SingleArcheryArrowView(color: AATheme.amber)
-                    .frame(width: 26, height: 26)
-            }
+    private var heroCardHeadline: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:  return "Your Anchor is waiting."
+        case 12..<17: return "You haven't anchored today."
+        case 17..<24: return "Day's almost over. Anchor up."
+        default:      return "It's not too late. Stand firm."
         }
-        .padding(.horizontal, AATheme.paddingLarge)
+    }
+
+    private var todayStatusSection: some View {
+        VStack(spacing: 14) {
+            // Hero urgency card
+            if !userStore.isAnchorDoneToday && !userStore.isArrowDoneToday {
+                // Neither done — Anchor CTA
+                NavigationLink(destination: AnchorView()) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(heroCardHeadline)
+                                .font(.system(.title3, design: .serif, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("Tap to start your morning reflection")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(AATheme.paddingMedium)
+                    .background(
+                        LinearGradient(colors: [AATheme.steel, AATheme.steelDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                    .cornerRadius(AATheme.cornerRadius)
+                    .opacity(heroCardPulsing ? 1.0 : 0.95)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                            heroCardPulsing = true
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, AATheme.paddingLarge)
+                .accessibilityLabel("Start your Anchor")
+                .accessibilityHint("Tap to begin your morning reflection")
+            } else if userStore.isAnchorDoneToday && !userStore.isArrowDoneToday {
+                // Anchor done, Arrow pending
+                NavigationLink(destination: ArrowView()) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("Anchor set. Now loose your Arrow.")
+                                .font(.system(.title3, design: .serif, weight: .bold))
+                                .foregroundColor(.white)
+                            Text("What kingdom action did you take today?")
+                                .font(.system(size: 14))
+                                .foregroundColor(.white.opacity(0.8))
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.white)
+                    }
+                    .padding(AATheme.paddingMedium)
+                    .background(
+                        LinearGradient(colors: [AATheme.amber, AATheme.amberDark], startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+                    .cornerRadius(AATheme.cornerRadius)
+                    .opacity(heroCardPulsing ? 1.0 : 0.95)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+                            heroCardPulsing = true
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .padding(.horizontal, AATheme.paddingLarge)
+                .accessibilityLabel("Log your Arrow")
+                .accessibilityHint("Tap to record your kingdom action")
+            } else if userStore.isAnchorDoneToday && userStore.isArrowDoneToday {
+                // Both done — celebration
+                HStack(spacing: 12) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 28, weight: .semibold))
+                        .foregroundColor(AATheme.success)
+                    Text("Both done. Well fought, brother.")
+                        .font(.system(.title3, design: .serif, weight: .semibold))
+                        .foregroundColor(AATheme.primaryText)
+                }
+                .padding(AATheme.paddingMedium)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(AATheme.success.opacity(0.1))
+                .cornerRadius(AATheme.cornerRadius)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                        .stroke(AATheme.success, lineWidth: 1.5)
+                )
+                .padding(.horizontal, AATheme.paddingLarge)
+            }
+
+            // Existing status card pair
+            HStack(spacing: 14) {
+                TodayStatusCard(
+                    title: "Anchor",
+                    subtitle: "Morning",
+                    isComplete: userStore.isAnchorDoneToday,
+                    color: AATheme.steel,
+                    destination: AnyView(AnchorView())
+                ) {
+                    AnchorSymbolView()
+                        .frame(width: 24, height: 30)
+                }
+                TodayStatusCard(
+                    title: "Arrow",
+                    subtitle: "Evening",
+                    isComplete: userStore.isArrowDoneToday,
+                    color: AATheme.amber,
+                    destination: AnyView(ArrowView())
+                ) {
+                    SingleArcheryArrowView(color: AATheme.amber)
+                        .frame(width: 26, height: 26)
+                }
+            }
+            .padding(.horizontal, AATheme.paddingLarge)
+        }
     }
 
     private var streakStatsSection: some View {
         let streakColor = userStore.currentStreak >= 7 ? AATheme.warmGold : AATheme.steel
-        return HStack(spacing: 14) {
-            StatPill(value: "\(userStore.currentStreak)", label: "Day Streak",
-                     color: streakColor) {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(streakColor)
-            }
-            StatPill(value: "\(userStore.appUser?.totalAnchorDays ?? 0)", label: "Anchors",
-                     color: AATheme.steel) {
-                AnchorSymbolView()
-                    .frame(width: 20, height: 25)
-            }
-            StatPill(value: "\(userStore.appUser?.totalArrowDays ?? 0)", label: "Arrows",
-                     color: AATheme.amber) {
-                SingleArcheryArrowView(color: AATheme.amber)
-                    .frame(width: 20, height: 20)
+        return VStack(spacing: 10) {
+            HStack(spacing: 14) {
+                ZStack(alignment: .topTrailing) {
+                    StatPill(value: "\(userStore.currentStreak)", label: "Day Streak",
+                             color: streakColor) {
+                        Image(systemName: "flame.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(streakColor)
+                    }
+                    Button {
+                        shareImage = generateStreakShareImage()
+                        showShareSheet = true
+                    } label: {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(AATheme.secondaryText)
+                            .padding(6)
+                            .background(AATheme.cardBackground)
+                            .clipShape(SwiftUI.Circle())
+                            .shadow(color: AATheme.cardShadow, radius: 2, x: 0, y: 1)
+                    }
+                    .offset(x: -4, y: 4)
+                    .accessibilityLabel("Share your streak")
+                }
+                StatPill(value: "\(userStore.appUser?.totalAnchorDays ?? 0)", label: "Anchors",
+                         color: AATheme.steel) {
+                    AnchorSymbolView()
+                        .frame(width: 20, height: 25)
+                }
+                StatPill(value: "\(userStore.appUser?.totalArrowDays ?? 0)", label: "Arrows",
+                         color: AATheme.amber) {
+                    SingleArcheryArrowView(color: AATheme.amber)
+                        .frame(width: 20, height: 20)
+                }
             }
         }
         .padding(.horizontal, AATheme.paddingLarge)

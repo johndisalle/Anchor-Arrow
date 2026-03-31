@@ -1,5 +1,5 @@
 // OnboardingContainerView.swift
-// Manages the 4-step onboarding flow
+// Manages the 4-step onboarding flow: Problem → Solution → Brotherhood → CTA
 
 import SwiftUI
 
@@ -80,7 +80,7 @@ struct OnboardingContainerView: View {
     }
 }
 
-// MARK: - Onboarding Page 1 — Welcome
+// MARK: - Onboarding Page 1 — The Problem (Conviction)
 struct OnboardingPage1: View {
     @State private var appeared = false
 
@@ -88,48 +88,25 @@ struct OnboardingPage1: View {
         VStack(spacing: 0) {
             Spacer()
 
-            // Brand mark hero — same composition as splash screen
-            ZStack {
-                // Subtle atmospheric glow (no ring border — it clipped the arrows)
-                SwiftUI.Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [AATheme.steel.opacity(0.11), Color.clear],
-                            center: .center,
-                            startRadius: 10,
-                            endRadius: 148
-                        )
-                    )
-                    .frame(width: 296, height: 296)
-                    .opacity(appeared ? 1.0 : 0)
-                    .animation(.easeOut(duration: 1.0).delay(0.2), value: appeared)
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 56))
+                .foregroundColor(AATheme.warning)
+                .opacity(appeared ? 1.0 : 0.0)
+                .scaleEffect(appeared ? 1.0 : 0.5)
+                .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1), value: appeared)
 
-                VStack(spacing: -30) {
-                    CrossedArrowsView()
-                        .frame(width: 196, height: 122)
-                        .scaleEffect(appeared ? 1.0 : 0.1)
-                        .opacity(appeared ? 1.0 : 0)
-                        .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: appeared)
+            Spacer().frame(height: 36)
 
-                    AnchorSymbolView()
-                        .frame(width: 158, height: 198)
-                        .opacity(appeared ? 1.0 : 0)
-                        .animation(.easeOut(duration: 0.7).delay(0.15), value: appeared)
-                }
-            }
-
-            Spacer().frame(height: 44)
-
-            VStack(spacing: 16) {
-                Text("Welcome, Brother.")
+            VStack(spacing: 20) {
+                Text("You know the feeling.")
                     .font(AATheme.titleFont)
                     .foregroundColor(AATheme.primaryText)
 
-                Text("Anchor & Arrow is a daily habit journal built for men who are done drifting and ready to stand firm in Christ.")
-                    .font(.system(size: 17))
+                Text("Another day on autopilot. Another week drifting. You meant to pray. You meant to lead. You meant to be the man God called you to be.\n\nBut the drift is quiet. And it's winning.")
+                    .font(AATheme.scriptureFont)
                     .foregroundColor(AATheme.secondaryText)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+                    .lineSpacing(5)
                     .padding(.horizontal, 32)
             }
             .opacity(appeared ? 1.0 : 0.0)
@@ -153,7 +130,7 @@ struct OnboardingPage2: View {
             Spacer()
 
             VStack(spacing: 6) {
-                Text("One verse. Two callings.")
+                Text("There's a way back.")
                     .font(AATheme.headlineFont)
                     .foregroundColor(AATheme.primaryText)
             }
@@ -241,52 +218,69 @@ struct ConceptCard<Icon: View>: View {
     }
 }
 
-// MARK: - Onboarding Page 3 — How it Works
+// MARK: - Onboarding Page 3 — The Brotherhood (You're not alone)
 struct OnboardingPage3: View {
     @State private var appeared = false
 
+    private let testimonials: [(quote: String, attribution: String)] = [
+        ("I've tried every devotional app. This is the first one that asks me to actually do something.", "A brother, 14-day streak"),
+        ("The drift log saved me three times this week.", "A brother, 30-day streak"),
+        ("My circle knows my struggles. That changes everything.", "A brother, Iron Sharpener"),
+    ]
+
     var body: some View {
-        VStack(spacing: AATheme.paddingLarge) {
-            Spacer()
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: AATheme.paddingLarge) {
+                Spacer().frame(height: 40)
 
-            Text("How it works")
-                .font(AATheme.headlineFont)
-                .foregroundColor(AATheme.primaryText)
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 48))
+                    .foregroundColor(AATheme.warmGold)
+                    .opacity(appeared ? 1.0 : 0.0)
+                    .scaleEffect(appeared ? 1.0 : 0.5)
+                    .animation(.spring(response: 0.6, dampingFraction: 0.7).delay(0.1), value: appeared)
+
+                VStack(spacing: 16) {
+                    Text("You weren't meant to fight alone.")
+                        .font(AATheme.titleFont)
+                        .foregroundColor(AATheme.primaryText)
+                        .multilineTextAlignment(.center)
+
+                    Text("Iron Sharpeners are small circles of brothers who hold each other accountable. Share your wins. Confess your drifts. Pray for each other. Stand firm together.")
+                        .font(.system(size: 16))
+                        .foregroundColor(AATheme.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(5)
+                        .padding(.horizontal, 32)
+                }
                 .opacity(appeared ? 1.0 : 0.0)
+                .offset(y: appeared ? 0 : 20)
+                .animation(.easeOut(duration: 0.5).delay(0.3), value: appeared)
 
-            VStack(spacing: 16) {
-                HowItWorksRow(
-                    number: "1",
-                    color: AATheme.steel,
-                    title: "Morning Anchor",
-                    description: "Start your day grounded — scripture, reflection, reject the drift."
-                )
-                HowItWorksRow(
-                    number: "2",
-                    color: AATheme.amber,
-                    title: "Evening Arrow",
-                    description: "End your day purposeful — log one action that advanced God's kingdom."
-                )
-                HowItWorksRow(
-                    number: "3",
-                    color: AATheme.warning,
-                    title: "Drift Log",
-                    description: "Any moment you slip? Tap the shield. Hear a prayer. Anchor back fast."
-                )
-                HowItWorksRow(
-                    number: "4",
-                    color: AATheme.warmGold,
-                    title: "Iron Sharpeners",
-                    description: "Join a private circle of brothers. Sharpen each other. Stay accountable."
-                )
+                VStack(spacing: 12) {
+                    ForEach(Array(testimonials.enumerated()), id: \.offset) { index, testimonial in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("\"\(testimonial.quote)\"")
+                                .font(.system(size: 15, design: .serif))
+                                .italic()
+                                .foregroundColor(AATheme.primaryText)
+                                .lineSpacing(4)
+
+                            Text("— \(testimonial.attribution)")
+                                .font(.system(size: 13))
+                                .foregroundColor(AATheme.secondaryText)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .aaCard()
+                        .opacity(appeared ? 1.0 : 0.0)
+                        .offset(y: appeared ? 0 : 16)
+                        .animation(.easeOut(duration: 0.5).delay(0.45 + Double(index) * 0.1), value: appeared)
+                    }
+                }
+                .padding(.horizontal, AATheme.paddingLarge)
+
+                Spacer().frame(height: 80)
             }
-            .padding(.horizontal, AATheme.paddingLarge)
-            .opacity(appeared ? 1.0 : 0.0)
-            .offset(y: appeared ? 0 : 20)
-            .animation(.easeOut(duration: 0.5).delay(0.2), value: appeared)
-
-            Spacer()
-            Spacer()
         }
         .onAppear { appeared = true }
         .onDisappear { appeared = false }

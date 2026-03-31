@@ -52,11 +52,13 @@ class NotificationManager: ObservableObject {
         content.title = "Morning Anchor"
 
         let morningMessages = [
-            "Time to anchor up. What's pulling at you today?",
-            "Stand firm. Your Morning Anchor is ready.",
-            "Be watchful. The day begins — anchor first.",
-            "\"Stand firm in the faith\" — your morning reflection is waiting.",
-            "Before the chaos — anchor yourself in Christ."
+            "\"Be watchful, stand firm in the faith, act like men, be strong.\" — 1 Cor 16:13. Your Anchor is ready.",
+            "\"The Lord is my rock, my fortress, and my deliverer.\" — Psalm 18:2. Anchor into Him this morning.",
+            "\"Be strong and courageous. Do not be afraid; do not be discouraged.\" — Joshua 1:9. Start your day anchored.",
+            "\"Put on the full armor of God, so that you can take your stand.\" — Ephesians 6:11. Time to anchor up.",
+            "\"He who began a good work in you will carry it on to completion.\" — Philippians 1:6. Your morning reflection awaits.",
+            "\"Watch and pray so that you will not fall into temptation.\" — Matthew 26:41. Anchor before the drift.",
+            "\"I can do all things through Christ who strengthens me.\" — Philippians 4:13. Stand firm today, brother."
         ]
         content.body = morningMessages[Calendar.current.component(.weekday, from: Date()) % morningMessages.count]
         content.sound = .default
@@ -88,11 +90,13 @@ class NotificationManager: ObservableObject {
         content.title = "Evening Arrow"
 
         let eveningMessages = [
-            "Day's not done. What kingdom action did you take today?",
-            "Log your Arrow. Did you serve, speak truth, or pray today?",
-            "Evening reflection: How did you act like a man in love today?",
-            "One action for God's kingdom — log it before you sleep.",
-            "Arrow time. Reflect and close the day with purpose."
+            "\"Let all that you do be done in love.\" — 1 Cor 16:14. What kingdom action did you take today?",
+            "\"Faith without works is dead.\" — James 2:26. Log your Arrow — what did you do for God's kingdom?",
+            "\"Well done, good and faithful servant.\" — Matthew 25:21. Reflect on today's purposeful action.",
+            "\"Whatever you do, work at it with all your heart, as working for the Lord.\" — Colossians 3:23. Evening Arrow time.",
+            "\"Be doers of the word, and not hearers only.\" — James 1:22. One action. Log it before you rest.",
+            "\"The harvest is plentiful but the workers are few.\" — Matthew 9:37. How did you advance the kingdom today?",
+            "\"Let your light shine before others.\" — Matthew 5:16. Evening reflection — how did your light shine?"
         ]
         content.body = eveningMessages[Calendar.current.component(.weekday, from: Date()) % eveningMessages.count]
         content.sound = .default
