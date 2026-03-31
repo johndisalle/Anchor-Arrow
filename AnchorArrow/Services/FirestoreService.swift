@@ -581,8 +581,11 @@ class FirestoreService {
             for uid in uids {
                 group.addTask {
                     let doc = try await self.db.collection("users").document(uid).getDocument()
-                    let name = (doc.data()?["displayName"] as? String) ?? "Unknown"
-                    return (uid, name)
+                    let data = doc.data() ?? [:]
+                    let name = (data["displayName"] as? String)
+                        ?? (data["email"] as? String)
+                        ?? "A Brother"
+                    return (uid, name.isEmpty ? "A Brother" : name)
                 }
             }
             for try await (uid, name) in group {

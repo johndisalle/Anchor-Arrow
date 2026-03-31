@@ -333,6 +333,7 @@ class UserStore: ObservableObject {
 
     func blockUser(_ uid: String) async {
         guard let myUid = Auth.auth().currentUser?.uid, uid != myUid else { return }
+        guard !(appUser?.blockedUserIds.contains(uid) ?? false) else { return }
         do {
             try await firestoreService.blockUser(uid: myUid, blockedUid: uid)
             appUser?.blockedUserIds.append(uid)

@@ -429,12 +429,17 @@ struct BlockedUsersView: View {
     @State private var blockedNames: [String: String] = [:]
     @State private var isLoading = true
 
+    private var uniqueBlockedIds: [String] {
+        var seen = Set<String>()
+        return (userStore.appUser?.blockedUserIds ?? []).filter { seen.insert($0).inserted }
+    }
+
     var body: some View {
         Group {
             if isLoading {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if (userStore.appUser?.blockedUserIds ?? []).isEmpty {
+            } else if uniqueBlockedIds.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "hand.raised.slash")
                         .font(.system(size: 44))
@@ -446,7 +451,7 @@ struct BlockedUsersView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
-                    ForEach(userStore.appUser?.blockedUserIds ?? [], id: \.self) { uid in
+                    ForEach(uniqueBlockedIds, id: \.self) { uid in
                         HStack {
                             ZStack {
                                 SwiftUI.Circle()
