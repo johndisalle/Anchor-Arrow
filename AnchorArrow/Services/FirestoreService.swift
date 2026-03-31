@@ -650,28 +650,16 @@ class FirestoreService {
         let ref = circlesRef().document(Self.globalCircleId)
         do {
             let doc = try await ref.getDocument()
-
-            if doc.exists {
-                // Circle exists — add user if not already a member
-                let memberIds = (doc.data()?["memberIds"] as? [String]) ?? []
-                if !memberIds.contains(uid) {
-                    try await ref.updateData([
-                        "memberIds": FieldValue.arrayUnion([uid])
-                    ])
-                }
-            } else {
-                // Create the Global Brotherhood circle using raw data
-                let data: [String: Any] = [
-                    "name": "The Global Brotherhood",
-                    "inviteCode": "GLOBAL",
-                    "creatorId": uid,
-                    "memberIds": [uid],
-                    "createdAt": Timestamp(date: Date()),
-                    "isPublic": true
-                ]
-                try await ref.setData(data)
+            guard doc.exists else {
+                return "Global Brotherhood circle not found in Firestore."
             }
-            return nil // success
+            let memberIds = (doc.data()?["memberIds"] as? [String]) ?? []
+            if !memberIds.contains(uid) {
+                try await ref.updateData([
+                    "memberIds": FieldValue.arrayUnion([uid])
+                ])
+            }
+            return nil
         } catch {
             return "Global Brotherhood error: \(error.localizedDescription)"
         }
