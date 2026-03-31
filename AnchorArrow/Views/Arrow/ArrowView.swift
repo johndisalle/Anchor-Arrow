@@ -160,6 +160,46 @@ struct ArrowView: View {
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
     }
 
+    private var quickResponses: [String] {
+        switch selectedRole {
+        case .servantLeader:
+            return ["Served my family without being asked", "Led a meeting with humility", "Put someone else's needs first", "Helped a neighbor or coworker"]
+        case .truthTeller:
+            return ["Spoke truth to a friend in love", "Had a hard conversation I'd been avoiding", "Shared my faith with someone", "Called out something that needed to be said"]
+        case .prayerWarrior:
+            return ["Prayed for my wife/family", "Interceded for a brother", "Spent time in focused prayer", "Prayed for someone who doesn't know Christ"]
+        case .providerProtector:
+            return ["Provided for my family's needs", "Protected someone vulnerable", "Made a sacrifice for my household", "Stood up for what's right"]
+        case .discipleMaker:
+            return ["Mentored a younger man", "Shared a verse with someone", "Invested time in someone's growth", "Invited someone to church or study"]
+        }
+    }
+
+    private var quickResponseSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Quick Response")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(AATheme.secondaryText)
+
+            FlowLayout(spacing: 8) {
+                ForEach(quickResponses, id: \.self) { response in
+                    Button {
+                        reflection = response
+                    } label: {
+                        Text(response)
+                            .font(.system(size: 13, weight: .medium))
+                            .foregroundColor(reflection == response ? .white : AATheme.primaryText)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(reflection == response ? AATheme.amber : AATheme.amber.opacity(0.1))
+                            .cornerRadius(20)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
     private var reflectionSection: some View {
         VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             Text("Your Response")

@@ -212,6 +212,9 @@ struct CirclesView: View {
         // Ensure user is in the Global Brotherhood before fetching circles
         _ = await firestoreService.ensureGlobalCircleMembership(uid: uid)
 
+        // Seed today's devotional into Global Brotherhood if not already posted
+        await firestoreService.seedGlobalBrotherhoodPost()
+
         circles = (try? await firestoreService.fetchUserCircles(uid: uid)) ?? []
 
         // Ensure Global Brotherhood appears first
