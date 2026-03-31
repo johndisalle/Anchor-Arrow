@@ -289,7 +289,7 @@ struct SettingsView: View {
                                 .foregroundColor(AATheme.secondaryText)
                         }
                         Spacer()
-                        Text("$6.99/mo")
+                        Text("$3.99/mo")
                             .font(.system(size: 14, weight: .bold, design: .serif))
                             .foregroundColor(AATheme.warmGold)
                     }

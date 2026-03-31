@@ -20,14 +20,14 @@ enum SubscriptionProduct: String, CaseIterable {
 
     var priceString: String {
         switch self {
-        case .monthly: return "$6.99/month"
-        case .annual:  return "$59.99/year"
+        case .monthly: return "$3.99/month"
+        case .annual:  return "$29.99/year"
         }
     }
 
     var savingsNote: String? {
         switch self {
-        case .annual: return "Save 28% vs monthly"
+        case .annual: return "Save 37% vs monthly"
         default: return nil
         }
     }

@@ -35,7 +35,7 @@
       "subscriptions" : [
         {
           "adHocOffers" : [],
-          "displayPrice" : "6.99",
+          "displayPrice" : "3.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "anchor_arrow_monthly_001",
@@ -60,7 +60,7 @@
         },
         {
           "adHocOffers" : [],
-          "displayPrice" : "59.99",
+          "displayPrice" : "29.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "anchor_arrow_annual_001",

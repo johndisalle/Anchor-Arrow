@@ -178,8 +178,8 @@ struct PremiumUpsellView: View {
 
     private var priceSubtext: String {
         switch selectedProduct {
-        case .monthly: return "$6.99/month • Cancel anytime"
-        case .annual:  return "$59.99/year • That's ~$5/month"
+        case .monthly: return "$3.99/month \u{2022} Cancel anytime"
+        case .annual:  return "$29.99/year \u{2022} That's ~$2.50/month"
         }
     }
 }
