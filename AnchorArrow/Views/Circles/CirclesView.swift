@@ -190,15 +190,15 @@ struct CirclesView: View {
                     .padding(14)
                     .background(AATheme.warmGold.opacity(0.1))
                     .cornerRadius(AATheme.cornerRadiusSmall)
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, AATheme.paddingLarge)
                 }
                 ForEach(circles) { circle in
                     CircleCard(circle: circle,
                                activeThisWeek: circleActivity[circle.id ?? ""]) {
                         selectedCircle = circle
                     }
-                    .padding(.horizontal, 20)
                 }
+                .padding(.horizontal, AATheme.paddingLarge)
                 Spacer(minLength: 100)
             }
             .padding(.top, 16)
