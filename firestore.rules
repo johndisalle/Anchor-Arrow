@@ -24,8 +24,11 @@ service cloud.firestore {
 
     // ─── Users ──────────────────────────────────────────────────
     match /users/{userId} {
-      // Users can only read and write their own document
-      allow read, write: if isOwner(userId);
+      // Users can read and write their own document.
+      // Any authenticated user can read other users' profiles
+      // (needed for circle member names, streaks, battle formation).
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
 
       // Daily entries subcollection
       match /entries/{entryId} {

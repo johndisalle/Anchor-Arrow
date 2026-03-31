@@ -1067,7 +1067,7 @@ struct CirclePostRow: View {
     var onReport: (() -> Void)? = nil
     var onBlock: (() -> Void)? = nil
 
-    private let reactionEmojis = ["🔥", "🙏", "🙌", "💪"]
+    private let reactionEmojis = ["\u{1F525}", "\u{1F64F}", "\u{1F64C}", "\u{1F4AA}"]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
