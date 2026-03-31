@@ -194,7 +194,7 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
     var icon: String {
         switch self {
         case .standFirm:         return "figure.stand.line.dotted.figure.stand"
-        case .armorOfGod:        return "shield.checkered"
+        case .armorOfGod:        return "shield.lefthalf.filled"
         case .surrenderFirst:    return "arrow.down.to.line"
         case .prophetPriestKing: return "person.3.fill"
         case .strengthInLove:    return "heart.circle.fill"

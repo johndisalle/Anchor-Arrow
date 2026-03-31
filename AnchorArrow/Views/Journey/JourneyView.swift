@@ -588,7 +588,7 @@ struct JourneyDayDetailView: View {
 
                     // Anchor prompt
                     journeyReflectionField(
-                        icon: "shield.checkered",
+                        icon: "shield.lefthalf.filled",
                         title: "Anchor Reflection",
                         color: AATheme.steel,
                         prompt: day.anchorPrompt,
