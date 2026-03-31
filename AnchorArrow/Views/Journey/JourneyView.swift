@@ -598,7 +598,7 @@ struct JourneyDayDetailView: View {
 
                     // Arrow prompt
                     journeyReflectionField(
-                        icon: "arrow.up.right.circle.fill",
+                        icon: "target",
                         title: "Arrow Reflection",
                         color: AATheme.amber,
                         prompt: day.arrowPrompt,
