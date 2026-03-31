@@ -651,7 +651,7 @@ class FirestoreService {
         let doc = try await ref.getDocument()
 
         if doc.exists {
-            var circle = try doc.data(as: Circle.self)
+            let circle = try doc.data(as: Circle.self)
             if !circle.memberIds.contains(uid) {
                 try await ref.updateData([
                     "memberIds": FieldValue.arrayUnion([uid])
