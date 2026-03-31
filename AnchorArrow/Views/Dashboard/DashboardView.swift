@@ -474,6 +474,97 @@ struct DashboardView: View {
         default:      greeting = "Standing firm,"
         }
     }
+
+    // MARK: - Streak Share Image
+    private func generateStreakShareImage() -> UIImage {
+        let size = CGSize(width: 1080, height: 1080)
+        let renderer = UIGraphicsImageRenderer(size: size)
+
+        return renderer.image { context in
+            let rect = CGRect(origin: .zero, size: size)
+
+            // Background — warm stone/parchment
+            UIColor(red: 0.96, green: 0.94, blue: 0.90, alpha: 1.0).setFill()
+            context.fill(rect)
+
+            // Colors
+            let steelColor = UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1.0)
+            let secondaryColor = UIColor(red: 0.42, green: 0.44, blue: 0.50, alpha: 1.0)
+
+            // Top: "ANCHOR & ARROW"
+            let titleFont = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .largeTitle)
+                .withDesign(.serif)!
+                .withSymbolicTraits(.traitBold)!, size: 42)
+            let titleAttrs: [NSAttributedString.Key: Any] = [
+                .font: titleFont,
+                .foregroundColor: steelColor,
+                .kern: 4.0
+            ]
+            let titleString = "ANCHOR & ARROW"
+            let titleSize = titleString.size(withAttributes: titleAttrs)
+            let titlePoint = CGPoint(x: (size.width - titleSize.width) / 2, y: 160)
+            titleString.draw(at: titlePoint, withAttributes: titleAttrs)
+
+            // Decorative line below title
+            let lineY = titlePoint.y + titleSize.height + 30
+            let lineRect = CGRect(x: size.width / 2 - 60, y: lineY, width: 120, height: 2)
+            UIColor(red: 0.76, green: 0.52, blue: 0.30, alpha: 1.0).setFill()
+            UIBezierPath(roundedRect: lineRect, cornerRadius: 1).fill()
+
+            // Center: Large streak number
+            let streakValue = "\(userStore.currentStreak)"
+            let numberFont = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .largeTitle)
+                .withDesign(.serif)!
+                .withSymbolicTraits(.traitBold)!, size: 120)
+            let numberAttrs: [NSAttributedString.Key: Any] = [
+                .font: numberFont,
+                .foregroundColor: steelColor
+            ]
+            let numberSize = streakValue.size(withAttributes: numberAttrs)
+            let numberPoint = CGPoint(x: (size.width - numberSize.width) / 2, y: 340)
+            streakValue.draw(at: numberPoint, withAttributes: numberAttrs)
+
+            // Below number: "DAY STREAK"
+            let streakLabelFont = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .title2)
+                .withDesign(.serif)!
+                .withSymbolicTraits(.traitBold)!, size: 32)
+            let streakLabelAttrs: [NSAttributedString.Key: Any] = [
+                .font: streakLabelFont,
+                .foregroundColor: steelColor,
+                .kern: 6.0
+            ]
+            let streakLabel = "DAY STREAK"
+            let streakLabelSize = streakLabel.size(withAttributes: streakLabelAttrs)
+            let streakLabelPoint = CGPoint(x: (size.width - streakLabelSize.width) / 2,
+                                           y: numberPoint.y + numberSize.height + 16)
+            streakLabel.draw(at: streakLabelPoint, withAttributes: streakLabelAttrs)
+
+            // Below that: flame emoji + "days standing firm"
+            let mottoFont = UIFont.systemFont(ofSize: 26, weight: .medium)
+            let mottoAttrs: [NSAttributedString.Key: Any] = [
+                .font: mottoFont,
+                .foregroundColor: secondaryColor
+            ]
+            let motto = "\u{1F525} days standing firm"
+            let mottoSize = motto.size(withAttributes: mottoAttrs)
+            let mottoPoint = CGPoint(x: (size.width - mottoSize.width) / 2,
+                                     y: streakLabelPoint.y + streakLabelSize.height + 40)
+            motto.draw(at: mottoPoint, withAttributes: mottoAttrs)
+
+            // Bottom: "1 Corinthians 16:13" in italic serif
+            let verseFont = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body)
+                .withDesign(.serif)!
+                .withSymbolicTraits([.traitItalic])!, size: 24)
+            let verseAttrs: [NSAttributedString.Key: Any] = [
+                .font: verseFont,
+                .foregroundColor: secondaryColor
+            ]
+            let verse = "1 Corinthians 16:13"
+            let verseSize = verse.size(withAttributes: verseAttrs)
+            let versePoint = CGPoint(x: (size.width - verseSize.width) / 2, y: 840)
+            verse.draw(at: versePoint, withAttributes: verseAttrs)
+        }
+    }
 }
 
 // MARK: - TodayStatusCard
@@ -601,4 +692,18 @@ struct BadgePill: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Badge: \(badge.name)")
     }
+}
+
+// MARK: - ImageShareSheet (UIActivityViewController wrapper for UIImage)
+struct ImageShareSheet: UIViewControllerRepresentable {
+    let image: UIImage
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(
+            activityItems: [image],
+            applicationActivities: nil
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
