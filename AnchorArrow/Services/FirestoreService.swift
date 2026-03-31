@@ -659,10 +659,11 @@ class FirestoreService {
             }
         } else {
             // Create the Global Brotherhood circle (first user ever)
+            // creatorId must be the actual user to satisfy Firestore security rules
             let circle = Circle(
                 name: "The Global Brotherhood",
                 inviteCode: "GLOBAL",
-                creatorId: "system",
+                creatorId: uid,
                 memberIds: [uid],
                 createdAt: Date(),
                 isPublic: true

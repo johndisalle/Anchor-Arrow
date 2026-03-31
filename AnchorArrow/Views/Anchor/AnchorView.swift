@@ -10,6 +10,8 @@ struct AnchorView: View {
     @State private var showCompletionAnimation = false
     @State private var dismissTask: Task<Void, Never>?
     @State private var isSubmitting = false
+    @State private var showVerseShare = false
+    @State private var verseShareImage: UIImage?
     @FocusState private var reflectionFocused: Bool
     @Environment(\.dismiss) var dismiss
 
@@ -71,6 +73,75 @@ struct AnchorView: View {
                 }
             }
         }
+        .sheet(isPresented: $showVerseShare) {
+            if let image = verseShareImage {
+                VerseShareSheet(image: image)
+            }
+        }
+    }
+
+    // MARK: - Verse Share Image
+    private func generateVerseShareImage() -> UIImage {
+        let size = CGSize(width: 1080, height: 1080)
+        let renderer = UIGraphicsImageRenderer(size: size)
+        return renderer.image { ctx in
+            // Background
+            UIColor(red: 0.96, green: 0.94, blue: 0.90, alpha: 1).setFill()
+            ctx.fill(CGRect(origin: .zero, size: size))
+
+            // Top label
+            let topAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 32, weight: .bold),
+                .foregroundColor: UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1),
+                .kern: 4.0
+            ]
+            let topText = "ANCHOR & ARROW" as NSString
+            let topSize = topText.size(withAttributes: topAttrs)
+            topText.draw(at: CGPoint(x: (1080 - topSize.width) / 2, y: 80), withAttributes: topAttrs)
+
+            // Divider
+            UIColor(red: 0.76, green: 0.52, blue: 0.30, alpha: 1).setFill()
+            ctx.fill(CGRect(x: 440, y: 140, width: 200, height: 3))
+
+            // Quote mark
+            let quoteAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Georgia-Bold", size: 80) ?? UIFont.systemFont(ofSize: 80, weight: .bold),
+                .foregroundColor: UIColor(red: 0.85, green: 0.75, blue: 0.55, alpha: 0.5)
+            ]
+            ("\u{201C}" as NSString).draw(at: CGPoint(x: 80, y: 180), withAttributes: quoteAttrs)
+
+            // Scripture
+            let verseStyle = NSMutableParagraphStyle()
+            verseStyle.alignment = .center
+            verseStyle.lineSpacing = 12
+            let verseAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Georgia-Italic", size: 42) ?? UIFont.italicSystemFont(ofSize: 42),
+                .foregroundColor: UIColor(red: 0.12, green: 0.14, blue: 0.20, alpha: 1),
+                .paragraphStyle: verseStyle
+            ]
+            let verseText = prompt.scripture as NSString
+            let verseRect = CGRect(x: 100, y: 280, width: 880, height: 400)
+            verseText.draw(in: verseRect, withAttributes: verseAttrs)
+
+            // Reference
+            let refAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont(name: "Georgia-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28, weight: .bold),
+                .foregroundColor: UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1)
+            ]
+            let refText = "— \(prompt.reference)" as NSString
+            let refSize = refText.size(withAttributes: refAttrs)
+            refText.draw(at: CGPoint(x: (1080 - refSize.width) / 2, y: 720), withAttributes: refAttrs)
+
+            // Bottom
+            let bottomStyle = NSMutableParagraphStyle()
+            bottomStyle.alignment = .center
+            let bottomAttrs: [NSAttributedString.Key: Any] = [
+                .font: UIFont.systemFont(ofSize: 24, weight: .medium),
+                .foregroundColor: UIColor(red: 0.42, green: 0.44, blue: 0.50, alpha: 1),
+                .paragraphStyle: bottomStyle
+            ]
+            ("anchorarrow.app" as NSString).draw(in: CGRect(x: 100, y: 960, width: 880, height: 40), withAttributes: bottomAttrs)
+        }
     }
 
     // MARK: - Scripture Card
@@ -92,9 +163,24 @@ struct AnchorView: View {
                 .foregroundColor(AATheme.primaryText)
                 .lineSpacing(6)
 
-            Text("— \(prompt.reference)")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(AATheme.steel)
+            HStack {
+                Text("— \(prompt.reference)")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AATheme.steel)
+                Spacer()
+                Button {
+                    verseShareImage = generateVerseShareImage()
+                    showVerseShare = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 14, weight: .medium))
+                        .foregroundColor(AATheme.steel)
+                        .padding(8)
+                        .background(AATheme.steel.opacity(0.1))
+                        .clipShape(SwiftUI.Circle())
+                }
+                .buttonStyle(.plain)
+            }
 
             Divider()
                 .background(AATheme.secondaryText.opacity(0.2))
@@ -297,6 +383,17 @@ struct TagChip: View {
         .accessibilityHint(isSelected ? "Selected. Double tap to remove." : "Double tap to select.")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
+}
+
+// MARK: - VerseShareSheet
+struct VerseShareSheet: UIViewControllerRepresentable {
+    let image: UIImage
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: [image], applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 // MARK: - Completed Banner
