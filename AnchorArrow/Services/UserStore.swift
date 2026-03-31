@@ -77,6 +77,21 @@ class UserStore: ObservableObject {
             if let gbError = await firestoreService.ensureGlobalCircleMembership(uid: uid) {
                 errorMessage = gbError
             }
+
+            // Schedule weekly summary notification
+            let calendar = Calendar.current
+            let weekAgo = calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+            let thisWeekEntries = recentEntries.filter { $0.date >= weekAgo }
+            let weekAnchors = thisWeekEntries.filter { $0.anchorCompleted }.count
+            let weekArrows = thisWeekEntries.filter { $0.arrowCompleted }.count
+            let weekDrifts = driftLogs.filter { $0.timestamp >= weekAgo }.count
+            let topDriftTag = driftLogs.filter { $0.timestamp >= weekAgo }
+                .reduce(into: [String: Int]()) { counts, log in counts[log.category.displayName, default: 0] += 1 }
+                .max(by: { $0.value < $1.value })?.key
+            await NotificationManager().scheduleWeeklySummary(
+                anchors: weekAnchors, arrows: weekArrows,
+                drifts: weekDrifts, topDrift: topDriftTag
+            )
         } catch {
             errorMessage = error.localizedDescription
         }

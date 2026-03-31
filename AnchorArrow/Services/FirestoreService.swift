@@ -644,6 +644,66 @@ class FirestoreService {
     /// The well-known document ID for the Global Brotherhood circle
     static let globalCircleId = "global_brotherhood"
 
+    /// Posts today's devotional to the Global Brotherhood if not already posted today.
+    func seedGlobalBrotherhoodPost() async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        let circleId = Self.globalCircleId
+        let today = Date().entryDateString  // e.g. "2026-03-31"
+
+        // Check if today's devotional already exists (use today's date as doc ID to prevent duplicates)
+        let postRef = circlePostsRef(circleId).document("daily_\(today)")
+        do {
+            let doc = try await postRef.getDocument()
+            if doc.exists { return } // Already posted today
+
+            let devotionals = Self.dailyDevotionals
+            let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+            let devotional = devotionals[(dayOfYear - 1) % devotionals.count]
+
+            let data: [String: Any] = [
+                "circleId": circleId,
+                "authorId": uid,
+                "authorName": "Daily Anchor",
+                "content": devotional,
+                "type": "general",
+                "isAnonymous": false,
+                "timestamp": Timestamp(date: Date()),
+                "reactions": [:] as [String: Int],
+                "isAnswered": false,
+                "isPinned": true
+            ]
+            try await postRef.setData(data)
+        } catch {
+            #if DEBUG
+            print("[GlobalBrotherhood] Failed to seed daily post: \(error.localizedDescription)")
+            #endif
+        }
+    }
+
+    static let dailyDevotionals: [String] = [
+        "\"Be watchful, stand firm in the faith, act like men, be strong.\" — 1 Cor 16:13\n\nWhat does it mean to 'act like men' today? It's not about toughness — it's about responsibility. Where is God asking you to step up?",
+        "\"Iron sharpens iron, and one man sharpens another.\" — Proverbs 27:17\n\nWho is sharpening you right now? If the answer is 'no one,' that's the drift talking. Reach out to a brother today.",
+        "\"The Lord is my shepherd; I shall not want.\" — Psalm 23:1\n\nWhat are you trying to provide for yourself that only God can give? Surrender it. He's already ahead of you.",
+        "\"Watch and pray so that you will not fall into temptation.\" — Matthew 26:41\n\nJesus didn't say 'try harder.' He said watch and pray. What are you watching for today? What are you praying against?",
+        "\"Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go.\" — Joshua 1:9\n\nCourage isn't the absence of fear. It's moving forward anyway because God is with you. Where do you need courage today?",
+        "\"He who began a good work in you will carry it on to completion.\" — Philippians 1:6\n\nYou're not finished. Neither is God. The fact that you're here, anchoring, proves the work is still happening.",
+        "\"Whoever walks with the wise becomes wise, but the companion of fools will suffer harm.\" — Proverbs 13:20\n\nLook at your inner circle. Are they pulling you toward Christ or away from Him? This circle exists because isolation kills.",
+        "\"No temptation has overtaken you except what is common to mankind.\" — 1 Cor 10:13\n\nYou're not the only one fighting this. Every brother in this circle knows the battle. You're not alone.",
+        "\"Let all that you do be done in love.\" — 1 Cor 16:14\n\nStrength without love is just aggression. How will you lead with love today — at home, at work, in your circle?",
+        "\"Create in me a clean heart, O God, and renew a right spirit within me.\" — Psalm 51:10\n\nDavid didn't hide his mess. He brought it to God. What do you need to bring to Him today?",
+        "\"The righteous man falls seven times, and rises again.\" — Proverbs 24:16\n\nFalling isn't the problem. Staying down is. If you drifted yesterday, get back up. That's what righteous men do.",
+        "\"Do not be conformed to this world, but be transformed by the renewal of your mind.\" — Romans 12:2\n\nWhat is the world telling you today that contradicts what God says about you? Reject the lie. Anchor into truth.",
+        "\"As iron sharpens iron, so one man sharpens the face of his friend.\" — Proverbs 27:17\n\nToday's challenge: send a message to one brother. Ask how he's really doing. Don't settle for 'fine.'",
+        "\"Trust in the Lord with all your heart, and do not lean on your own understanding.\" — Proverbs 3:5\n\nSelf-reliance is the quiet drift. Where are you leaning on your own understanding instead of His?",
+        "\"Greater love has no one than this: to lay down one's life for one's friends.\" — John 15:13\n\nYou don't have to die for someone today. But you can sacrifice your time, your pride, your comfort. That's the arrow.",
+        "\"But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control.\" — Galatians 5:22-23\n\nWhich fruit is hardest for you right now? That's where the Spirit wants to grow you.",
+        "\"Put on the full armor of God, so that you can take your stand against the devil's schemes.\" — Ephesians 6:11\n\nThe armor isn't optional. Truth, righteousness, peace, faith, salvation, the Word. Which piece are you missing today?",
+        "\"Come to me, all who labor and are heavy laden, and I will give you rest.\" — Matthew 11:28\n\nStrength isn't grinding harder. Sometimes it's stopping and letting God carry it. What burden do you need to lay down?",
+        "\"Above all else, guard your heart, for everything you do flows from it.\" — Proverbs 4:23\n\nWhat did you let into your heart this week that shouldn't be there? Guard the gates, brother.",
+        "\"Therefore encourage one another and build one another up.\" — 1 Thessalonians 5:11\n\nLeave an encouraging word for a brother in this circle today. Your words might be the anchor someone needs.",
+        "\"I have fought the good fight, I have finished the race, I have kept the faith.\" — 2 Timothy 4:7\n\nYou're not at the finish line yet. But every day you anchor and loose your arrow, you're running the race. Keep going.",
+    ]
+
     /// Ensures the Global Brotherhood circle exists and the user is a member.
     /// Creates it on first-ever call; adds the user if not already a member.
     func ensureGlobalCircleMembership(uid: String) async -> String? {

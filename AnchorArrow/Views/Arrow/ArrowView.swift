@@ -36,6 +36,10 @@ struct ArrowView: View {
                     // Role-specific prompt
                     promptCard
 
+                    // Quick Responses
+                    quickResponseSection
+                        .animation(.easeInOut(duration: 0.2), value: selectedRole)
+
                     // Reflection Input
                     reflectionSection
 

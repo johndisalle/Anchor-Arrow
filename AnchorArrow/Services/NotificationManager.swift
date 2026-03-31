@@ -172,6 +172,46 @@ class NotificationManager: ObservableObject {
         }
     }
 
+    // MARK: - Weekly Summary (Sunday 7PM)
+    func scheduleWeeklySummary(anchors: Int, arrows: Int, drifts: Int, topDrift: String?) async {
+        guard permissionGranted else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "Your Weekly Report"
+
+        var body = "This week: \(anchors)/7 Anchors, \(arrows)/7 Arrows"
+        if drifts > 0 {
+            body += ", \(drifts) drift\(drifts == 1 ? "" : "s") logged"
+        }
+        if let drift = topDrift {
+            body += ". Top struggle: \(drift)"
+        }
+        body += ". Keep fighting, brother."
+
+        content.body = body
+        content.sound = .default
+
+        var dateComponents = DateComponents()
+        dateComponents.weekday = 1  // Sunday
+        dateComponents.hour = 19    // 7 PM
+        dateComponents.minute = 0
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        let request = UNNotificationRequest(
+            identifier: NotificationID.weeklySummary,
+            content: content,
+            trigger: trigger
+        )
+
+        do {
+            try await notificationCenter.add(request)
+        } catch {
+            #if DEBUG
+            print("[Notifications] Failed to schedule weekly summary: \(error.localizedDescription)")
+            #endif
+        }
+    }
+
     // MARK: - Cancel
     func cancelAll() {
         notificationCenter.removeAllPendingNotificationRequests()
@@ -198,4 +238,5 @@ enum NotificationID {
     static let eveningArrow  = "com.anchorarrow.notification.evening"
     static let streakWarning = "com.anchorarrow.notification.streak_warning"
     static let graceDayUsed  = "com.anchorarrow.notification.grace_day_used"
+    static let weeklySummary = "com.anchorarrow.notification.weekly_summary"
 }
