@@ -137,6 +137,12 @@ struct SettingsView: View {
                                 .foregroundColor(AATheme.primaryText)
                         }
                     }
+                    Button {
+                        ReviewManager.requestReviewIfAppropriate()
+                    } label: {
+                        Label("Leave a Review", systemImage: "star.fill")
+                            .foregroundColor(AATheme.primaryText)
+                    }
                 } header: {
                     Text("Legal")
                 }
