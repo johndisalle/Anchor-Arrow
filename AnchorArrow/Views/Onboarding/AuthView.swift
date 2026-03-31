@@ -16,6 +16,7 @@ struct AuthView: View {
     @State private var isLoading = false
     @State private var errorMessage = ""
     @State private var showError = false
+    @State private var agreedToTerms = false
     @FocusState private var focusedField: AuthField?
 
     enum AuthField { case name, email, password, confirm }
@@ -94,6 +95,56 @@ struct AuthView: View {
                     }
                 }
                 .padding(.horizontal, AATheme.paddingLarge)
+
+                // EULA Agreement (sign-up only)
+                if isSignUp {
+                    VStack(spacing: 8) {
+                        HStack(alignment: .top, spacing: 12) {
+                            Button {
+                                agreedToTerms.toggle()
+                            } label: {
+                                Image(systemName: agreedToTerms ? "checkmark.square.fill" : "square")
+                                    .font(.system(size: 22))
+                                    .foregroundColor(agreedToTerms ? AATheme.steel : AATheme.secondaryText.opacity(0.5))
+                            }
+                            .buttonStyle(.plain)
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("I agree to the ")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(AATheme.primaryText)
+                                +
+                                Text("Terms of Use")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(AATheme.steel)
+                                +
+                                Text(" and ")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(AATheme.primaryText)
+                                +
+                                Text("Privacy Policy")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(AATheme.steel)
+
+                                Text("No tolerance for objectionable content or abusive users.")
+                                    .font(.system(size: 11))
+                                    .foregroundColor(AATheme.secondaryText)
+                            }
+                        }
+
+                        HStack(spacing: 12) {
+                            Spacer().frame(width: 22)
+                            HStack(spacing: 4) {
+                                Link("Terms of Use", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!)
+                                Text("|").foregroundColor(AATheme.secondaryText.opacity(0.4))
+                                Link("Privacy Policy", destination: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!)
+                            }
+                            .font(.system(size: 12, weight: .medium))
+                        }
+                    }
+                    .padding(.horizontal, AATheme.paddingLarge)
+                    .padding(.top, AATheme.paddingMedium)
+                }
 
                 // Error
                 if showError {
@@ -219,6 +270,9 @@ struct AuthView: View {
             guard password.count >= 6 else {
                 showAuthError("Password must be at least 6 characters."); return
             }
+            guard agreedToTerms else {
+                showAuthError("You must agree to the Terms of Use to create an account."); return
+            }
         }
 
         isLoading = true
@@ -229,6 +283,8 @@ struct AuthView: View {
                 try await authManager.signUp(email: email, password: password, displayName: displayName)
                 guard let uid = authManager.currentUID else { return }
                 try await FirestoreService.shared.createUser(uid: uid, email: email, displayName: displayName)
+                // Persist EULA acceptance to Firestore
+                try await FirestoreService.shared.updateUser(uid: uid, fields: ["acceptedTerms": true])
                 await userStore.loadUserData(uid: uid)
                 userStore.completeOnboarding()
             } else {

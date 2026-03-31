@@ -79,6 +79,17 @@ struct PremiumUpsellView: View {
                                     if storeKitManager.hasActiveSubscription {
                                         showWelcome = true
                                     }
+                                } else {
+                                    // Products not loaded — retry
+                                    await storeKitManager.loadProducts()
+                                    if let product = storeKitManager.product(for: selectedProduct) {
+                                        await storeKitManager.purchase(product)
+                                        if storeKitManager.hasActiveSubscription {
+                                            showWelcome = true
+                                        }
+                                    } else {
+                                        storeKitManager.purchaseError = "Unable to load subscription. Check your connection and try again."
+                                    }
                                 }
                             }
                         } label: {
@@ -150,6 +161,11 @@ struct PremiumUpsellView: View {
                     Button("Maybe Later") { dismiss() }
                         .font(.system(size: 14))
                         .foregroundColor(AATheme.secondaryText)
+                }
+            }
+            .task {
+                if storeKitManager.products.isEmpty {
+                    await storeKitManager.loadProducts()
                 }
             }
             .fullScreenCover(isPresented: $showWelcome) {
