@@ -72,6 +72,9 @@ class UserStore: ObservableObject {
 
             // Set up real-time user listener
             setupUserListener(uid: uid)
+
+            // Auto-join Global Brotherhood circle
+            try? await firestoreService.ensureGlobalCircleMembership(uid: uid)
         } catch {
             errorMessage = error.localizedDescription
         }

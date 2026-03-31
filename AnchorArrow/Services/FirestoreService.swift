@@ -638,6 +638,38 @@ class FirestoreService {
             "completedJourneys": FieldValue.arrayUnion([series.rawValue])
         ])
     }
+
+    // MARK: - Global Brotherhood
+
+    /// The well-known document ID for the Global Brotherhood circle
+    static let globalCircleId = "global_brotherhood"
+
+    /// Ensures the Global Brotherhood circle exists and the user is a member.
+    /// Creates it on first-ever call; adds the user if not already a member.
+    func ensureGlobalCircleMembership(uid: String) async throws {
+        let ref = circlesRef().document(Self.globalCircleId)
+        let doc = try await ref.getDocument()
+
+        if doc.exists {
+            var circle = try doc.data(as: Circle.self)
+            if !circle.memberIds.contains(uid) {
+                try await ref.updateData([
+                    "memberIds": FieldValue.arrayUnion([uid])
+                ])
+            }
+        } else {
+            // Create the Global Brotherhood circle (first user ever)
+            let circle = Circle(
+                name: "The Global Brotherhood",
+                inviteCode: "GLOBAL",
+                creatorId: "system",
+                memberIds: [uid],
+                createdAt: Date(),
+                isPublic: true
+            )
+            try ref.setData(from: circle)
+        }
+    }
 }
 
 // MARK: - CircleError

@@ -209,6 +209,14 @@ struct CirclesView: View {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isLoading = true
         circles = (try? await firestoreService.fetchUserCircles(uid: uid)) ?? []
+
+        // Ensure Global Brotherhood appears first
+        circles.sort { a, b in
+            if a.id == FirestoreService.globalCircleId { return true }
+            if b.id == FirestoreService.globalCircleId { return false }
+            return false
+        }
+
         isLoading = false
 
         // Load weekly activity counts for health badge
