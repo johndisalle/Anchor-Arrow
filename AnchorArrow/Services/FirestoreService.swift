@@ -646,7 +646,7 @@ class FirestoreService {
 
     /// Ensures the Global Brotherhood circle exists and the user is a member.
     /// Creates it on first-ever call; adds the user if not already a member.
-    func ensureGlobalCircleMembership(uid: String) async {
+    func ensureGlobalCircleMembership(uid: String) async -> String? {
         let ref = circlesRef().document(Self.globalCircleId)
         do {
             let doc = try await ref.getDocument()
@@ -661,7 +661,6 @@ class FirestoreService {
                 }
             } else {
                 // Create the Global Brotherhood circle using raw data
-                // (avoids Codable encoding issues with @DocumentID)
                 let data: [String: Any] = [
                     "name": "The Global Brotherhood",
                     "inviteCode": "GLOBAL",
@@ -672,10 +671,9 @@ class FirestoreService {
                 ]
                 try await ref.setData(data)
             }
+            return nil // success
         } catch {
-            #if DEBUG
-            print("[GlobalBrotherhood] Failed: \(error.localizedDescription)")
-            #endif
+            return "Global Brotherhood error: \(error.localizedDescription)"
         }
     }
 }

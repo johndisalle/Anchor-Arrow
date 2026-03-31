@@ -208,6 +208,10 @@ struct CirclesView: View {
     private func loadCircles() async {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         isLoading = true
+
+        // Ensure user is in the Global Brotherhood before fetching circles
+        _ = await firestoreService.ensureGlobalCircleMembership(uid: uid)
+
         circles = (try? await firestoreService.fetchUserCircles(uid: uid)) ?? []
 
         // Ensure Global Brotherhood appears first
