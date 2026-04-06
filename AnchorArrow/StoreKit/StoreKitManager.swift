@@ -6,39 +6,23 @@ import Combine
 import StoreKit
 import FirebaseAuth
 
-// MARK: - Product IDs
-enum SubscriptionProduct: String, CaseIterable {
-    case monthly = "com.yourcompany.anchorarrow.premium.monthly"
-    case annual  = "com.yourcompany.anchorarrow.premium.annual"
+// MARK: - Subscription Configuration
+// ⚠️ IMPORTANT: Update this to match your App Store Connect subscription group ID.
+// Find it in App Store Connect → Your App → Subscriptions → Subscription Group → Group ID
+enum SubscriptionConfig {
+    static let groupID = "anchor-arrow-premium"
 
-    var displayName: String {
-        switch self {
-        case .monthly: return "Monthly"
-        case .annual:  return "Annual (Best Value)"
-        }
-    }
+    // Product IDs must exactly match what is configured in App Store Connect.
+    // App Store Connect → Your App → Subscriptions → Product ID
+    static let monthlyID = "com.yourcompany.anchorarrow.premium.monthly"
+    static let annualID  = "com.yourcompany.anchorarrow.premium.annual"
 
-    var priceString: String {
-        switch self {
-        case .monthly: return "$6.99/month"
-        case .annual:  return "$59.99/year"
-        }
-    }
-
-    var savingsNote: String? {
-        switch self {
-        case .annual: return "Save 28% vs monthly"
-        default: return nil
-        }
-    }
+    static let allProductIDs = [monthlyID, annualID]
 }
 
 // MARK: - StoreKitManager
 @MainActor
 class StoreKitManager: ObservableObject {
-    @Published var products: [Product] = []
-    @Published var isPurchasing = false
-    @Published var purchaseError: String?
     @Published var hasActiveSubscription = false
     @Published var activeSubscriptionExpiry: Date?
 
@@ -46,7 +30,6 @@ class StoreKitManager: ObservableObject {
 
     init() {
         transactionListener = listenForTransactions()
-        Task { await loadProducts() }
         Task { await checkSubscriptionStatus() }
     }
 
@@ -54,83 +37,30 @@ class StoreKitManager: ObservableObject {
         transactionListener?.cancel()
     }
 
-    // MARK: - Load Products
-    func loadProducts() async {
-        do {
-            let productIds = SubscriptionProduct.allCases.map(\.rawValue)
-            products = try await Product.products(for: productIds)
-            // Sort: annual first
-            products.sort { $0.id.contains("annual") && !$1.id.contains("annual") }
-        } catch {
-            purchaseError = "Could not load subscription options."
-        }
-    }
-
-    // MARK: - Purchase
-    func purchase(_ product: Product) async {
-        isPurchasing = true
-        purchaseError = nil
-
-        do {
-            let result = try await product.purchase()
-
-            switch result {
-            case .success(let verificationResult):
-                let transaction = try checkVerified(verificationResult)
-                await updatePremiumStatus(expiryDate: transaction.expirationDate)
-                await transaction.finish()
-                hasActiveSubscription = true
-
-            case .pending:
-                // Transaction awaiting approval (e.g. Ask to Buy)
-                break
-
-            case .userCancelled:
-                break
-
-            @unknown default:
-                break
-            }
-        } catch {
-            purchaseError = "Purchase failed: \(error.localizedDescription)"
-        }
-
-        isPurchasing = false
-    }
-
-    // MARK: - Restore Purchases
-    func restorePurchases() async {
-        isPurchasing = true
-        do {
-            try await AppStore.sync()
-            await checkSubscriptionStatus()
-        } catch {
-            purchaseError = "Restore failed. Please try again."
-        }
-        isPurchasing = false
-    }
-
     // MARK: - Check Subscription Status
     func checkSubscriptionStatus() async {
+        var foundActive = false
+
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
-                let productId = transaction.productID
-
-                if SubscriptionProduct.allCases.map(\.rawValue).contains(productId) {
+                if SubscriptionConfig.allProductIDs.contains(transaction.productID) {
                     if let expiry = transaction.expirationDate, expiry > Date() {
-                        hasActiveSubscription = true
+                        foundActive = true
                         activeSubscriptionExpiry = expiry
                         await updatePremiumStatus(expiryDate: expiry)
-                        return
+                        break
                     }
                 }
-            } catch {}
+            } catch {
+                // Skip unverified transactions
+            }
         }
 
-        // No active subscription found
-        hasActiveSubscription = false
-        await updatePremiumStatus(expiryDate: nil)
+        if !foundActive {
+            hasActiveSubscription = false
+            await updatePremiumStatus(expiryDate: nil)
+        }
     }
 
     // MARK: - Listen for Transactions
@@ -141,7 +71,10 @@ class StoreKitManager: ObservableObject {
                     let transaction = try await self.checkVerified(result)
                     await self.updatePremiumStatus(expiryDate: transaction.expirationDate)
                     await transaction.finish()
-                } catch {}
+                    await self.checkSubscriptionStatus()
+                } catch {
+                    // Skip unverified transactions
+                }
             }
         }
     }
@@ -163,15 +96,6 @@ class StoreKitManager: ObservableObject {
         case .verified(let safe):
             return safe
         }
-    }
-
-    // MARK: - Product helpers
-    func product(for subscription: SubscriptionProduct) -> Product? {
-        products.first { $0.id == subscription.rawValue }
-    }
-
-    func formattedPrice(for product: Product) -> String {
-        product.displayPrice
     }
 }
 

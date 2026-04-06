@@ -204,7 +204,7 @@ struct SettingsView: View {
                                 .foregroundColor(Color("TextSecondary"))
                         }
                         Spacer()
-                        Text("$6.99/mo")
+                        Image(systemName: "chevron.right")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(Color("BrandGold"))
                     }
