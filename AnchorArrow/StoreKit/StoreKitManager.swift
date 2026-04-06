@@ -10,12 +10,11 @@ import FirebaseAuth
 // ⚠️ IMPORTANT: Update this to match your App Store Connect subscription group ID.
 // Find it in App Store Connect → Your App → Subscriptions → Subscription Group → Group ID
 enum SubscriptionConfig {
-    static let groupID = "anchor-arrow-premium"
+    static let groupID = "21994049"
 
-    // Product IDs must exactly match what is configured in App Store Connect.
-    // App Store Connect → Your App → Subscriptions → Product ID
-    static let monthlyID = "com.yourcompany.anchorarrow.premium.monthly"
-    static let annualID  = "com.yourcompany.anchorarrow.premium.annual"
+    // Product IDs — must exactly match App Store Connect
+    static let monthlyID = "com.ellasid.anchorarrow.premium.monthly"
+    static let annualID  = "com.ellasid.anchorarrow.premium.annual"
 
     static let allProductIDs = [monthlyID, annualID]
 }

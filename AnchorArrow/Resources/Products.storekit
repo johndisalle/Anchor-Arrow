@@ -47,7 +47,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.yourcompany.anchorarrow.premium.monthly",
+          "productID" : "com.ellasid.anchorarrow.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Monthly Premium",
           "subscriptionGroupID" : "anchor-arrow-premium",
@@ -67,7 +67,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.yourcompany.anchorarrow.premium.annual",
+          "productID" : "com.ellasid.anchorarrow.premium.annual",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Annual Premium",
           "subscriptionGroupID" : "anchor-arrow-premium",
