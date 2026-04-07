@@ -57,8 +57,10 @@ struct PremiumUpsellView: View {
             .onInAppPurchaseCompletion { _, result in
                 switch result {
                 case .success(.success(_)):
-                    Task { await storeKitManager.checkSubscriptionStatus() }
-                    dismiss()
+                    Task {
+                        await storeKitManager.checkSubscriptionStatus()
+                        dismiss()
+                    }
                 default:
                     break
                 }

@@ -18,7 +18,13 @@ class UserStore: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
 
+    /// Injected after init so premium checks reflect StoreKit state immediately
+    weak var storeKitManager: StoreKitManager? {
+        didSet { observeStoreKit() }
+    }
+
     private var userListener: ListenerRegistration?
+    private var storeKitCancellable: AnyCancellable?
     private let firestoreService = FirestoreService.shared
     private let defaults = UserDefaults.standard
 
@@ -160,7 +166,7 @@ class UserStore: ObservableObject {
     }
 
     // MARK: - Helpers
-    var isPremium: Bool { appUser?.isPremium ?? false }
+    var isPremium: Bool { (appUser?.isPremium ?? false) || (storeKitManager?.hasActiveSubscription ?? false) }
     var currentStreak: Int { appUser?.currentStreak ?? 0 }
     var displayName: String { appUser?.displayName ?? Auth.auth().currentUser?.displayName ?? "Warrior" }
     var colorScheme: ColorScheme? { appUser?.theme.swiftUIColorScheme }
@@ -184,5 +190,14 @@ class UserStore: ObservableObject {
         driftLogs = []
         userListener?.remove()
         userListener = nil
+    }
+
+    /// Re-publish when StoreKit subscription state changes so views re-render
+    private func observeStoreKit() {
+        storeKitCancellable = storeKitManager?.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
     }
 }
