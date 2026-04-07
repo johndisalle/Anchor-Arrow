@@ -37,7 +37,6 @@ struct AnchorArrowApp: App {
                 .environmentObject(storeKitManager)
                 .environmentObject(notificationManager)
                 .preferredColorScheme(userStore.colorScheme)
-                .onAppear { userStore.storeKitManager = storeKitManager }
         }
     }
 

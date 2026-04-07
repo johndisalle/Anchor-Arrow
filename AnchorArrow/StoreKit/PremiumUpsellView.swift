@@ -7,6 +7,7 @@ import StoreKit
 struct PremiumUpsellView: View {
     let reason: String?
     @EnvironmentObject var storeKitManager: StoreKitManager
+    @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -59,6 +60,8 @@ struct PremiumUpsellView: View {
                 case .success(.success(_)):
                     Task {
                         await storeKitManager.checkSubscriptionStatus()
+                        // Immediately mark premium in local state so views update
+                        userStore.appUser?.isPremium = true
                         dismiss()
                     }
                 default:
