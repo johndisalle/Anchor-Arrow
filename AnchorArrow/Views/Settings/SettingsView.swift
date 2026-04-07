@@ -89,6 +89,29 @@ struct SettingsView: View {
                     Text("Account")
                 }
 
+                // Legal & Support Section
+                Section {
+                    Button {
+                        if let url = URL(string: "mailto:support@ellasid.com?subject=Report%20Inappropriate%20Content") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Label("Report Inappropriate Content", systemImage: "exclamationmark.bubble")
+                            .foregroundColor(Color("TextPrimary"))
+                    }
+
+                    Button {
+                        if let url = URL(string: "mailto:support@ellasid.com") {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Label("Contact Us", systemImage: "envelope")
+                            .foregroundColor(Color("TextPrimary"))
+                    }
+                } header: {
+                    Text("Support")
+                }
+
                 // About Section
                 Section {
                     LabeledContent("Version", value: "1.0.0 (MVP)")
