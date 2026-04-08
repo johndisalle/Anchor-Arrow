@@ -380,41 +380,7 @@ struct CircleDetailView: View {
                                 if feedPosts.isEmpty && prayerPosts.isEmpty {
                                     emptyPostsState
                                 } else {
-                                    ForEach(orderedFeed) { post in
-                                        CirclePostRow(
-                                            post: post,
-                                            isLeader: isCircleLeader,
-                                            canModerate: canModerate,
-                                            onReact: { emoji in
-                                                Task { await react(to: post, emoji: emoji) }
-                                            },
-                                            onComment: {
-                                                if canPost {
-                                                    selectedPostForComments = post
-                                                } else {
-                                                    showPremiumUpsell = true
-                                                }
-                                            },
-                                            onPin: {
-                                                Task { await togglePin(post: post) }
-                                            },
-                                            onDelete: canModerate ? {
-                                                postToDelete = post
-                                            } : nil,
-                                            onReport: {
-                                                postToReport = post
-                                                reportReason = ""
-                                                showReportSheet = true
-                                            },
-                                            onBlockUser: {
-                                                Task { await blockUser(post.authorId) }
-                                            },
-                                            onHidePost: {
-                                                posts.removeAll { $0.id == post.id }
-                                            }
-                                        )
-                                        .padding(.horizontal, 20)
-                                    }
+                                    postFeedView(orderedFeed)
                                 }
                                 Spacer(minLength: 140)
                             }
@@ -620,6 +586,46 @@ struct CircleDetailView: View {
     /// Admin or circle creator can delete posts/comments
     private var canModerate: Bool {
         userStore.isAdmin || isCircleLeader
+    }
+
+    // MARK: - Post Feed (extracted to help compiler)
+    @ViewBuilder
+    private func postFeedView(_ orderedFeed: [CirclePost]) -> some View {
+        ForEach(orderedFeed) { post in
+            CirclePostRow(
+                post: post,
+                isLeader: isCircleLeader,
+                canModerate: canModerate,
+                onReact: { emoji in
+                    Task { await react(to: post, emoji: emoji) }
+                },
+                onComment: {
+                    if canPost {
+                        selectedPostForComments = post
+                    } else {
+                        showPremiumUpsell = true
+                    }
+                },
+                onPin: {
+                    Task { await togglePin(post: post) }
+                },
+                onDelete: canModerate ? {
+                    postToDelete = post
+                } : nil,
+                onReport: {
+                    postToReport = post
+                    reportReason = ""
+                    showReportSheet = true
+                },
+                onBlockUser: {
+                    Task { await blockUser(post.authorId) }
+                },
+                onHidePost: {
+                    posts.removeAll { $0.id == post.id }
+                }
+            )
+            .padding(.horizontal, 20)
+        }
     }
 
     // MARK: - Actions
@@ -1390,6 +1396,7 @@ struct CommentRow: View {
     var canModerate: Bool = false
     var onDelete: (() -> Void)? = nil
     var onReport: (() -> Void)? = nil
+    var onBlockUser: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -1414,16 +1421,16 @@ struct CommentRow: View {
                     .foregroundColor(Color("TextSecondary").opacity(0.6))
             }
             Spacer()
-            if canModerate || onReport != nil {
+            if canModerate || onReport != nil || onBlockUser != nil {
                 Menu {
                     if canModerate, let onDelete {
                         Button(role: .destructive) { onDelete() } label: {
                             Label("Delete Comment", systemImage: "trash")
                         }
-                        if let onBlockUser {
-                            Button(role: .destructive) { onBlockUser() } label: {
-                                Label("Block User", systemImage: "hand.raised")
-                            }
+                    }
+                    if let onBlockUser {
+                        Button(role: .destructive) { onBlockUser() } label: {
+                            Label("Block User", systemImage: "hand.raised")
                         }
                     }
                     if let onReport {
