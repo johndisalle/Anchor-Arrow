@@ -1259,10 +1259,10 @@ struct CommentsSheet: View {
                                     onReport: {
                                         commentToReport = comment
                                         showReportSheet = true
-                                    }
+                                    },
                                     onBlockUser: {
                                         Task { await blockCommentUser(comment.authorId) }
-                                    },
+                                    }
                                 )
                                 .padding(.horizontal, 20)
                             }
