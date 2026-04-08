@@ -2,6 +2,7 @@
 // Iron Sharpeners – private accountability circles
 
 import SwiftUI
+import FirebaseAuth
 
 struct CirclesView: View {
     @EnvironmentObject var userStore: UserStore
@@ -440,6 +441,10 @@ struct CircleDetailView: View {
                                     emoji: "🔥"
                                 )
                             }
+                        } onBlockUser: {
+                            Task { await blockUser(post.authorId) }
+                        } onHidePost: {
+                            posts.removeAll { $0.id == post.id }
                         }
                         .listRowBackground(Color("CardBackground"))
                         .listRowSeparator(.hidden)
@@ -484,6 +489,19 @@ struct CircleDetailView: View {
         posts = (try? await FirestoreService.shared.fetchCirclePosts(circleId: circleId)) ?? []
         isLoading = false
     }
+
+    private func blockUser(_ userId: String) async {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        do {
+            try await FirestoreService.shared.updateUser(uid: uid, fields: [
+                "blockedUserIds": [userId] + (userStore.appUser?.blockedUserIds ?? [])
+            ])
+            userStore.appUser?.blockedUserIds.append(userId)
+            posts.removeAll { $0.authorId == userId }
+        } catch {
+            userStore.errorMessage = "Couldn't block user. Try again."
+        }
+    }
 }
 
 // MARK: - CirclePostRow
@@ -491,6 +509,12 @@ struct CirclePostRow: View {
     let post: CirclePost
     let canReact: Bool
     let onReact: () -> Void
+    var isLeader: Bool = false
+    var canModerate: Bool = false
+    var onReport: (() -> Void)? = nil
+    var onDelete: (() -> Void)? = nil
+    var onBlockUser: (() -> Void)? = nil
+    var onHidePost: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -513,6 +537,36 @@ struct CirclePostRow: View {
                 Text(post.timestamp.timeAgo)
                     .font(.system(size: 11))
                     .foregroundColor(Color("TextSecondary"))
+
+                if isLeader || canModerate || onReport != nil || onBlockUser != nil {
+                    Menu {
+                        if isLeader || canModerate, let onDelete {
+                            Button(role: .destructive) { onDelete() } label: {
+                                Label("Delete Post", systemImage: "trash")
+                            }
+                        }
+                        if let onHidePost {
+                            Button { onHidePost() } label: {
+                                Label("Hide Post", systemImage: "eye.slash")
+                            }
+                        }
+                        if let onBlockUser {
+                            Button(role: .destructive) { onBlockUser() } label: {
+                                Label("Block User", systemImage: "hand.raised")
+                            }
+                        }
+                        if let onReport {
+                            Button { onReport() } label: {
+                                Label("Report Post", systemImage: "flag")
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis")
+                            .font(.system(size: 16))
+                            .foregroundColor(Color("TextSecondary"))
+                            .padding(6)
+                    }
+                }
             }
 
             Text(post.isAnonymous ? "A brother shared:" : post.authorName)
