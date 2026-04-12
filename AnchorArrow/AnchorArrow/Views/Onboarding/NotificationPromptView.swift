@@ -18,9 +18,7 @@ struct NotificationPromptView: View {
                     .fill(AATheme.steel.opacity(0.12))
                     .frame(width: 100, height: 100)
 
-                Image(systemName: "bell.badge.fill")
-                    .font(.system(size: 44, weight: .medium))
-                    .foregroundColor(AATheme.steel)
+                AAIcon("bell.badge.fill", size: 44, weight: .medium, color: AATheme.steel)
             }
             .padding(.bottom, 28)
 

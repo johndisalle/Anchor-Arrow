@@ -103,9 +103,7 @@ struct AuthView: View {
                             Button {
                                 agreedToTerms.toggle()
                             } label: {
-                                Image(systemName: agreedToTerms ? "checkmark.square.fill" : "square")
-                                    .font(.system(size: 22))
-                                    .foregroundColor(agreedToTerms ? AATheme.steel : AATheme.secondaryText.opacity(0.5))
+                                AAIcon(agreedToTerms ? "checkmark.square.fill" : "square", size: 22, weight: .semibold, color: agreedToTerms ? AATheme.steel : AATheme.secondaryText.opacity(0.5))
                             }
                             .buttonStyle(.plain)
 

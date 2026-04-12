@@ -92,7 +92,7 @@ struct AnchorView: View {
             // Top label
             let topAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont.systemFont(ofSize: 32, weight: .bold),
-                .foregroundColor: UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1),
+                .foregroundColor: UIColor(AATheme.steel),
                 .kern: 4.0
             ]
             let topText = "ANCHOR & ARROW" as NSString
@@ -100,13 +100,13 @@ struct AnchorView: View {
             topText.draw(at: CGPoint(x: (1080 - topSize.width) / 2, y: 80), withAttributes: topAttrs)
 
             // Divider
-            UIColor(red: 0.76, green: 0.52, blue: 0.30, alpha: 1).setFill()
+            UIColor(AATheme.amber).setFill()
             ctx.fill(CGRect(x: 440, y: 140, width: 200, height: 3))
 
             // Quote mark
             let quoteAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont(name: "Georgia-Bold", size: 80) ?? UIFont.systemFont(ofSize: 80, weight: .bold),
-                .foregroundColor: UIColor(red: 0.85, green: 0.75, blue: 0.55, alpha: 0.5)
+                .foregroundColor: UIColor(AATheme.warmGold).withAlphaComponent(0.5)
             ]
             ("\u{201C}" as NSString).draw(at: CGPoint(x: 80, y: 180), withAttributes: quoteAttrs)
 
@@ -116,7 +116,7 @@ struct AnchorView: View {
             verseStyle.lineSpacing = 12
             let verseAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont(name: "Georgia-Italic", size: 42) ?? UIFont.italicSystemFont(ofSize: 42),
-                .foregroundColor: UIColor(red: 0.12, green: 0.14, blue: 0.20, alpha: 1),
+                .foregroundColor: UIColor(AATheme.darkIron),
                 .paragraphStyle: verseStyle
             ]
             let verseText = prompt.scripture as NSString
@@ -126,7 +126,7 @@ struct AnchorView: View {
             // Reference
             let refAttrs: [NSAttributedString.Key: Any] = [
                 .font: UIFont(name: "Georgia-Bold", size: 28) ?? UIFont.systemFont(ofSize: 28, weight: .bold),
-                .foregroundColor: UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1)
+                .foregroundColor: UIColor(AATheme.steel)
             ]
             let refText = "— \(prompt.reference)" as NSString
             let refSize = refText.size(withAttributes: refAttrs)
@@ -403,9 +403,7 @@ struct CompletedBanner: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 20))
-                .foregroundColor(Color(color))
+            AAIcon("checkmark.circle.fill", size: 20, weight: .semibold, color: Color(color))
             Text(message)
                 .font(.system(size: 14, weight: .medium))
                 .foregroundColor(AATheme.primaryText)
@@ -441,9 +439,7 @@ struct CompletionOverlay: View {
                     SwiftUI.Circle()
                         .fill(Color(color).opacity(0.2))
                         .frame(width: 100, height: 100)
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 56))
-                        .foregroundColor(Color(color))
+                    AAIcon("checkmark.circle.fill", size: 56, weight: .semibold, color: Color(color))
                 }
 
                 Text(message)

@@ -101,9 +101,7 @@ struct CirclesView: View {
     private var emptyState: some View {
         VStack(spacing: 28) {
             Spacer()
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 52))
-                .foregroundColor(Color("BrandAnchor").opacity(0.5))
+            AAIcon("person.3.fill", size: 52, weight: .semibold, color: Color("BrandAnchor").opacity(0.5))
             VStack(spacing: 10) {
                 Text("No Circles Yet")
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
@@ -532,9 +530,7 @@ struct CircleDetailView: View {
     private var dailyPromptBanner: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 6) {
-                Image(systemName: "flame.fill")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundColor(Color("BrandGold"))
+                AAIcon("flame.fill", size: 11, weight: .bold, color: Color("BrandGold"))
                 Text("TODAY'S CIRCLE PROMPT")
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundColor(Color("BrandGold"))
@@ -559,9 +555,7 @@ struct CircleDetailView: View {
     private var emptyPostsState: some View {
         VStack(spacing: 16) {
             Spacer(minLength: 60)
-            Image(systemName: "bubble.left.and.bubble.right")
-                .font(.system(size: 44))
-                .foregroundColor(Color("TextSecondary").opacity(0.4))
+            AAIcon("bubble.left.and.bubble.right", size: 44, weight: .semibold, color: Color("TextSecondary").opacity(0.4))
             Text("No posts yet. Be the first to share.")
                 .font(.system(size: 15))
                 .foregroundColor(Color("TextSecondary"))
@@ -801,9 +795,7 @@ struct MemberListSheet: View {
                         Spacer()
                         if let streak = profile?.currentStreak, streak > 0 {
                             HStack(spacing: 3) {
-                                Image(systemName: "flame.fill")
-                                    .font(.system(size: 11))
-                                    .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                                AAIcon("flame.fill", size: 11, weight: .semibold, color: profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
                                 Text("\(streak)")
                                     .font(.system(size: 13, weight: .bold))
                                     .foregroundColor(profile?.isStreakAlive == true ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
@@ -847,9 +839,7 @@ struct BattleFormationCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 6) {
-                Image(systemName: "shield.fill")
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandAnchor"))
+                AAIcon("shield.fill", size: 11, weight: .heavy, color: Color("BrandAnchor"))
                 Text("BATTLE FORMATION")
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundColor(Color("BrandAnchor"))
@@ -911,9 +901,7 @@ struct BattleFormationCard: View {
             // Streak badge
             if let p = profile, p.currentStreak > 0 {
                 HStack(spacing: 2) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 8, weight: .bold))
-                        .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
+                    AAIcon("flame.fill", size: 8, weight: .bold, color: p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
                     Text("\(p.currentStreak)")
                         .font(.system(size: 9, weight: .heavy))
                         .foregroundColor(p.isStreakAlive ? Color("BrandGold") : Color("TextSecondary").opacity(0.4))
@@ -947,9 +935,7 @@ struct PrayerWallSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 6) {
-                Image(systemName: "hands.sparkles.fill")
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundColor(Color("BrandGold"))
+                AAIcon("hands.sparkles.fill", size: 11, weight: .heavy, color: Color("BrandGold"))
                 Text("PRAYER WALL")
                     .font(.system(size: 11, weight: .heavy))
                     .foregroundColor(Color("BrandGold"))
@@ -975,9 +961,7 @@ struct PrayerWallSection: View {
                 VStack(spacing: 8) {
                     ForEach(answered) { post in
                         HStack(spacing: 8) {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 14))
-                                .foregroundColor(Color("BrandArrow"))
+                            AAIcon("checkmark.circle.fill", size: 14, weight: .semibold, color: Color("BrandArrow"))
                             Text(post.content)
                                 .font(.system(size: 13))
                                 .foregroundColor(Color("TextSecondary"))
@@ -1084,9 +1068,7 @@ struct CirclePostRow: View {
             // Type badge + time + leader menu
             HStack {
                 HStack(spacing: 6) {
-                    Image(systemName: post.type.icon)
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(Color(post.type.color))
+                    AAIcon(post.type.icon, size: 12, color: Color(post.type.color))
                     Text(post.type.displayName)
                         .font(.system(size: 12, weight: .bold))
                         .foregroundColor(Color(post.type.color))
@@ -1298,9 +1280,7 @@ struct CommentsSheet: View {
                                 .cornerRadius(12)
 
                             Button { Task { await submitComment() } } label: {
-                                Image(systemName: isPosting ? "hourglass" : "arrow.up.circle.fill")
-                                    .font(.system(size: 32))
-                                    .foregroundColor(newComment.trimmingCharacters(in: .whitespaces).isEmpty
+                                AAIcon(isPosting ? "hourglass" : "arrow.up.circle.fill", size: 32, weight: .semibold, color: newComment.trimmingCharacters(in: .whitespaces).isEmpty
                                         ? Color("TextSecondary").opacity(0.3)
                                         : Color("BrandAnchor"))
                             }
@@ -1804,9 +1784,7 @@ struct NewCirclePostView: View {
 
                 // Contextual nudge for the selected post type
                 HStack(spacing: 8) {
-                    Image(systemName: selectedType.icon)
-                        .font(.system(size: 12))
-                        .foregroundColor(Color(selectedType.color))
+                    AAIcon(selectedType.icon, size: 12, weight: .semibold, color: Color(selectedType.color))
                     Text(selectedType.postHint)
                         .font(.system(size: 13))
                         .foregroundColor(Color("TextSecondary"))
@@ -1909,9 +1887,7 @@ struct BrowsePublicCirclesView: View {
                 } else if publicCircles.isEmpty {
                     VStack(spacing: 16) {
                         Spacer()
-                        Image(systemName: "globe")
-                            .font(.system(size: 44))
-                            .foregroundColor(Color("TextSecondary").opacity(0.4))
+                        AAIcon("globe", size: 44, weight: .semibold, color: Color("TextSecondary").opacity(0.4))
                         Text("No Public Circles Yet")
                             .font(.system(size: 20, weight: .bold, design: .rounded))
                             .foregroundColor(Color("TextPrimary"))
@@ -1927,9 +1903,7 @@ struct BrowsePublicCirclesView: View {
                         VStack(spacing: 12) {
                             // Explanation banner
                             HStack(spacing: 10) {
-                                Image(systemName: "globe")
-                                    .font(.system(size: 16, weight: .medium))
-                                    .foregroundColor(Color("BrandArrow"))
+                                AAIcon("globe", size: 16, weight: .medium, color: Color("BrandArrow"))
                                 Text("Public circles are open to all. Join to read posts, share, and find brotherhood.")
                                     .font(.system(size: 13))
                                     .foregroundColor(Color("TextSecondary"))

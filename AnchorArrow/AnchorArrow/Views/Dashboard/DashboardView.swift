@@ -480,7 +480,7 @@ struct DashboardView: View {
             context.fill(rect)
 
             // Colors
-            let steelColor = UIColor(red: 0.22, green: 0.30, blue: 0.42, alpha: 1.0)
+            let steelColor = UIColor(AATheme.steel)
             let secondaryColor = UIColor(red: 0.42, green: 0.44, blue: 0.50, alpha: 1.0)
 
             // Top: "ANCHOR & ARROW"
@@ -500,7 +500,7 @@ struct DashboardView: View {
             // Decorative line below title
             let lineY = titlePoint.y + titleSize.height + 30
             let lineRect = CGRect(x: size.width / 2 - 60, y: lineY, width: 120, height: 2)
-            UIColor(red: 0.76, green: 0.52, blue: 0.30, alpha: 1.0).setFill()
+            UIColor(AATheme.amber).setFill()
             UIBezierPath(roundedRect: lineRect, cornerRadius: 1).fill()
 
             // Center: Large streak number
