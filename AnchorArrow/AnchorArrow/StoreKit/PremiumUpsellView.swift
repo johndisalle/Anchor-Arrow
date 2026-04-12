@@ -9,6 +9,8 @@ struct PremiumUpsellView: View {
     @EnvironmentObject var storeKitManager: StoreKitManager
     @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss
+    @State private var purchaseError: String?
+    @State private var showPendingAlert: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -55,6 +57,8 @@ struct PremiumUpsellView: View {
             }
             .subscriptionStoreButtonLabel(.multiline)
             .storeButton(.visible, for: .restorePurchases)
+            .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!, for: .termsOfService)
+            .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!, for: .privacyPolicy)
             .onInAppPurchaseCompletion { _, result in
                 switch result {
                 case .success(.success(_)):
@@ -64,9 +68,28 @@ struct PremiumUpsellView: View {
                         userStore.appUser?.isPremium = true
                         dismiss()
                     }
-                default:
+                case .success(.userCancelled):
                     break
+                case .success(.pending):
+                    showPendingAlert = true
+                case .success(_):
+                    break
+                case .failure(let error):
+                    purchaseError = error.localizedDescription
                 }
+            }
+            .alert("Purchase Failed", isPresented: Binding(
+                get: { purchaseError != nil },
+                set: { if !$0 { purchaseError = nil } }
+            )) {
+                Button("OK", role: .cancel) { purchaseError = nil }
+            } message: {
+                Text(purchaseError ?? "")
+            }
+            .alert("Purchase Pending", isPresented: $showPendingAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Your purchase is awaiting approval. You'll be notified when it's complete.")
             }
             .background(Color("BackgroundPrimary").ignoresSafeArea())
             .navigationTitle("")

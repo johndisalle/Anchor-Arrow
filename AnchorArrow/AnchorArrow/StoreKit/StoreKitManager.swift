@@ -24,20 +24,56 @@ enum SubscriptionConfig {
 class StoreKitManager: ObservableObject {
     @Published var hasActiveSubscription = false
     @Published var activeSubscriptionExpiry: Date?
+    @Published var productsLoaded: Bool = false
+    @Published var productLoadError: String?
 
     private var transactionListener: Task<Void, Error>?
+    private var authStateHandle: AuthStateDidChangeListenerHandle?
 
     init() {
+        print("[StoreKit] init")
         transactionListener = listenForTransactions()
         Task { await checkSubscriptionStatus() }
+        Task { await loadProducts() }
+        authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            print("[StoreKit] auth state changed — user: \(user?.uid ?? "nil")")
+            guard user != nil else { return }
+            Task { [weak self] in
+                await self?.checkSubscriptionStatus()
+            }
+        }
     }
 
     deinit {
         transactionListener?.cancel()
+        if let handle = authStateHandle {
+            Auth.auth().removeStateDidChangeListener(handle)
+        }
+    }
+
+    // MARK: - Load Products
+    func loadProducts() async {
+        do {
+            let products = try await Product.products(for: SubscriptionConfig.allProductIDs)
+            if products.isEmpty {
+                productLoadError = "No subscription products returned by App Store."
+                productsLoaded = false
+                print("[StoreKit] loadProducts: empty result")
+            } else {
+                productsLoaded = true
+                productLoadError = nil
+                print("[StoreKit] loadProducts: loaded \(products.count) products — \(products.map(\.id))")
+            }
+        } catch {
+            productLoadError = "Failed to load products: \(error.localizedDescription)"
+            productsLoaded = false
+            print("[StoreKit] loadProducts error: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Check Subscription Status
     func checkSubscriptionStatus() async {
+        print("[StoreKit] checkSubscriptionStatus start")
         var foundActive = false
 
         for await result in Transaction.currentEntitlements {
@@ -60,6 +96,7 @@ class StoreKitManager: ObservableObject {
             hasActiveSubscription = false
             await updatePremiumStatus(expiryDate: nil)
         }
+        print("[StoreKit] checkSubscriptionStatus end — active: \(hasActiveSubscription)")
     }
 
     // MARK: - Listen for Transactions
@@ -68,9 +105,9 @@ class StoreKitManager: ObservableObject {
             for await result in Transaction.updates {
                 do {
                     let transaction = try await self.checkVerified(result)
+                    print("[StoreKit] transaction received — productID: \(transaction.productID)")
                     await self.updatePremiumStatus(expiryDate: transaction.expirationDate)
                     await transaction.finish()
-                    await self.checkSubscriptionStatus()
                 } catch {
                     // Skip unverified transactions
                 }
@@ -80,11 +117,19 @@ class StoreKitManager: ObservableObject {
 
     // MARK: - Update Firebase Premium Flag
     private func updatePremiumStatus(expiryDate: Date?) async {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
         let isPremium = expiryDate != nil && expiryDate! > Date()
-        try? await FirestoreService.shared.setPremium(uid: uid, isPremium: isPremium, expiry: expiryDate)
         hasActiveSubscription = isPremium
         activeSubscriptionExpiry = expiryDate
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("[StoreKit] updatePremiumStatus: no uid, skipping Firestore write (local state updated)")
+            return
+        }
+        do {
+            try await FirestoreService.shared.setPremium(uid: uid, isPremium: isPremium, expiry: expiryDate)
+            print("[StoreKit] premium write success — uid: \(uid), isPremium: \(isPremium)")
+        } catch {
+            print("[StoreKit] premium write failure: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Verify Transaction
