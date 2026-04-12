@@ -13,8 +13,8 @@ enum SubscriptionConfig {
     static let groupID = "21994049"
 
     // Product IDs — must exactly match App Store Connect
-    static let monthlyID = "com.ellasid.anchorarrow.premium.monthly"
-    static let annualID  = "com.ellasid.anchorarrow.premium.annual"
+    static let monthlyID = "com.ellasid.anchorarrow.premium.monthly.v2"
+    static let annualID  = "com.ellasid.anchorarrow.premium.annual.v2"
 
     static let allProductIDs = [monthlyID, annualID]
 }
