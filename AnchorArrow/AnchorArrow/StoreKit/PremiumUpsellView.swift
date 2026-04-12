@@ -14,7 +14,7 @@ struct PremiumUpsellView: View {
 
     var body: some View {
         NavigationStack {
-            SubscriptionStoreView(groupID: SubscriptionConfig.groupID) {
+            SubscriptionStoreView(productIDs: SubscriptionConfig.allProductIDs) {
                 // Custom marketing header
                 VStack(spacing: 20) {
                     // Icon
