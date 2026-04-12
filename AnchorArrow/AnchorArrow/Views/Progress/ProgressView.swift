@@ -401,9 +401,7 @@ struct ProgressView: View {
             // Empty state
             if userStore.driftLogs.isEmpty {
                 HStack(spacing: 8) {
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.amber)
+                    AAIcon("checkmark.shield.fill", size: 14, weight: .semibold, color: AATheme.amber)
                     Text("No drift data yet. Insights will appear as you log drift moments.")
                         .font(.system(size: 13))
                         .foregroundColor(AATheme.secondaryText)
@@ -449,9 +447,7 @@ struct ProgressView: View {
             // Weakest day
             if let weakestDay = userStore.weakestDayOfWeek {
                 HStack(spacing: 8) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.warning)
+                    AAIcon("exclamationmark.triangle.fill", size: 14, weight: .semibold, color: AATheme.warning)
                     Text("You drift most on \(weakestDay)s")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(AATheme.primaryText)
@@ -466,9 +462,7 @@ struct ProgressView: View {
             if !userStore.driftLogs.isEmpty {
                 let trend = userStore.driftTrending
                 HStack(spacing: 8) {
-                    Image(systemName: trend.icon)
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(Color(trend.color))
+                    AAIcon(trend.icon, size: 14, weight: .bold, color: Color(trend.color))
                     Text("90-day drift trend: \(trend.label.lowercased())")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(AATheme.primaryText)
@@ -479,9 +473,7 @@ struct ProgressView: View {
             let streaks = userStore.accountabilityStreaks
             if let best = streaks.first {
                 HStack(spacing: 8) {
-                    Image(systemName: "checkmark.shield.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.amber)
+                    AAIcon("checkmark.shield.fill", size: 14, weight: .semibold, color: AATheme.amber)
                     Text("Accountable on \(best.tag.displayName) for \(best.weeks) weeks")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundColor(AATheme.amber)
@@ -618,9 +610,7 @@ struct ProgressView: View {
     // MARK: - Drift Empty State
     private var driftEmptyState: some View {
         VStack(spacing: 10) {
-            Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 28))
-                .foregroundColor(AATheme.amber.opacity(0.5))
+            AAIcon("checkmark.shield.fill", size: 28, color: AATheme.amber.opacity(0.5))
             Text("No Drift Logs Yet")
                 .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
@@ -664,9 +654,7 @@ struct ProgressView: View {
 
                     VStack(alignment: .leading, spacing: 4) {
                         HStack {
-                            Image(systemName: log.displayIcon)
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(AATheme.warning)
+                            AAIcon(log.displayIcon, size: 12, color: AATheme.warning)
                             Text(log.displayName)
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(AATheme.primaryText)
@@ -739,9 +727,7 @@ struct StatsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: icon)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundColor(color)
+            AAIcon(icon, size: 22, color: color)
 
             Text(value)
                 .font(.system(size: 30, weight: .heavy))
@@ -911,13 +897,9 @@ struct WeekDayDot: View {
 
                 if anchorDone || arrowDone {
                     if anchorDone && arrowDone {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                        AAIcon("checkmark", size: 11, weight: .bold, color: .white)
                     } else if anchorDone {
-                        Image(systemName: "sunrise.fill")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(.white)
+                        AAIcon("sunrise.fill", size: 11, weight: .bold, color: .white)
                     } else {
                         CrossedArrowsView(color: .white)
                             .frame(width: 20, height: 13)
@@ -965,9 +947,7 @@ struct BadgeGridCell: View {
                     SwiftUI.Circle()
                         .fill(isEarned ? badgeType.color.opacity(0.15) : AATheme.cardBackground)
                         .frame(width: 52, height: 52)
-                    Image(systemName: badgeType.icon)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundColor(isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
+                    AAIcon(badgeType.icon, size: 22, color: isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
 
                     if !isEarned {
                         Image(systemName: "lock.fill")
@@ -1012,9 +992,7 @@ struct BadgeDetailSheet: View {
                 SwiftUI.Circle()
                     .fill(isEarned ? badgeType.color.opacity(0.15) : AATheme.cardBackground)
                     .frame(width: 100, height: 100)
-                Image(systemName: badgeType.icon)
-                    .font(.system(size: 44, weight: .semibold))
-                    .foregroundColor(isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
+                AAIcon(badgeType.icon, size: 44, color: isEarned ? badgeType.color : AATheme.secondaryText.opacity(0.3))
             }
 
             VStack(spacing: 8) {
@@ -1062,9 +1040,7 @@ struct WeeklyReportStat: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            Image(systemName: icon)
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(color)
+            AAIcon(icon, size: 14, color: color)
             Text(value)
                 .font(.system(size: 16, weight: .heavy))
                 .foregroundColor(AATheme.primaryText)

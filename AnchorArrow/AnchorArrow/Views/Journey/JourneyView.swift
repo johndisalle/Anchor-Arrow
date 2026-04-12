@@ -126,9 +126,7 @@ struct JourneyView: View {
     private var journeyHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: "map.fill")
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(AATheme.amber)
+                AAIcon("map.fill", size: 20, color: AATheme.amber)
                 Text("30-Day Guided Plan")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(AATheme.amber)
@@ -169,9 +167,7 @@ struct JourneyView: View {
 
     private var startJourneyCTA: some View {
         VStack(spacing: 20) {
-            Image(systemName: "figure.stand.line.dotted.figure.stand")
-                .font(.system(size: 52))
-                .foregroundColor(AATheme.amber)
+            AAIcon("figure.stand.line.dotted.figure.stand", size: 52, weight: .semibold, color: AATheme.amber)
 
             VStack(spacing: AATheme.paddingSmall) {
                 Text("Ready to Commit?")
@@ -312,9 +308,7 @@ struct JourneyView: View {
                     }
                 } label: {
                     HStack(spacing: 14) {
-                        Image(systemName: series.icon)
-                            .font(.system(size: 22, weight: .semibold))
-                            .foregroundColor(selectedSeries == series
+                        AAIcon(series.icon, size: 22, color: selectedSeries == series
                                              ? AATheme.amber : AATheme.secondaryText)
                             .frame(width: 40)
 
@@ -324,9 +318,7 @@ struct JourneyView: View {
                                     .font(.system(size: 16, weight: .bold))
                                     .foregroundColor(isAvailable ? AATheme.primaryText : AATheme.secondaryText.opacity(0.5))
                                 if completed {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .font(.system(size: 13))
-                                        .foregroundColor(.green)
+                                    AAIcon("checkmark.circle.fill", size: 13, weight: .semibold, color: .green)
                                 }
                                 if !isAvailable {
                                     Text("PREMIUM")
@@ -450,13 +442,9 @@ struct JourneyDayRow: View {
                         .frame(width: 40, height: 40)
 
                     if isCompleted {
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                        AAIcon("checkmark", size: 16, weight: .bold, color: .white)
                     } else if !isUnlocked {
-                        Image(systemName: "lock.fill")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.white.opacity(0.6))
+                        AAIcon("lock.fill", size: 14, weight: .bold, color: .white.opacity(0.6))
                     } else {
                         Text("\(day.id)")
                             .font(.system(size: 15, weight: .heavy))
@@ -660,9 +648,7 @@ struct JourneyDayDetailView: View {
     ) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(color)
+                AAIcon(icon, size: 16, color: color)
                 Text(title)
                     .font(.system(size: 15, weight: .bold))
                     .foregroundColor(AATheme.primaryText)

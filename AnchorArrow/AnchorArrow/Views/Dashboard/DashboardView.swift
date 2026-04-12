@@ -218,9 +218,7 @@ struct DashboardView: View {
             } else if userStore.isAnchorDoneToday && userStore.isArrowDoneToday {
                 // Both done — celebration
                 HStack(spacing: 12) {
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 28, weight: .semibold))
-                        .foregroundColor(AATheme.success)
+                    AAIcon("checkmark.seal.fill", size: 28, color: AATheme.success)
                     Text("Both done. Well fought, brother.")
                         .font(.system(.title3, design: .serif, weight: .semibold))
                         .foregroundColor(AATheme.primaryText)
@@ -270,9 +268,7 @@ struct DashboardView: View {
                 ZStack(alignment: .topTrailing) {
                     StatPill(value: "\(userStore.currentStreak)", label: "Day Streak",
                              color: streakColor) {
-                        Image(systemName: "flame.fill")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(streakColor)
+                        AAIcon("flame.fill", size: 16, color: streakColor)
                     }
                     Button {
                         shareImage = generateStreakShareImage()
@@ -306,9 +302,7 @@ struct DashboardView: View {
 
     private var badgesEmptyState: some View {
         HStack(spacing: 12) {
-            Image(systemName: "star.circle")
-                .font(.system(size: 28))
-                .foregroundColor(AATheme.warmGold.opacity(0.5))
+            AAIcon("star.circle", size: 28, color: AATheme.warmGold.opacity(0.5))
 
             VStack(alignment: .leading, spacing: 3) {
                 Text("Badges")
@@ -367,9 +361,7 @@ struct DashboardView: View {
                     SwiftUI.Circle()
                         .fill(AATheme.amber.opacity(0.15))
                         .frame(width: 48, height: 48)
-                    Image(systemName: "map.fill")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundColor(AATheme.amber)
+                    AAIcon("map.fill", size: 20, color: AATheme.amber)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -581,9 +573,7 @@ struct TodayStatusCard<IncompleteIcon: View>: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     if isComplete {
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 24, weight: .semibold))
-                            .foregroundColor(AATheme.success)
+                        AAIcon("checkmark.circle.fill", size: 24, color: AATheme.success)
                     } else {
                         incompleteIcon()
                     }
@@ -678,9 +668,7 @@ struct BadgePill: View {
                 SwiftUI.Circle()
                     .fill(badge.color.opacity(0.15))
                     .frame(width: 44, height: 44)
-                Image(systemName: badge.icon)
-                    .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(badge.color)
+                AAIcon(badge.icon, size: 20, color: badge.color)
             }
             Text(badge.name)
                 .font(.system(size: 10, weight: .medium))

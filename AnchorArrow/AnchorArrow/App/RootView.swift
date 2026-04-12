@@ -291,9 +291,7 @@ struct MainTabView: View {
                     Button {
                         showErrorToast = false
                     } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundColor(.white.opacity(0.7))
+                        AAIcon("xmark", size: 12, weight: .bold, color: .white.opacity(0.7))
                     }
                 }
                 .padding(14)

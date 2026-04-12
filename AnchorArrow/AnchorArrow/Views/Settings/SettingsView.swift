@@ -474,9 +474,7 @@ struct BlockedUsersView: View {
                 ProgressView()
             } else if blockedIds.isEmpty {
                 VStack(spacing: 16) {
-                    Image(systemName: "hand.raised.slash")
-                        .font(.system(size: 44))
-                        .foregroundColor(AATheme.secondaryText.opacity(0.4))
+                    AAIcon("hand.raised.slash", size: 44, weight: .semibold, color: AATheme.secondaryText.opacity(0.4))
                     Text("No blocked users")
                         .font(.system(size: 15))
                         .foregroundColor(AATheme.secondaryText)

@@ -87,9 +87,7 @@ struct ArrowView: View {
 
     private var scriptureChip: some View {
         HStack {
-            Image(systemName: "book.fill")
-                .font(.system(size: 13))
-                .foregroundColor(AATheme.amber)
+            AAIcon("book.fill", size: 13, weight: .semibold, color: AATheme.amber)
             Text("\"Let all that you do be done in love.\" — 1 Cor 16:14")
                 .font(AATheme.scriptureFont)
                 .foregroundColor(AATheme.secondaryText)
@@ -131,9 +129,7 @@ struct ArrowView: View {
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Image(systemName: selectedRole.icon)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(AATheme.amber)
+                AAIcon(selectedRole.icon, size: 18, color: AATheme.amber)
                 Text(selectedRole.displayName)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(AATheme.amber)
@@ -237,9 +233,7 @@ struct ArrowView: View {
 
         return VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
             HStack {
-                Image(systemName: "lightbulb.fill")
-                    .font(.system(size: 13))
-                    .foregroundColor(AATheme.warmGold)
+                AAIcon("lightbulb.fill", size: 13, weight: .semibold, color: AATheme.warmGold)
                 Text("Examples")
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(AATheme.warmGold)
@@ -373,9 +367,7 @@ struct QuickWinButton: View {
     var body: some View {
         Button(action: action) {
             VStack(spacing: 5) {
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(AATheme.amber)
+                AAIcon(icon, size: 16, weight: .semibold, color: AATheme.amber)
                 Text(label)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(AATheme.secondaryText)

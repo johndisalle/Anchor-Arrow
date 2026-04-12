@@ -95,9 +95,7 @@ struct DriftLogView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
             HStack(spacing: 12) {
-                Image(systemName: "exclamationmark.shield.fill")
-                    .font(.system(size: 24))
-                    .foregroundColor(AATheme.warning)
+                AAIcon("exclamationmark.shield.fill", size: 24, weight: .semibold, color: AATheme.warning)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Drift Detected")
                         .font(AATheme.headlineFont)
@@ -379,9 +377,7 @@ struct DriftCategoryButton: View {
                     SwiftUI.Circle()
                         .fill(isSelected ? AATheme.warning.opacity(0.2) : AATheme.cardBackground)
                         .frame(width: 46, height: 46)
-                    Image(systemName: tag.icon)
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(isSelected ? AATheme.warning : AATheme.secondaryText)
+                    AAIcon(tag.icon, size: 20, weight: .medium, color: isSelected ? AATheme.warning : AATheme.secondaryText)
                 }
                 Text(tag.displayName)
                     .font(.system(size: 11, weight: .medium))

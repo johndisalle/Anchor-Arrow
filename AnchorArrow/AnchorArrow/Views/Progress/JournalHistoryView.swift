@@ -68,9 +68,7 @@ struct JournalHistoryView: View {
             if filteredEntries.isEmpty {
                 Spacer()
                 VStack(spacing: 12) {
-                    Image(systemName: searchText.isEmpty ? "book.closed" : "magnifyingglass")
-                        .font(.system(size: 36))
-                        .foregroundColor(AATheme.secondaryText.opacity(0.4))
+                    AAIcon(searchText.isEmpty ? "book.closed" : "magnifyingglass", size: 36, weight: .semibold, color: AATheme.secondaryText.opacity(0.4))
                     Text(searchText.isEmpty ? "No entries yet" : "No entries match your search")
                         .font(.system(size: 15))
                         .foregroundColor(AATheme.secondaryText)
@@ -115,14 +113,10 @@ private struct JournalEntryCard: View {
 
                 HStack(spacing: 6) {
                     if entry.anchorCompleted {
-                        Image(systemName: "sunrise.fill")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(AATheme.steel)
+                        AAIcon("sunrise.fill", size: 11, weight: .bold, color: AATheme.steel)
                     }
                     if entry.arrowCompleted {
-                        Image(systemName: "arrow.up.right")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(AATheme.amber)
+                        AAIcon("arrow.up.right", size: 11, weight: .bold, color: AATheme.amber)
                     }
                 }
             }
@@ -220,9 +214,7 @@ struct JournalEntryDetailSheet: View {
                     if entry.anchorCompleted {
                         VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
                             HStack(spacing: AATheme.paddingSmall) {
-                                Image(systemName: "sunrise.fill")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(AATheme.steel)
+                                AAIcon("sunrise.fill", size: 16, color: AATheme.steel)
                                 Text("Anchor — Morning Reflection")
                                     .font(AATheme.subheadlineFont)
                                     .foregroundColor(AATheme.primaryText)
@@ -269,9 +261,7 @@ struct JournalEntryDetailSheet: View {
                     if entry.arrowCompleted {
                         VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
                             HStack(spacing: AATheme.paddingSmall) {
-                                Image(systemName: "arrow.up.right")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(AATheme.amber)
+                                AAIcon("arrow.up.right", size: 16, color: AATheme.amber)
                                 Text("Arrow — Evening Reflection")
                                     .font(AATheme.subheadlineFont)
                                     .foregroundColor(AATheme.primaryText)
