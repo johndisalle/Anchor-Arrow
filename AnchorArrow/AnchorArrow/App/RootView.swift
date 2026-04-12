@@ -167,31 +167,26 @@ struct MainTabView: View {
             CustomTabBar(selectedTab: $selectedTab)
 
             // Floating Drift Log Button
-            VStack {
-                Spacer()
-                HStack {
+            if !showDriftLog {
+                VStack {
                     Spacer()
-                    Button {
-                        showDriftLog = true
-                    } label: {
-                        ZStack {
-                            SwiftUI.Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [AATheme.warning, AATheme.destructive],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .frame(width: 52, height: 52)
-                                .shadow(color: AATheme.destructive.opacity(0.4), radius: 8, x: 0, y: 4)
+                    HStack {
+                        Spacer()
+                        Button {
+                            showDriftLog = true
+                        } label: {
+                            ZStack {
+                                SwiftUI.Circle()
+                                    .fill(AATheme.amber)
+                                    .frame(width: 42, height: 42)
 
-                            AAIcon("exclamationmark.shield.fill", size: 22, color: .white)
+                                AAIcon("exclamationmark.shield.fill", size: 22, weight: .semibold, color: .white)
+                            }
                         }
+                        .padding(.trailing, AATheme.paddingLarge)
+                        .padding(.bottom, 83 + AATheme.paddingMedium)
+                        .accessibilityLabel("Log a drift moment")
                     }
-                    .padding(.trailing, 20)
-                    .padding(.bottom, 95) // above custom tab bar
-                    .accessibilityLabel("Log a drift moment")
                 }
             }
 
