@@ -127,9 +127,7 @@ struct ProgressView: View {
 
                     if userStore.currentStreak > 0 {
                         HStack(spacing: 4) {
-                            Image(systemName: "flame.fill")
-                                .font(.system(size: 12))
-                                .foregroundColor(.orange)
+                            AAIcon("flame.fill", size: 12, weight: .regular, color: .orange)
                             Text("Longest: \(userStore.appUser?.longestStreak ?? 0) days")
                                 .font(.system(size: 13))
                                 .foregroundColor(.white.opacity(0.7))
@@ -139,11 +137,11 @@ struct ProgressView: View {
                     // Grace day status (premium only)
                     if userStore.isPremium {
                         HStack(spacing: 4) {
-                            Image(systemName: userStore.appUser?.hasGraceDayAvailable == true
-                                  ? "heart.fill" : "heart.slash")
-                                .font(.system(size: 11))
-                                .foregroundColor(userStore.appUser?.hasGraceDayAvailable == true
-                                                 ? .green : .white.opacity(0.4))
+                            AAIcon(userStore.appUser?.hasGraceDayAvailable == true
+                                   ? "heart.fill" : "heart.slash",
+                                   size: 11, weight: .regular,
+                                   color: userStore.appUser?.hasGraceDayAvailable == true
+                                       ? .green : .white.opacity(0.4))
                             Text(userStore.appUser?.hasGraceDayAvailable == true
                                  ? "Grace day available"
                                  : "Grace day used")
@@ -224,9 +222,7 @@ struct ProgressView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .fill(AATheme.steel.opacity(0.12))
                         .frame(width: 40, height: 40)
-                    Image(systemName: "book.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(AATheme.steel)
+                    AAIcon("book.fill", size: 18, color: AATheme.steel)
                 }
 
                 VStack(alignment: .leading, spacing: 3) {
@@ -283,9 +279,7 @@ struct ProgressView: View {
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Image(systemName: "doc.text.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(AATheme.steel)
+                AAIcon("doc.text.fill", size: 16, color: AATheme.steel)
                 Text("Weekly Report")
                     .font(AATheme.subheadlineFont)
                     .foregroundColor(AATheme.primaryText)
@@ -325,9 +319,7 @@ struct ProgressView: View {
             // Encouragement
             if fullDays == 7 {
                 HStack(spacing: 8) {
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.warmGold)
+                    AAIcon("crown.fill", size: 14, weight: .regular, color: AATheme.warmGold)
                     Text("Perfect week. Every day anchored and aimed. Stand firm, brother.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(AATheme.warmGold)
@@ -338,9 +330,7 @@ struct ProgressView: View {
                 .cornerRadius(12)
             } else if fullDays >= 5 {
                 HStack(spacing: 8) {
-                    Image(systemName: "hand.thumbsup.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.amber)
+                    AAIcon("hand.thumbsup.fill", size: 14, weight: .regular, color: AATheme.amber)
                     Text("Strong week. \(7 - fullDays) day\(fullDays == 6 ? "" : "s") to sharpen. Keep pressing.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(AATheme.amber)
@@ -351,9 +341,7 @@ struct ProgressView: View {
                 .cornerRadius(12)
             } else if fullDays > 0 {
                 HStack(spacing: 8) {
-                    Image(systemName: "figure.stand")
-                        .font(.system(size: 14))
-                        .foregroundColor(AATheme.steel)
+                    AAIcon("figure.stand", size: 14, weight: .regular, color: AATheme.steel)
                     Text("You showed up \(fullDays) day\(fullDays == 1 ? "" : "s"). That's \(fullDays) more than quitting. Build on it.")
                         .font(.system(size: 13, weight: .semibold))
                         .foregroundColor(AATheme.steel)
@@ -396,9 +384,7 @@ struct ProgressView: View {
     private var driftInsightsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Image(systemName: "chart.bar.fill")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(AATheme.warning)
+                AAIcon("chart.bar.fill", size: 16, color: AATheme.warning)
                 Text("Drift Insights")
                     .font(AATheme.subheadlineFont)
                     .foregroundColor(AATheme.primaryText)

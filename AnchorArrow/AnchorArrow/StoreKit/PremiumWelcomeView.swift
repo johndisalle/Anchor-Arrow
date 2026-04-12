@@ -164,9 +164,7 @@ private struct PremiumWelcomeCard: View {
                     .fill(iconColor.opacity(0.12))
                     .frame(width: 40, height: 40)
 
-                Image(systemName: icon)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundColor(iconColor)
+                AAIcon(icon, size: 18, color: iconColor)
             }
 
             VStack(alignment: .leading, spacing: 4) {

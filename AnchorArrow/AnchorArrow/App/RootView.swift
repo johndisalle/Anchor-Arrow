@@ -186,9 +186,7 @@ struct MainTabView: View {
                                 .frame(width: 52, height: 52)
                                 .shadow(color: AATheme.destructive.opacity(0.4), radius: 8, x: 0, y: 4)
 
-                            Image(systemName: "exclamationmark.shield.fill")
-                                .font(.system(size: 22, weight: .semibold))
-                                .foregroundColor(.white)
+                            AAIcon("exclamationmark.shield.fill", size: 22, color: .white)
                         }
                     }
                     .padding(.trailing, 20)
@@ -284,9 +282,7 @@ struct MainTabView: View {
         .safeAreaInset(edge: .top) {
             if showErrorToast {
                 HStack(spacing: AATheme.paddingSmall + 2) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundColor(.white)
+                    AAIcon("exclamationmark.triangle.fill", size: 15, color: .white)
                     Text(errorToastMessage)
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.white)

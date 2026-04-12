@@ -21,9 +21,7 @@ struct PremiumUpsellView: View {
                     SwiftUI.Circle()
                         .fill(Color("BrandGold").opacity(0.15))
                         .frame(width: 80, height: 80)
-                    Image(systemName: "crown.fill")
-                        .font(.system(size: 36))
-                        .foregroundColor(Color("BrandGold"))
+                    AAIcon("crown.fill", size: 36, weight: .regular, color: Color("BrandGold"))
                 }
                 .padding(.top, 8)
 
@@ -102,9 +100,7 @@ struct PremiumFeatureRow: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            Image(systemName: icon)
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(Color(color))
+            AAIcon(icon, size: 16, color: Color(color))
                 .frame(width: 24)
 
             Text(text)
@@ -113,9 +109,7 @@ struct PremiumFeatureRow: View {
 
             Spacer()
 
-            Image(systemName: "checkmark")
-                .font(.system(size: 13, weight: .bold))
-                .foregroundColor(.green)
+            AAIcon("checkmark", size: 13, weight: .bold, color: .green)
         }
     }
 }

@@ -38,9 +38,7 @@ struct TreeArrowProgressView: View {
             // Streak badge below anchor
             if streak > 0 {
                 HStack(spacing: 5) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundColor(.white)
+                    AAIcon("flame.fill", size: 11, weight: .bold, color: .white)
                     Text("\(streak) day streak")
                         .font(.system(size: 12, weight: .heavy, design: .serif))
                         .foregroundColor(.white)
