@@ -7,8 +7,9 @@ import SwiftUI
 struct TreeArrowProgressView: View {
     let anchorProgress: Double
     let arrowProgress: Double
-    let streak: Int
     let animate: Bool
+    var anchorCompleted: Bool = false
+    var arrowCompleted: Bool = false
 
     @State private var anchorRevealed = false
     @State private var arrowsRevealed = false
@@ -20,7 +21,8 @@ struct TreeArrowProgressView: View {
             CrossedArrowsView()
                 .frame(width: 140, height: 88)
                 .scaleEffect(arrowsRevealed ? 1.0 : 0.15)
-                .opacity(arrowsRevealed ? 1.0 : 0)
+                .opacity(arrowsRevealed ? (arrowCompleted ? 1.0 : 0.35) : 0)
+                .animation(.easeInOut(duration: 0.4), value: arrowCompleted)
 
             // Ground line
             Rectangle()
@@ -33,23 +35,8 @@ struct TreeArrowProgressView: View {
             AnchorSymbolView()
                 .frame(width: 120, height: 150)
                 .scaleEffect(anchorRevealed ? 1.0 : 0.1)
-                .opacity(anchorRevealed ? 1.0 : 0)
-
-            // Streak badge below anchor
-            if streak > 0 {
-                HStack(spacing: 5) {
-                    AAIcon("flame.fill", size: 11, weight: .bold, color: .white)
-                    Text("\(streak) day streak")
-                        .font(.system(size: 12, weight: .heavy, design: .serif))
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(AATheme.steel)
-                .cornerRadius(10)
-                .opacity(anchorRevealed ? 1 : 0)
-                .padding(.top, 10)
-            }
+                .opacity(anchorRevealed ? (anchorCompleted ? 1.0 : 0.35) : 0)
+                .animation(.easeInOut(duration: 0.4), value: anchorCompleted)
         }
         .frame(maxWidth: .infinity)
         .onAppear { triggerAnimation() }

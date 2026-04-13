@@ -235,8 +235,9 @@ struct TreeArrowProgressView_Previews: PreviewProvider {
             TreeArrowProgressView(
                 anchorProgress: 0.7,
                 arrowProgress: 0.6,
-                streak: 12,
-                animate: true
+                animate: true,
+                anchorCompleted: true,
+                arrowCompleted: false
             )
             .frame(height: 300)
         }
