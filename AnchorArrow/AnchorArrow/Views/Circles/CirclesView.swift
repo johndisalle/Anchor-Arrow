@@ -164,14 +164,14 @@ struct CirclesView: View {
     // MARK: - Circles List
     private var circlesList: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: 16) {
+            VStack(spacing: AATheme.paddingMedium) {
                 if !userStore.isPremium && circles.count >= 1 {
                     HStack(spacing: 10) {
                         Image(systemName: "info.circle.fill")
                             .foregroundColor(Color("BrandGold"))
                         Text("Free plan: react only. Upgrade to post and comment.")
                             .font(.system(size: 13))
-                            .foregroundColor(Color("TextSecondary"))
+                            .foregroundColor(AATheme.secondaryText)
                         Spacer()
                         Button("Upgrade") { showPremiumUpsell = true }
                             .font(.system(size: 12, weight: .bold))
@@ -220,89 +220,90 @@ struct CircleCard: View {
     @State private var showCopiedToast = false
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 16) {
-                ZStack {
-                    SwiftUI.Circle()
-                        .fill(Color("BrandAnchor").opacity(0.15))
-                        .frame(width: 52, height: 52)
-                    Text(String(circle.name.prefix(2)).uppercased())
-                        .font(.system(size: 18, weight: .heavy))
-                        .foregroundColor(Color("BrandAnchor"))
-                }
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(circle.name)
-                        .font(.system(size: 17, weight: .bold))
-                        .foregroundColor(Color("TextPrimary"))
+        HStack(spacing: 16) {
+            ZStack {
+                SwiftUI.Circle()
+                    .fill(AATheme.steel.opacity(0.15))
+                    .frame(width: 52, height: 52)
+                Text(String(circle.name.prefix(2)).uppercased())
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundColor(AATheme.steel)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(circle.name)
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(AATheme.primaryText)
+                    .lineLimit(1)
+
+                HStack(spacing: 8) {
+                    Label("\(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers")", systemImage: "person.2.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(AATheme.secondaryText)
                         .lineLimit(1)
-
-                    HStack(spacing: 8) {
-                        Label("\(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers")", systemImage: "person.2.fill")
-                            .font(.system(size: 12))
-                            .foregroundColor(Color("TextSecondary"))
-                            .lineLimit(1)
-                            .fixedSize(horizontal: true, vertical: false)
-
-                        // Public/Private badge
-                        HStack(spacing: 3) {
-                            Image(systemName: circle.isPublic ? "globe" : "lock.fill")
-                                .font(.system(size: 9, weight: .semibold))
-                            Text(circle.isPublic ? "Public" : "Private")
-                                .font(.system(size: 11, weight: .semibold))
-                        }
-                        .foregroundColor(circle.isPublic ? Color("BrandArrow") : Color("TextSecondary"))
                         .fixedSize(horizontal: true, vertical: false)
 
-                        // Weekly health badge
-                        if let active = activeThisWeek {
-                            HStack(spacing: 3) {
-                                SwiftUI.Circle()
-                                    .fill(active == circle.memberCount ? Color("BrandArrow") : Color("BrandWarning"))
-                                    .frame(width: 6, height: 6)
-                                Text("\(active)/\(circle.memberCount) active")
-                                    .font(.system(size: 11, weight: .semibold))
-                                    .foregroundColor(active == circle.memberCount
-                                                     ? Color("BrandArrow") : Color("BrandWarning"))
-                            }
-                            .fixedSize(horizontal: true, vertical: false)
-                        }
-                    }
-                }
-                .layoutPriority(1)
-                Spacer(minLength: 4)
-                // Copy invite code chip
-                Button {
-                    UIPasteboard.general.string = circle.inviteCode
-                    showCopiedToast = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        showCopiedToast = false
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: showCopiedToast ? "checkmark" : "doc.on.doc")
+                    // Public/Private badge
+                    HStack(spacing: 3) {
+                        Image(systemName: circle.isPublic ? "globe" : "lock.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                        Text(circle.isPublic ? "Public" : "Private")
                             .font(.system(size: 11, weight: .semibold))
-                        Text(showCopiedToast ? "Copied!" : circle.inviteCode)
-                            .font(.system(size: 12, weight: .bold, design: .monospaced))
                     }
-                    .foregroundColor(showCopiedToast ? Color("BrandArrow") : Color("BrandAnchor"))
-                    .padding(.horizontal, 8).padding(.vertical, 5)
-                    .background(Color("BrandAnchor").opacity(0.1))
-                    .cornerRadius(8)
-                }
-                .buttonStyle(.plain)
-                .fixedSize(horizontal: true, vertical: false)
-                .accessibilityLabel(showCopiedToast ? "Invite code copied" : "Copy invite code \(circle.inviteCode)")
+                    .foregroundColor(circle.isPublic ? Color("BrandArrow") : AATheme.secondaryText)
+                    .fixedSize(horizontal: true, vertical: false)
 
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(Color("TextSecondary"))
+                    // Weekly health badge
+                    if let active = activeThisWeek {
+                        HStack(spacing: 3) {
+                            SwiftUI.Circle()
+                                .fill(active == circle.memberCount ? Color("BrandArrow") : Color("BrandWarning"))
+                                .frame(width: 6, height: 6)
+                            Text("\(active)/\(circle.memberCount) active")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(active == circle.memberCount
+                                                 ? Color("BrandArrow") : Color("BrandWarning"))
+                        }
+                        .fixedSize(horizontal: true, vertical: false)
+                    }
+                }
             }
-            .padding(16)
-            .background(Color("CardBackground"))
-            .cornerRadius(16)
+            .layoutPriority(1)
+            Spacer(minLength: 4)
+            // Copy invite code chip (stays as Button — no longer nested in parent Button)
+            Button {
+                UIPasteboard.general.string = circle.inviteCode
+                showCopiedToast = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    showCopiedToast = false
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: showCopiedToast ? "checkmark" : "doc.on.doc")
+                        .font(.system(size: 11, weight: .semibold))
+                    Text(showCopiedToast ? "Copied!" : circle.inviteCode)
+                        .font(.system(size: 12, weight: .bold, design: .monospaced))
+                }
+                .foregroundColor(showCopiedToast ? Color("BrandArrow") : AATheme.steel)
+                .padding(.horizontal, 8).padding(.vertical, 5)
+                .background(AATheme.steel.opacity(0.1))
+                .cornerRadius(8)
+            }
+            .buttonStyle(.plain)
+            .fixedSize(horizontal: true, vertical: false)
+            .accessibilityLabel(showCopiedToast ? "Invite code copied" : "Copy invite code \(circle.inviteCode)")
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(AATheme.secondaryText)
         }
-        .buttonStyle(.plain)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+        .contentShape(Rectangle())
+        .onTapGesture { onTap() }
         .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
         .accessibilityLabel("\(circle.name), \(circle.memberCount) \(circle.memberCount == 1 ? "brother" : "brothers"), \(circle.isPublic ? "public" : "private") circle")
         .accessibilityHint("Double tap to open this circle")
     }
