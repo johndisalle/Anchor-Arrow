@@ -283,8 +283,13 @@ struct SettingsView: View {
     private var redeemOfferCodeRow: some View {
         Button {
             Task {
+                guard let scene = UIApplication.shared.connectedScenes
+                    .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene else {
+                    print("[Settings] No active window scene available for offer code redemption")
+                    return
+                }
                 do {
-                    try await AppStore.presentOfferCodeRedeemSheet()
+                    try await AppStore.presentOfferCodeRedeemSheet(in: scene)
                 } catch {
                     print("[Settings] Offer code redemption sheet failed: \(error)")
                 }
