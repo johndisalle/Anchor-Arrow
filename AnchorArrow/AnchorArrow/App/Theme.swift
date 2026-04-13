@@ -31,7 +31,7 @@ struct AATheme {
     static let darkIron = Color(red: 0.12, green: 0.14, blue: 0.20)           // #1F2433 — dark iron
     static let parchment = adaptive(
         light: UIColor(red: 0.99, green: 0.97, blue: 0.94, alpha: 1),         // #FCF8F0 — warm parchment
-        dark: UIColor(red: 0.14, green: 0.14, blue: 0.16, alpha: 1)           // #242429 — dark card
+        dark: UIColor(red: 0.18, green: 0.18, blue: 0.21, alpha: 1)           // #2E2E36 — elevated dark card
     )
 
     // MARK: - Semantic Colors (adaptive)
