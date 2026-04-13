@@ -10,7 +10,6 @@ struct DashboardView: View {
     @State private var showJourney = false
     @State private var animateTree = false
     @State private var showPremiumUpsell = false
-    @State private var greeting = ""
     @State private var heroCardPulsing = false
 
     var body: some View {
@@ -35,10 +34,9 @@ struct DashboardView: View {
 
                     // Journey CTA
                     journeyCTASection
-
-                    Spacer(minLength: 100) // tab bar clearance
                 }
                 .padding(.top, AATheme.paddingSmall)
+                .padding(.bottom, 80) // floating drift button clearance
                 }
             }
             .refreshable {
@@ -55,7 +53,6 @@ struct DashboardView: View {
             PremiumUpsellView(reason: "Unlock all guided journeys")
         }
         .onAppear {
-            updateGreeting()
             withAnimation(.easeOut(duration: 1.2).delay(0.3)) {
                 animateTree = true
             }
@@ -65,18 +62,17 @@ struct DashboardView: View {
     // MARK: - Subviews
 
     private var headerSection: some View {
-        HStack(alignment: .firstTextBaseline, spacing: AATheme.paddingSmall) {
-            Text("\(greeting) \(userStore.displayName)")
-                .font(.system(size: 17, weight: .bold, design: .serif))
-                .foregroundColor(AATheme.primaryText)
-                .lineLimit(1)
-            Text("·")
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(AATheme.secondaryText)
-            Text(inlineDateString)
-                .font(.system(size: 14, weight: .medium))
-                .foregroundColor(AATheme.secondaryText)
-                .lineLimit(1)
+        HStack(alignment: .center, spacing: AATheme.paddingSmall) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(firstName)
+                    .font(.system(size: 17, weight: .bold, design: .serif))
+                    .foregroundColor(AATheme.primaryText)
+                    .lineLimit(1)
+                Text(inlineDateString)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AATheme.secondaryText)
+                    .lineLimit(1)
+            }
             Spacer(minLength: AATheme.paddingSmall)
 
             // Compact streak pill (hidden when streak is 0)
@@ -106,6 +102,11 @@ struct DashboardView: View {
         }
         .padding(.horizontal, AATheme.paddingLarge)
         .padding(.top, AATheme.paddingMedium)
+    }
+
+    private var firstName: String {
+        let name = userStore.displayName
+        return name.components(separatedBy: " ").first ?? name
     }
 
     private var inlineDateString: String {
@@ -139,25 +140,25 @@ struct DashboardView: View {
                 if userStore.isAnchorDoneToday {
                     HStack(spacing: 4) {
                         Text("Anchor")
-                            .font(.system(size: 12, weight: .semibold, design: .serif))
-                        AAIcon("checkmark", size: 11, weight: .bold, color: AATheme.steel)
+                            .font(.system(size: 13, weight: .semibold, design: .serif))
+                        AAIcon("checkmark", size: 12, weight: .bold, color: AATheme.steel)
                     }
                     .foregroundColor(AATheme.steel)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(AATheme.steel.opacity(0.10))
+                    .background(AATheme.steel.opacity(0.18))
                     .clipShape(Capsule())
                 }
                 if userStore.isArrowDoneToday {
                     HStack(spacing: 4) {
                         Text("Arrow")
-                            .font(.system(size: 12, weight: .semibold, design: .serif))
-                        AAIcon("checkmark", size: 11, weight: .bold, color: AATheme.amber)
+                            .font(.system(size: 13, weight: .semibold, design: .serif))
+                        AAIcon("checkmark", size: 12, weight: .bold, color: AATheme.amber)
                     }
                     .foregroundColor(AATheme.amber)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
-                    .background(AATheme.amber.opacity(0.10))
+                    .background(AATheme.amber.opacity(0.18))
                     .clipShape(Capsule())
                 }
             }
@@ -229,26 +230,24 @@ struct DashboardView: View {
                 .accessibilityLabel("Start your Anchor")
                 .accessibilityHint("Tap to begin your morning reflection")
             } else if userStore.isAnchorDoneToday && !userStore.isArrowDoneToday {
-                // Anchor done, Arrow pending
+                // Anchor done, Arrow pending — softened amber variant
                 NavigationLink(destination: ArrowView()) {
                     HStack {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("Anchor set. Now loose your Arrow.")
                                 .font(.system(.title3, design: .serif, weight: .bold))
-                                .foregroundColor(.white)
+                                .foregroundColor(AATheme.amber)
                             Text("What kingdom action did you take today?")
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundColor(AATheme.secondaryText)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(AATheme.amber)
                     }
                     .padding(AATheme.paddingMedium)
-                    .background(
-                        LinearGradient(colors: [AATheme.amber, AATheme.amberDark], startPoint: .topLeading, endPoint: .bottomTrailing)
-                    )
+                    .background(AATheme.amber.opacity(0.18))
                     .cornerRadius(AATheme.cornerRadius)
                     .opacity(heroCardPulsing ? 1.0 : 0.95)
                     .onAppear {
@@ -376,15 +375,6 @@ struct DashboardView: View {
         return min(1.0, Double(total) / 30.0)
     }
 
-    private func updateGreeting() {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12:  greeting = "Good morning,"
-        case 12..<17: greeting = "Good afternoon,"
-        case 17..<21: greeting = "Good evening,"
-        default:      greeting = "Standing firm,"
-        }
-    }
 }
 
 // MARK: - IllustrationPressStyle
