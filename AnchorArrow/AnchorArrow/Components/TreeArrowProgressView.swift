@@ -135,7 +135,7 @@ struct CrossedArrowsView: View {
     }
 }
 
-// MARK: - Anchor Roots Shape (used by SplashView)
+// MARK: - Anchor Roots Shape
 struct AnchorRootsShape: Shape {
     var progress: Double
 

@@ -6,14 +6,10 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject var authManager: AuthManager
     @EnvironmentObject var userStore: UserStore
-    @State private var showSplash = true
 
     var body: some View {
         ZStack {
-            if showSplash {
-                SplashView()
-                    .transition(.opacity)
-            } else if authManager.isAuthenticated {
+            if authManager.isAuthenticated {
                 if userStore.hasCompletedOnboarding {
                     MainTabView()
                         .transition(.asymmetric(
@@ -35,104 +31,9 @@ struct RootView: View {
                     ))
             }
         }
-        .animation(.easeInOut(duration: 0.4), value: showSplash)
         .animation(.easeInOut(duration: 0.4), value: authManager.isAuthenticated)
         .animation(.easeInOut(duration: 0.4), value: userStore.hasCompletedOnboarding)
         .preferredColorScheme((AppTheme(rawValue: userStore.savedTheme) ?? .system).swiftUIColorScheme)
-        .onAppear {
-            // Show splash for 2 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                withAnimation { showSplash = false }
-            }
-        }
-    }
-}
-
-// MARK: - Splash Screen
-struct SplashView: View {
-    @State private var anchorShown = false
-    @State private var arrowsShown = false
-    @State private var glowOpacity = 0.0
-    @State private var titleOpacity = 0.0
-    @State private var subtitleOpacity = 0.0
-
-    var body: some View {
-        ZStack {
-            AATheme.background.ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                Spacer()
-
-                // Hero composition
-                // Arrows sit above anchor ring with ~30pt overlap so they
-                // cross ABOVE the ring, not through the anchor body.
-                ZStack {
-                    // Subtle atmospheric glow
-                    SwiftUI.Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [AATheme.steel.opacity(0.11), Color.clear],
-                                center: .center,
-                                startRadius: 10,
-                                endRadius: 148
-                            )
-                        )
-                        .frame(width: 296, height: 296)
-                        .opacity(glowOpacity)
-
-                    VStack(spacing: -30) {
-                        CrossedArrowsView()
-                            .frame(width: 200, height: 124)
-                            .scaleEffect(arrowsShown ? 1.0 : 0.1)
-                            .opacity(arrowsShown ? 1.0 : 0)
-                            .animation(.spring(response: 0.7, dampingFraction: 0.6).delay(0.85), value: arrowsShown)
-
-                        AnchorSymbolView()
-                            .frame(width: 164, height: 205)
-                            .opacity(anchorShown ? 1.0 : 0)
-                            .animation(.easeOut(duration: 0.7).delay(0.15), value: anchorShown)
-                    }
-                }
-
-                Spacer().frame(height: 52)
-
-                // Wordmark
-                VStack(spacing: 12) {
-                    Text("ANCHOR & ARROW")
-                        .font(AATheme.titleFont)
-                        .tracking(3)
-                        .foregroundColor(AATheme.primaryText)
-                        .opacity(titleOpacity)
-
-                    Rectangle()
-                        .fill(AATheme.steel.opacity(0.3))
-                        .frame(width: 40, height: 1.5)
-                        .opacity(titleOpacity)
-
-                    Text("Stand Firm Edition")
-                        .font(.system(size: 14, weight: .medium, design: .rounded))
-                        .tracking(1.5)
-                        .foregroundColor(AATheme.secondaryText)
-                        .opacity(subtitleOpacity)
-                }
-
-                Spacer()
-                Spacer()
-            }
-        }
-        .onAppear {
-            anchorShown = true
-            arrowsShown = true
-            withAnimation(.easeOut(duration: 1.8).delay(0.15)) {
-                glowOpacity = 1.0
-            }
-            withAnimation(.easeIn(duration: 0.6).delay(0.35)) {
-                titleOpacity = 1.0
-            }
-            withAnimation(.easeIn(duration: 0.5).delay(1.0)) {
-                subtitleOpacity = 1.0
-            }
-        }
     }
 }
 
