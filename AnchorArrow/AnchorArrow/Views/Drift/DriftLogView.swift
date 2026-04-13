@@ -65,7 +65,7 @@ struct DriftLogView: View {
             .navigationTitle("Drift Log")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
                         .foregroundColor(AATheme.secondaryText)
                 }
@@ -135,7 +135,7 @@ struct DriftLogView: View {
             }
 
             LazyVGrid(
-                columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
+                columns: [GridItem(.flexible()), GridItem(.flexible())],
                 spacing: 12
             ) {
                 ForEach(AnchorTag.allCases) { tag in
@@ -372,21 +372,26 @@ struct DriftCategoryButton: View {
 
     var body: some View {
         Button(action: action) {
-            VStack(spacing: 6) {
+            VStack(spacing: 10) {
                 ZStack {
                     SwiftUI.Circle()
                         .fill(isSelected ? AATheme.warning.opacity(0.2) : AATheme.cardBackground)
-                        .frame(width: 46, height: 46)
-                    AAIcon(tag.icon, size: 20, weight: .medium, color: isSelected ? AATheme.warning : AATheme.secondaryText)
+                        .frame(width: 56, height: 56)
+                    AAIcon(
+                        tag.icon,
+                        size: 28,
+                        weight: .semibold,
+                        color: isSelected ? AATheme.warning : AATheme.primaryText
+                    )
                 }
                 Text(tag.displayName)
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(isSelected ? AATheme.warning : AATheme.secondaryText)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(isSelected ? AATheme.warning : AATheme.primaryText)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
+            .padding(.vertical, 16)
             .background(isSelected ? AATheme.warning.opacity(0.08) : AATheme.cardBackground)
             .cornerRadius(14)
             .overlay(

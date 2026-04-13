@@ -71,7 +71,7 @@ enum AnchorTag: String, Codable, CaseIterable, Identifiable {
         case .temptation:   return "flame.fill"
         case .pride:        return "crown.fill"
         case .selfReliance: return "person.fill"
-        case .lust:         return "eye.slash.fill"
+        case .lust:         return "heart.slash.fill"
         case .anger:        return "bolt.fill"
         case .avoidance:    return "arrow.uturn.backward"
         case .anxiety:      return "waveform.path.ecg"

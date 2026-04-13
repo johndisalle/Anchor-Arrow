@@ -212,6 +212,8 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.hidden)
         }
         .fullScreenCover(isPresented: $showNotificationPrompt) {
             NotificationPromptView(isPresented: $showNotificationPrompt)
