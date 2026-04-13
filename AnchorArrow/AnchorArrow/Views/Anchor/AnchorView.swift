@@ -17,6 +17,10 @@ struct AnchorView: View {
 
     private let prompt = PromptLibrary.anchorPromptForToday()
 
+    private var isReflectionEmpty: Bool {
+        reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -30,27 +34,26 @@ struct AnchorView: View {
                         )
                     }
 
-                    // Scripture Card
+                    // 1. Scripture Card
                     scriptureCard
 
-                    // Reflection Section
+                    // 2. Your Reflection
                     reflectionSection
 
-                    // Tag Section
-                    tagSection
-
-                    // Prayer Audio
+                    // 3. Open in Prayer
                     prayerSection
 
-                    // Submit Button
+                    // 4. Any drift pulling at you?
+                    tagSection
+
+                    // 5. Mark Anchor Complete
                     if !userStore.isAnchorDoneToday {
                         submitButton
                     }
-
-                    Spacer(minLength: 80)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, AATheme.paddingMedium)
+                .padding(.bottom, 100)
             }
             .aaScreenBackground()
             .navigationTitle("Morning Anchor")
@@ -226,11 +229,6 @@ struct AnchorView: View {
                 RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall)
                     .stroke(reflectionFocused ? AATheme.steel : AATheme.steel.opacity(0.2), lineWidth: 1.5)
             )
-
-            Text("\(reflection.count) / 500")
-                .font(.system(size: 12))
-                .foregroundColor(AATheme.secondaryText)
-                .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 
@@ -265,14 +263,18 @@ struct AnchorView: View {
     // MARK: - Prayer Section
     private var prayerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Open in Prayer")
-                .font(AATheme.subheadlineFont)
-                .foregroundColor(AATheme.primaryText)
+            Text("OPEN IN PRAYER")
+                .font(.system(size: 14, weight: .semibold))
+                .tracking(1.5)
+                .foregroundColor(AATheme.secondaryText)
 
             VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
-                Label("Pray this out loud", systemImage: "mouth.fill")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(AATheme.steel)
+                HStack(spacing: 6) {
+                    AAIcon("hands.sparkles.fill", size: 14, weight: .semibold, color: AATheme.steel)
+                    Text("Pray this out loud")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(AATheme.steel)
+                }
 
                 Text("""
                     Lord Jesus, I anchor myself in You this morning.
@@ -297,32 +299,41 @@ struct AnchorView: View {
 
     // MARK: - Submit Button
     private var submitButton: some View {
-        let trimmed = reflection.trimmingCharacters(in: .whitespacesAndNewlines)
-        return Button {
-            Task { await submit() }
-        } label: {
-            ZStack {
-                if isSubmitting {
-                    ProgressView().tint(.white)
-                } else {
-                    HStack {
-                        Image(systemName: "checkmark.shield.fill")
-                        Text("Mark Anchor Complete")
-                            .font(.system(size: 17, weight: .bold))
+        VStack(spacing: 8) {
+            Button {
+                Task { await submit() }
+            } label: {
+                ZStack {
+                    if isSubmitting {
+                        ProgressView().tint(.white)
+                    } else {
+                        HStack {
+                            Image(systemName: "checkmark.shield.fill")
+                            Text("Mark Anchor Complete")
+                                .font(.system(size: 17, weight: .bold))
+                        }
+                        .foregroundColor(.white)
                     }
-                    .foregroundColor(.white)
                 }
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(isReflectionEmpty || isSubmitting
+                    ? AATheme.steel.opacity(0.4)
+                    : AATheme.steel)
+                .cornerRadius(AATheme.cornerRadius)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .background(trimmed.isEmpty || isSubmitting
-                ? AATheme.secondaryText.opacity(0.3)
-                : AATheme.steel)
-            .cornerRadius(AATheme.cornerRadius)
+            .disabled(isReflectionEmpty || isSubmitting)
+            .accessibilityLabel("Mark Anchor Complete")
+            .accessibilityHint(isReflectionEmpty ? "Write a reflection first" : "Double tap to submit your morning anchor")
+
+            if isReflectionEmpty {
+                Text("Write your reflection to set your Anchor.")
+                    .font(.system(size: 12))
+                    .foregroundColor(AATheme.secondaryText)
+                    .transition(.opacity)
+            }
         }
-        .disabled(trimmed.isEmpty || isSubmitting)
-        .accessibilityLabel("Mark Anchor Complete")
-        .accessibilityHint(trimmed.isEmpty ? "Write a reflection first" : "Double tap to submit your morning anchor")
+        .animation(.easeInOut(duration: 0.2), value: isReflectionEmpty)
     }
 
     // MARK: - Submit Action
