@@ -57,13 +57,15 @@ struct DriftLogView: View {
                     Spacer(minLength: 40)
                 }
                 .padding(.horizontal, 20)
-                .padding(.top, AATheme.paddingMedium)
+                .padding(.top, 8)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCategory)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedCustomCategory)
             }
             .aaScreenBackground()
             .navigationTitle("Drift Log")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
@@ -93,23 +95,17 @@ struct DriftLogView: View {
     // MARK: - Subviews
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
-            HStack(spacing: 12) {
-                AAIcon("exclamationmark.shield.fill", size: 24, weight: .semibold, color: AATheme.warning)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Drift Detected")
-                        .font(AATheme.headlineFont)
-                        .foregroundColor(AATheme.primaryText)
-                    Text("Name it. Anchor back fast.")
-                        .font(.system(size: 13))
-                        .foregroundColor(AATheme.secondaryText)
-                }
+        HStack(spacing: 12) {
+            AAIcon("exclamationmark.shield.fill", size: 24, weight: .semibold, color: AATheme.warning)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Drift Detected")
+                    .font(AATheme.headlineFont)
+                    .foregroundColor(AATheme.primaryText)
+                Text("Name it. Anchor back fast.")
+                    .font(.system(size: 13))
+                    .foregroundColor(AATheme.secondaryText)
             }
-
-            Text("Honesty is strength, not weakness. Naming what's pulling at you is the first step to standing firm.")
-                .font(.system(size: 14))
-                .foregroundColor(AATheme.secondaryText)
-                .lineSpacing(4)
+            Spacer(minLength: 0)
         }
         .padding(AATheme.paddingMedium)
         .background(AATheme.warning.opacity(0.08))
