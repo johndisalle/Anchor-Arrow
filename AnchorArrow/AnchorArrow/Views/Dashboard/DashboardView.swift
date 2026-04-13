@@ -23,20 +23,13 @@ struct DashboardView: View {
                 } else {
                 VStack(spacing: AATheme.paddingLarge) {
 
-                    // Greeting Header
+                    // Greeting Header (compact, inline date + profile)
                     headerSection
 
-                    // Central Tree + Arrow Visual
-                    TreeArrowProgressView(
-                        anchorProgress: anchorProgress,
-                        arrowProgress: arrowProgress,
-                        streak: userStore.currentStreak,
-                        animate: animateTree
-                    )
-                    .frame(height: 280)
-                    .padding(.horizontal, AATheme.paddingLarge)
+                    // Central Tree + Arrow Visual (tappable)
+                    illustrationSection
 
-                    // Today's Status Cards
+                    // Smart contextual CTA
                     todayStatusSection
 
                     // Streak + Stats Row
@@ -62,22 +55,7 @@ struct DashboardView: View {
                 await userStore.loadUserData(uid: uid)
             }
             .aaScreenBackground()
-            .navigationTitle("Anchor & Arrow")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(AATheme.background, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 22))
-                            .foregroundColor(AATheme.steel)
-                            .accessibilityLabel("Profile and Settings")
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
         }
         .sheet(isPresented: $showJourney) {
             JourneyView()
@@ -101,39 +79,63 @@ struct DashboardView: View {
     // MARK: - Subviews
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(greeting)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AATheme.secondaryText)
-                    Text(userStore.displayName)
-                        .font(AATheme.headlineFont)
-                        .foregroundColor(AATheme.primaryText)
-                }
-                Spacer()
-                // Date chip
-                VStack(spacing: 2) {
-                    Text(Date().formatted(.dateTime.weekday(.wide)))
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(AATheme.steel)
-                    Text(Date().formatted(.dateTime.day()))
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(AATheme.primaryText)
-                    Text(Date().formatted(.dateTime.month(.abbreviated)))
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(AATheme.secondaryText)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, AATheme.paddingSmall + 2)
-                .background(AATheme.cardBackground)
-                .cornerRadius(AATheme.cornerRadiusSmall + 2)
-                .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel("Today is \(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))")
+        HStack(alignment: .firstTextBaseline, spacing: AATheme.paddingSmall) {
+            Text("\(greeting) \(userStore.displayName)")
+                .font(.system(size: 17, weight: .bold, design: .serif))
+                .foregroundColor(AATheme.primaryText)
+                .lineLimit(1)
+            Text("·")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(AATheme.secondaryText)
+            Text(inlineDateString)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(AATheme.secondaryText)
+                .lineLimit(1)
+            Spacer(minLength: AATheme.paddingSmall)
+            NavigationLink {
+                SettingsView()
+            } label: {
+                Image(systemName: "person.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(AATheme.steel)
+                    .accessibilityLabel("Profile and Settings")
             }
         }
         .padding(.horizontal, AATheme.paddingLarge)
+        .padding(.top, AATheme.paddingMedium)
+    }
+
+    private var inlineDateString: String {
+        let df = DateFormatter()
+        df.dateFormat = "EEEE d MMM"
+        return df.string(from: Date())
+    }
+
+    private var illustrationSection: some View {
+        NavigationLink(destination: contextualDestination) {
+            TreeArrowProgressView(
+                anchorProgress: anchorProgress,
+                arrowProgress: arrowProgress,
+                streak: userStore.currentStreak,
+                animate: animateTree
+            )
+            .frame(height: 350)
+            .padding(.horizontal, AATheme.paddingLarge)
+        }
+        .buttonStyle(IllustrationPressStyle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Anchor and Arrow illustration")
+        .accessibilityHint("Double tap to continue your day")
+    }
+
+    private var contextualDestination: AnyView {
+        if !userStore.isAnchorDoneToday {
+            return AnyView(AnchorView())
+        } else if !userStore.isArrowDoneToday {
+            return AnyView(ArrowView())
+        } else {
+            return AnyView(AnchorView())
+        }
     }
 
     private var heroCardHeadline: String {
@@ -233,31 +235,6 @@ struct DashboardView: View {
                 )
                 .padding(.horizontal, AATheme.paddingLarge)
             }
-
-            // Existing status card pair
-            HStack(spacing: 14) {
-                TodayStatusCard(
-                    title: "Anchor",
-                    subtitle: "Morning",
-                    isComplete: userStore.isAnchorDoneToday,
-                    color: AATheme.steel,
-                    destination: AnyView(AnchorView())
-                ) {
-                    AnchorSymbolView()
-                        .frame(width: 24, height: 30)
-                }
-                TodayStatusCard(
-                    title: "Arrow",
-                    subtitle: "Evening",
-                    isComplete: userStore.isArrowDoneToday,
-                    color: AATheme.amber,
-                    destination: AnyView(ArrowView())
-                ) {
-                    SingleArcheryArrowView(color: AATheme.amber)
-                        .frame(width: 26, height: 26)
-                }
-            }
-            .padding(.horizontal, AATheme.paddingLarge)
         }
     }
 
@@ -398,35 +375,27 @@ struct DashboardView: View {
     // MARK: - Skeleton
     private var dashboardSkeleton: some View {
         VStack(spacing: AATheme.paddingLarge) {
-            // Header placeholder
+            // Header placeholder (compact single-row)
             HStack {
-                VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(AATheme.cardBackground)
-                        .frame(width: 100, height: 14)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(AATheme.cardBackground)
-                        .frame(width: 160, height: 24)
-                }
-                Spacer()
-                RoundedRectangle(cornerRadius: AATheme.cornerRadiusSmall + 2)
+                RoundedRectangle(cornerRadius: 4)
                     .fill(AATheme.cardBackground)
-                    .frame(width: 52, height: 60)
+                    .frame(width: 220, height: 20)
+                Spacer()
+                SwiftUI.Circle()
+                    .fill(AATheme.cardBackground)
+                    .frame(width: 30, height: 30)
             }
             .padding(.horizontal, AATheme.paddingLarge)
 
             // Tree placeholder
             RoundedRectangle(cornerRadius: 20)
                 .fill(AATheme.cardBackground)
-                .frame(height: 280)
+                .frame(height: 350)
                 .padding(.horizontal, AATheme.paddingLarge)
 
-            // Status cards
-            HStack(spacing: 14) {
-                SkeletonCard(height: 130)
-                SkeletonCard(height: 130)
-            }
-            .padding(.horizontal, AATheme.paddingLarge)
+            // Hero CTA placeholder
+            SkeletonCard(height: 80)
+                .padding(.horizontal, AATheme.paddingLarge)
 
             // Stats row
             HStack(spacing: 14) {
@@ -559,75 +528,12 @@ struct DashboardView: View {
     }
 }
 
-// MARK: - TodayStatusCard
-struct TodayStatusCard<IncompleteIcon: View>: View {
-    let title: String
-    let subtitle: String
-    let isComplete: Bool
-    let color: Color
-    let destination: AnyView
-    @ViewBuilder let incompleteIcon: () -> IncompleteIcon
-
-    var body: some View {
-        NavigationLink(destination: destination) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    if isComplete {
-                        AAIcon("checkmark.circle.fill", size: 24, color: AATheme.success)
-                    } else {
-                        incompleteIcon()
-                    }
-                    Spacer()
-                    if isComplete {
-                        Text("Done")
-                            .font(.system(size: 11, weight: .bold))
-                            .foregroundColor(AATheme.success)
-                            .padding(.horizontal, AATheme.paddingSmall)
-                            .padding(.vertical, 4)
-                            .background(AATheme.success.opacity(0.15))
-                            .cornerRadius(AATheme.paddingSmall)
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
-                        .font(AATheme.subheadlineFont)
-                        .foregroundColor(AATheme.primaryText)
-                    Text(subtitle)
-                        .font(.system(size: 13))
-                        .foregroundColor(AATheme.secondaryText)
-                }
-
-                HStack {
-                    Text(isComplete ? "Completed" : "Tap to begin")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundColor(isComplete ? AATheme.success : color)
-                    Image(systemName: "arrow.right")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(isComplete ? AATheme.success : color)
-                }
-            }
-            .padding(AATheme.paddingMedium)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                ZStack {
-                    AATheme.cardBackground
-                    if isComplete {
-                        AATheme.success.opacity(0.05)
-                    }
-                }
-            )
-            .cornerRadius(AATheme.cornerRadius)
-            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
-            .overlay(
-                RoundedRectangle(cornerRadius: AATheme.cornerRadius)
-                    .stroke(isComplete ? AATheme.success.opacity(0.3) : Color.clear, lineWidth: 1.5)
-            )
-        }
-        .buttonStyle(.plain)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(title) \(subtitle), \(isComplete ? "completed" : "not yet completed")")
-        .accessibilityHint(isComplete ? "Tap to review" : "Tap to begin your \(title.lowercased())")
+// MARK: - IllustrationPressStyle
+private struct IllustrationPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
