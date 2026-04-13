@@ -37,6 +37,7 @@ struct SettingsView: View {
                 // Premium Section
                 Section {
                     premiumRow
+                    redeemOfferCodeRow
                 } header: {
                     Text("Subscription")
                 }
@@ -172,7 +173,7 @@ struct SettingsView: View {
 
                 // About Section
                 Section {
-                    LabeledContent("Version", value: "1.0.0 (MVP)")
+                    LabeledContent("Version", value: appVersionString)
                     LabeledContent("Built on", value: "1 Corinthians 16:13-14")
                 } header: {
                     Text("About")
@@ -278,6 +279,38 @@ struct SettingsView: View {
     }
 
     // MARK: - Premium Row
+    // MARK: - Redeem Offer Code
+    private var redeemOfferCodeRow: some View {
+        Button {
+            Task {
+                do {
+                    try await AppStore.presentOfferCodeRedeemSheet()
+                } catch {
+                    print("[Settings] Offer code redemption sheet failed: \(error)")
+                }
+            }
+        } label: {
+            HStack {
+                AAIcon("gift.fill", size: 17, weight: .semibold, color: AATheme.amber)
+                Text("Redeem Offer Code")
+                    .foregroundColor(AATheme.primaryText)
+                Spacer()
+                AAIcon("chevron.right", size: 13, weight: .semibold, color: AATheme.secondaryText)
+            }
+        }
+    }
+
+    // MARK: - App Version String
+    /// Reads marketing version + build number from Info.plist so the About
+    /// row always reflects whatever MARKETING_VERSION / CURRENT_PROJECT_VERSION
+    /// is set in the project. Returns "1.2 (14)" format.
+    private var appVersionString: String {
+        let info = Bundle.main.infoDictionary
+        let marketing = info?["CFBundleShortVersionString"] as? String ?? "—"
+        let build = info?["CFBundleVersion"] as? String ?? ""
+        return build.isEmpty ? marketing : "\(marketing) (\(build))"
+    }
+
     private var premiumRow: some View {
         Group {
             if userStore.isPremium {
