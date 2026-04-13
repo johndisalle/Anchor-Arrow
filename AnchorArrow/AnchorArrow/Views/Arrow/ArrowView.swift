@@ -14,6 +14,10 @@ struct ArrowView: View {
 
     private let prompt = PromptLibrary.arrowPromptForToday()
 
+    private var isReflectionEmpty: Bool {
+        reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView(showsIndicators: false) {
@@ -36,15 +40,15 @@ struct ArrowView: View {
                     // Role-specific prompt
                     promptCard
 
-                    // Quick Responses
+                    // Quick Responses (pre-fill, role-specific)
                     quickResponseSection
                         .animation(.easeInOut(duration: 0.2), value: selectedRole)
 
                     // Reflection Input
                     reflectionSection
 
-                    // Example prompt
-                    exampleSection
+                    // Examples (collapsible)
+                    examplesDisclosure
 
                     // Submit
                     if !userStore.isArrowDoneToday {
@@ -105,20 +109,17 @@ struct ArrowView: View {
                 .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: AATheme.cornerRadiusSmall) {
-                    ForEach(ArrowRole.allCases) { role in
-                        RoleChip(
-                            role: role,
-                            isSelected: selectedRole == role
-                        ) {
-                            withAnimation(.spring(response: 0.3)) {
-                                selectedRole = role
-                            }
+            FlowLayout(spacing: AATheme.cornerRadiusSmall) {
+                ForEach(ArrowRole.allCases) { role in
+                    RoleChip(
+                        role: role,
+                        isSelected: selectedRole == role
+                    ) {
+                        withAnimation(.spring(response: 0.3)) {
+                            selectedRole = role
                         }
                     }
                 }
-                .padding(.horizontal, 2)
             }
         }
     }
@@ -227,52 +228,34 @@ struct ArrowView: View {
         }
     }
 
-    private var exampleSection: some View {
+    private var examplesDisclosure: some View {
         let matchingPrompt = PromptLibrary.arrowPrompts.first { $0.role == selectedRole }
             ?? PromptLibrary.arrowPromptForToday()
 
-        return VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
-            HStack {
-                AAIcon("lightbulb.fill", size: 13, weight: .semibold, color: AATheme.warmGold)
-                Text("Examples")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(AATheme.warmGold)
-            }
-
+        return DisclosureGroup {
             Text(matchingPrompt.example)
                 .font(.system(size: 13))
                 .foregroundColor(AATheme.secondaryText)
                 .lineSpacing(4)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
+        } label: {
+            HStack(spacing: 8) {
+                AAIcon("lightbulb.fill", size: 13, weight: .semibold, color: AATheme.amber)
+                Text("Need ideas?")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(AATheme.amber)
+            }
         }
+        .tint(AATheme.amber)
         .padding(14)
-        .background(AATheme.warmGold.opacity(0.08))
+        .background(AATheme.cardBackground)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
     }
 
     private var submitButton: some View {
-        VStack(spacing: 14) {
-            // Quick one-tap options
-            Text("Or log a quick win:")
-                .font(.system(size: 13))
-                .foregroundColor(AATheme.secondaryText)
-
-            HStack(spacing: AATheme.cornerRadiusSmall) {
-                QuickWinButton(label: "Prayed", icon: "hands.sparkles.fill") {
-                    reflection = "I stopped and prayed intentionally today."
-                    Task { await submit() }
-                }
-                QuickWinButton(label: "Served", icon: "figure.walk") {
-                    reflection = "I chose to serve someone without being asked."
-                    Task { await submit() }
-                }
-                QuickWinButton(label: "Spoke Truth", icon: "text.bubble.fill") {
-                    reflection = "I spoke truth in love today when it would have been easier to stay quiet."
-                    Task { await submit() }
-                }
-            }
-
-            // Full submit
+        VStack(spacing: 8) {
             Button {
                 Task { await submit() }
             } label: {
@@ -292,16 +275,24 @@ struct ArrowView: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 54)
                 .background(
-                    reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting
+                    isReflectionEmpty || isSubmitting
                     ? AATheme.secondaryText.opacity(0.3)
                     : AATheme.amber
                 )
                 .cornerRadius(AATheme.cornerRadius)
             }
-            .disabled(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSubmitting)
+            .disabled(isReflectionEmpty || isSubmitting)
             .accessibilityLabel("Loose the Arrow")
-            .accessibilityHint(reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Write a reflection first" : "Double tap to submit your evening arrow")
+            .accessibilityHint(isReflectionEmpty ? "Write a reflection first" : "Double tap to submit your evening arrow")
+
+            if isReflectionEmpty {
+                Text("Write at least one sentence to loose your Arrow.")
+                    .font(.system(size: 12))
+                    .foregroundColor(AATheme.secondaryText)
+                    .transition(.opacity)
+            }
         }
+        .animation(.easeInOut(duration: 0.2), value: isReflectionEmpty)
     }
 
     // MARK: - Submit Action
@@ -343,43 +334,20 @@ struct RoleChip: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
-            .background(isSelected ? AATheme.amber : AATheme.cardBackground)
-            .foregroundColor(isSelected ? .white : AATheme.secondaryText)
+            .background(isSelected ? AATheme.amber.opacity(0.18) : AATheme.cardBackground)
+            .foregroundColor(isSelected ? AATheme.amber : AATheme.secondaryText)
             .cornerRadius(20)
             .overlay(
                 Capsule()
-                    .stroke(isSelected ? Color.clear : AATheme.secondaryText.opacity(0.2), lineWidth: 1)
+                    .stroke(
+                        isSelected ? AATheme.amber : AATheme.secondaryText.opacity(0.2),
+                        lineWidth: isSelected ? 1.5 : 1
+                    )
             )
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(role.displayName) role")
         .accessibilityHint(isSelected ? "Currently selected" : "Double tap to select")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-    }
-}
-
-// MARK: - QuickWinButton
-struct QuickWinButton: View {
-    let label: String
-    let icon: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 5) {
-                AAIcon(icon, size: 16, weight: .semibold, color: AATheme.amber)
-                Text(label)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(AATheme.secondaryText)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(AATheme.cardBackground)
-            .cornerRadius(12)
-            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Quick win: \(label)")
-        .accessibilityHint("Double tap to add \(label.lowercased()) to your reflection")
     }
 }
