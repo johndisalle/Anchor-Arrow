@@ -48,9 +48,6 @@ class NotificationManager: ObservableObject {
 
     // MARK: - Morning Anchor (7AM default)
     private func scheduleMorningAnchor(hour: Int) async {
-        let content = UNMutableNotificationContent()
-        content.title = "Morning Anchor"
-
         let morningMessages = [
             "\"Be watchful, stand firm in the faith, act like men, be strong.\" — 1 Cor 16:13. Your Anchor is ready.",
             "\"The Lord is my rock, my fortress, and my deliverer.\" — Psalm 18:2. Anchor into Him this morning.",
@@ -60,35 +57,38 @@ class NotificationManager: ObservableObject {
             "\"Watch and pray so that you will not fall into temptation.\" — Matthew 26:41. Anchor before the drift.",
             "\"I can do all things through Christ who strengthens me.\" — Philippians 4:13. Stand firm today, brother."
         ]
-        content.body = morningMessages[Calendar.current.component(.weekday, from: Date()) % morningMessages.count]
-        content.sound = .default
-        content.badge = 1
 
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = 0
+        // Schedule a separate notification for each weekday so messages rotate
+        for weekday in 1...7 {
+            let content = UNMutableNotificationContent()
+            content.title = "Morning Anchor"
+            content.body = morningMessages[(weekday - 1) % morningMessages.count]
+            content.sound = .default
+            content.badge = 1
 
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(
-            identifier: NotificationID.morningAnchor,
-            content: content,
-            trigger: trigger
-        )
+            var dateComponents = DateComponents()
+            dateComponents.weekday = weekday
+            dateComponents.hour = hour
+            dateComponents.minute = 0
 
-        do {
-            try await notificationCenter.add(request)
-        } catch {
-            #if DEBUG
-            print("[Notifications] Failed to schedule morning anchor: \(error.localizedDescription)")
-            #endif
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(
+                identifier: "\(NotificationID.morningAnchor).\(weekday)",
+                content: content,
+                trigger: trigger
+            )
+            do {
+                try await notificationCenter.add(request)
+            } catch {
+                #if DEBUG
+                print("[Notifications] Failed to schedule morning anchor day \(weekday): \(error.localizedDescription)")
+                #endif
+            }
         }
     }
 
     // MARK: - Evening Arrow (8PM default)
     private func scheduleEveningArrow(hour: Int) async {
-        let content = UNMutableNotificationContent()
-        content.title = "Evening Arrow"
-
         let eveningMessages = [
             "\"Let all that you do be done in love.\" — 1 Cor 16:14. What kingdom action did you take today?",
             "\"Faith without works is dead.\" — James 2:26. Log your Arrow — what did you do for God's kingdom?",
@@ -98,27 +98,33 @@ class NotificationManager: ObservableObject {
             "\"The harvest is plentiful but the workers are few.\" — Matthew 9:37. How did you advance the kingdom today?",
             "\"Let your light shine before others.\" — Matthew 5:16. Evening reflection — how did your light shine?"
         ]
-        content.body = eveningMessages[Calendar.current.component(.weekday, from: Date()) % eveningMessages.count]
-        content.sound = .default
-        content.badge = 1
 
-        var dateComponents = DateComponents()
-        dateComponents.hour = hour
-        dateComponents.minute = 0
+        // Schedule a separate notification for each weekday so messages rotate
+        for weekday in 1...7 {
+            let content = UNMutableNotificationContent()
+            content.title = "Evening Arrow"
+            content.body = eveningMessages[(weekday - 1) % eveningMessages.count]
+            content.sound = .default
+            content.badge = 1
 
-        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(
-            identifier: NotificationID.eveningArrow,
-            content: content,
-            trigger: trigger
-        )
+            var dateComponents = DateComponents()
+            dateComponents.weekday = weekday
+            dateComponents.hour = hour
+            dateComponents.minute = 0
 
-        do {
-            try await notificationCenter.add(request)
-        } catch {
-            #if DEBUG
-            print("[Notifications] Failed to schedule evening arrow: \(error.localizedDescription)")
-            #endif
+            let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+            let request = UNNotificationRequest(
+                identifier: "\(NotificationID.eveningArrow).\(weekday)",
+                content: content,
+                trigger: trigger
+            )
+            do {
+                try await notificationCenter.add(request)
+            } catch {
+                #if DEBUG
+                print("[Notifications] Failed to schedule evening arrow day \(weekday): \(error.localizedDescription)")
+                #endif
+            }
         }
     }
 

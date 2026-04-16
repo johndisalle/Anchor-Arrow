@@ -4,7 +4,7 @@
 import SwiftUI
 import FirebaseAuth
 
-struct ProgressView: View {
+struct ProgressDashboardView: View {
     @EnvironmentObject var userStore: UserStore
     @State private var selectedMonth = Date()
     @State private var calendarEntries: [String: DailyEntry] = [:]

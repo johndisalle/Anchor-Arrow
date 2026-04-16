@@ -8,10 +8,27 @@ import FirebaseAuth
 // NOTE: Add FirebaseCrashlytics SPM product in Xcode, then uncomment:
 // import FirebaseCrashlytics
 
+// MARK: - AppDelegate (ensures Firebase configures before any @StateObject)
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        FirebaseApp.configure()
+
+        let settings = FirestoreSettings()
+        settings.cacheSettings = PersistentCacheSettings(sizeBytes: NSNumber(value: FirestoreCacheSizeUnlimited))
+        Firestore.firestore().settings = settings
+        return true
+    }
+}
+
 @main
 struct AnchorArrowApp: App {
 
-    // MARK: - State Objects
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    // MARK: - State Objects (safe — Firebase is already configured)
     @StateObject private var authManager = AuthManager()
     @StateObject private var userStore = UserStore()
     @StateObject private var storeKitManager = StoreKitManager()
@@ -19,20 +36,6 @@ struct AnchorArrowApp: App {
     @StateObject private var networkMonitor = NetworkMonitor()
 
     init() {
-        // Configure Firebase
-        FirebaseApp.configure()
-
-        // Set Crashlytics user ID when authenticated
-        // Uncomment after adding FirebaseCrashlytics SPM product:
-        // Auth.auth().addStateDidChangeListener { _, user in
-        //     Crashlytics.crashlytics().setUserID(user?.uid ?? "anonymous")
-        // }
-
-        // Enable Firestore offline persistence
-        let settings = FirestoreSettings()
-        settings.cacheSettings = PersistentCacheSettings(sizeBytes: NSNumber(value: FirestoreCacheSizeUnlimited))
-        Firestore.firestore().settings = settings
-
         // Configure global appearance
         configureAppearance()
     }

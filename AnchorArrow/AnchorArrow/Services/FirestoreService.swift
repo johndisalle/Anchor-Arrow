@@ -228,8 +228,9 @@ class FirestoreService {
     }
 
     func driftLogCount(uid: String) async throws -> Int {
-        let snapshot = try await driftRef(uid).getDocuments()
-        return snapshot.count
+        let query = driftRef(uid)
+        let snapshot = try await query.count.getAggregation(source: .server)
+        return Int(truncating: snapshot.count)
     }
 
     // MARK: - Badges
@@ -360,7 +361,12 @@ class FirestoreService {
     }
 
     func postComment(comment: CircleComment) async throws {
-        try commentsRef(circleId: comment.circleId, postId: comment.postId).addDocument(from: comment)
+        var sanitized = comment
+        sanitized.content = String(sanitized.content
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .prefix(1000))
+        guard !sanitized.content.isEmpty else { return }
+        try commentsRef(circleId: sanitized.circleId, postId: sanitized.postId).addDocument(from: sanitized)
     }
 
     func fetchUserCircles(uid: String) async throws -> [Circle] {
@@ -456,7 +462,12 @@ class FirestoreService {
     }
 
     func postToCircle(post: CirclePost) async throws {
-        try circlePostsRef(post.circleId).addDocument(from: post)
+        var sanitized = post
+        sanitized.content = String(sanitized.content
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .prefix(2000))
+        guard !sanitized.content.isEmpty else { return }
+        try circlePostsRef(sanitized.circleId).addDocument(from: sanitized)
     }
 
     func reactToPost(circleId: String, postId: String, emoji: String) async throws {

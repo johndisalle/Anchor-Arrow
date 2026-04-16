@@ -186,9 +186,10 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .confirmationDialog("Sign Out?", isPresented: $showSignOutConfirm, titleVisibility: .visible) {
                 Button("Sign Out", role: .destructive) {
-                    try? authManager.signOut()
+                    userStore.clearData()
                     userStore.hasCompletedOnboarding = false
                     UserDefaults.standard.set(false, forKey: "onboardingComplete")
+                    try? authManager.signOut()
                 }
                 Button("Cancel", role: .cancel) {}
             }

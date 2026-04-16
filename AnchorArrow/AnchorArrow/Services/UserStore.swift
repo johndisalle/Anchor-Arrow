@@ -49,20 +49,35 @@ class UserStore: ObservableObject {
         }
     }
 
+    deinit {
+        userListener?.remove()
+        if let handle = authListener {
+            Auth.auth().removeStateDidChangeListener(handle)
+        }
+    }
+
     // MARK: - Load User Data
     func loadUserData(uid: String) async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            appUser = try await firestoreService.fetchUser(uid: uid)
-            todayEntry = try await firestoreService.fetchTodayEntry(uid: uid)
-            let entryLimit = (appUser?.isPremium ?? false) ? 365 : 60
-            recentEntries = try await firestoreService.fetchRecentEntries(uid: uid, limit: entryLimit)
-            driftLogs = try await firestoreService.fetchDriftLogs(uid: uid)
+            // Fetch user first (needed for premium check)
+            let user = try await firestoreService.fetchUser(uid: uid)
+            appUser = user
+            let entryLimit = user.isPremium ? 365 : 60
+
+            // Parallel fetch: independent reads run simultaneously
+            async let fetchedToday = firestoreService.fetchTodayEntry(uid: uid)
+            async let fetchedRecent = firestoreService.fetchRecentEntries(uid: uid, limit: entryLimit)
+            async let fetchedDrifts = firestoreService.fetchDriftLogs(uid: uid)
+
+            todayEntry = try await fetchedToday
+            recentEntries = try await fetchedRecent
+            driftLogs = try await fetchedDrifts
 
             // Sync theme from server on first load
-            if let theme = appUser?.theme {
+            if let theme = user.theme {
                 savedTheme = theme.rawValue
             }
 
@@ -72,6 +87,9 @@ class UserStore: ObservableObject {
 
             // Set up real-time user listener
             setupUserListener(uid: uid)
+
+            // Schedule weekly summary notification
+            await scheduleWeeklySummaryIfNeeded()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -384,7 +402,22 @@ class UserStore: ObservableObject {
         }
     }
 
-    private func clearData() {
+    /// Schedule weekly summary notification with current stats
+    private func scheduleWeeklySummaryIfNeeded() async {
+        let cal = Calendar.current
+        let weekAgo = cal.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let weekEntries = recentEntries.filter { $0.date >= weekAgo }
+        let anchors = weekEntries.filter { $0.anchorCompleted }.count
+        let arrows = weekEntries.filter { $0.arrowCompleted }.count
+        let weekDrifts = driftLogs.filter { $0.timestamp >= weekAgo }
+        let topDrift = topDriftCategoriesThisMonth.first?.tag.displayName
+        await NotificationManager().scheduleWeeklySummary(
+            anchors: anchors, arrows: arrows,
+            drifts: weekDrifts.count, topDrift: topDrift
+        )
+    }
+
+    func clearData() {
         appUser = nil
         todayEntry = nil
         recentEntries = []

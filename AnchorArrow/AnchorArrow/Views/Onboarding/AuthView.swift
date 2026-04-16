@@ -202,7 +202,7 @@ struct AuthView: View {
                         Task {
                             do {
                                 try await authManager.handleAppleSignIn(result: result)
-                                await userStore.loadUserData(uid: authManager.currentUID ?? "")
+                                // Auth listener in UserStore loads data automatically
                                 userStore.completeOnboarding()
                             } catch {
                                 showAuthError(authManager.friendlyError(error))
@@ -283,14 +283,12 @@ struct AuthView: View {
                 try await FirestoreService.shared.createUser(uid: uid, email: email, displayName: displayName)
                 // Persist EULA acceptance to Firestore
                 try await FirestoreService.shared.updateUser(uid: uid, fields: ["acceptedTerms": true])
-                await userStore.loadUserData(uid: uid)
+                // Auth listener in UserStore loads data automatically
                 userStore.completeOnboarding()
             } else {
                 try await authManager.signIn(email: email, password: password)
-                if let uid = authManager.currentUID {
-                    await userStore.loadUserData(uid: uid)
-                    userStore.completeOnboarding()
-                }
+                // Auth listener in UserStore loads data automatically
+                userStore.completeOnboarding()
             }
         } catch {
             showAuthError(authManager.friendlyError(error))

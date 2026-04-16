@@ -206,9 +206,9 @@ struct DriftLogView_Previews: PreviewProvider {
     }
 }
 
-struct ProgressView_Previews: PreviewProvider {
+struct ProgressDashboardView_Previews: PreviewProvider {
     static var previews: some View {
-        ProgressView()
+        ProgressDashboardView()
             .withPreviewEnvironment()
     }
 }

@@ -56,7 +56,7 @@ struct MainTabView: View {
                 DashboardView().tag(0)
                 AnchorView().tag(1)
                 ArrowView().tag(2)
-                ProgressView().tag(3)
+                ProgressDashboardView().tag(3)
                 CirclesView().tag(4)
             }
             .toolbar(.hidden, for: .tabBar)
