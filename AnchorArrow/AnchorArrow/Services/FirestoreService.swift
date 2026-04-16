@@ -148,10 +148,11 @@ class FirestoreService {
     @discardableResult
     func updateStreak(uid: String) async throws -> StreakResult {
         let entries = try await fetchRecentEntries(uid: uid, limit: 120)
-        let activeDates = Set(
+        // Use dateString for timezone-agnostic day comparisons
+        let activeDateStrings = Set(
             entries
                 .filter { $0.anchorCompleted || $0.arrowCompleted }
-                .map { Calendar.current.startOfDay(for: $0.date) }
+                .map { $0.dateString }
         )
 
         let user = try await fetchUser(uid: uid)
@@ -163,7 +164,7 @@ class FirestoreService {
         let graceDayAvailable = user.hasGraceDayAvailable
 
         while true {
-            if activeDates.contains(checkDate) {
+            if activeDateStrings.contains(checkDate.entryDateString) {
                 streak += 1
                 guard let prev = Calendar.current.date(byAdding: .day, value: -1, to: checkDate) else { break }
                 checkDate = prev

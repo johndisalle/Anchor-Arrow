@@ -75,7 +75,7 @@ struct ProgressView: View {
             .toolbarBackground(.visible, for: .navigationBar)
         }
         .onAppear { loadCalendarEntries() }
-        .onChange(of: selectedMonth) { loadCalendarEntries() }
+        .onChange(of: selectedMonth) { _, _ in loadCalendarEntries() }
     }
 
     // MARK: - Streak Hero

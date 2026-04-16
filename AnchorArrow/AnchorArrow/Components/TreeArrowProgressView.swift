@@ -40,7 +40,7 @@ struct TreeArrowProgressView: View {
         }
         .frame(maxWidth: .infinity)
         .onAppear { triggerAnimation() }
-        .onChange(of: animate) { if animate { triggerAnimation() } }
+        .onChange(of: animate) { _, newValue in if newValue { triggerAnimation() } }
         // The hero is purely decorative; progress is conveyed elsewhere in the UI
         .accessibilityHidden(true)
     }

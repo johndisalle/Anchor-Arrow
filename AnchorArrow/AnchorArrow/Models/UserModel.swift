@@ -151,10 +151,14 @@ struct AppUser: Codable, Identifiable {
                Calendar.current.isDateInToday(last)
     }
 
+    private static let _memberSinceFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM yyyy"
+        return f
+    }()
+
     var memberSince: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM yyyy"
-        return formatter.string(from: joinDate)
+        Self._memberSinceFormatter.string(from: joinDate)
     }
 }
 

@@ -164,16 +164,24 @@ struct DriftLog: Codable, Identifiable {
 
 // MARK: - Date Extension
 extension Date {
+    private static let _entryDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        return f
+    }()
+
     var entryDateString: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: self)
+        Self._entryDateFormatter.string(from: self)
     }
 
+    private static let _displayShortFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateStyle = .medium
+        f.timeStyle = .none
+        return f
+    }()
+
     var displayShort: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: self)
+        Self._displayShortFormatter.string(from: self)
     }
 }
