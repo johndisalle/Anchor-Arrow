@@ -77,9 +77,7 @@ class UserStore: ObservableObject {
             driftLogs = try await fetchedDrifts
 
             // Sync theme from server on first load
-            if let theme = user.theme {
-                savedTheme = theme.rawValue
-            }
+            savedTheme = user.theme.rawValue
 
             // Recalculate streak on app open (catches multi-day absences)
             try await firestoreService.updateStreak(uid: uid)
