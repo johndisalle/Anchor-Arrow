@@ -106,7 +106,8 @@ struct CirclesView: View {
                 pendingInviteCode = nil
                 Task {
                     do {
-                        let circle = try await FirestoreService.shared.joinCircle(code: code)
+                        guard let uid = Auth.auth().currentUser?.uid else { return }
+                        let circle = try await FirestoreService.shared.joinCircle(code: code, uid: uid)
                         if !circles.contains(where: { $0.id == circle.id }) {
                             circles.append(circle)
                         }

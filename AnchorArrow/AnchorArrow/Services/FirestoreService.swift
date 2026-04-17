@@ -228,9 +228,8 @@ class FirestoreService {
     }
 
     func driftLogCount(uid: String) async throws -> Int {
-        let query = driftRef(uid)
-        let snapshot = try await query.count.getAggregation(source: .server)
-        return Int(truncating: snapshot.count)
+        let snapshot = try await driftRef(uid).getDocuments()
+        return snapshot.count
     }
 
     // MARK: - Badges
@@ -361,12 +360,7 @@ class FirestoreService {
     }
 
     func postComment(comment: CircleComment) async throws {
-        var sanitized = comment
-        sanitized.content = String(sanitized.content
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .prefix(1000))
-        guard !sanitized.content.isEmpty else { return }
-        try commentsRef(circleId: sanitized.circleId, postId: sanitized.postId).addDocument(from: sanitized)
+        try commentsRef(circleId: comment.circleId, postId: comment.postId).addDocument(from: comment)
     }
 
     func fetchUserCircles(uid: String) async throws -> [Circle] {
@@ -410,7 +404,7 @@ class FirestoreService {
         var circle = try doc.data(as: Circle.self)
 
         guard circle.isPublic else { throw CircleError.invalidCode }
-        guard !circle.isFull else { throw CircleError.full }
+        guard circle.memberCount < 8 else { throw CircleError.full }
         guard !circle.memberIds.contains(uid) else { throw CircleError.alreadyMember }
 
         try await circlesRef().document(circleId).updateData([
@@ -434,7 +428,7 @@ class FirestoreService {
         var circle = try doc.data(as: Circle.self)
         guard let circleId = circle.id else { throw CircleError.invalidCode }
 
-        guard !circle.isFull else { throw CircleError.full }
+        guard circle.memberCount < 8 else { throw CircleError.full }
         guard !circle.memberIds.contains(uid) else { throw CircleError.alreadyMember }
 
         try await circlesRef().document(circleId).updateData([
@@ -461,26 +455,8 @@ class FirestoreService {
         }
     }
 
-    // Rate limit: track last post time per user
-    private static var lastPostTimes: [String: Date] = [:]
-    private static let postCooldownSeconds: TimeInterval = 30
-
     func postToCircle(post: CirclePost) async throws {
-        var sanitized = post
-        sanitized.content = String(sanitized.content
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .prefix(2000))
-        guard !sanitized.content.isEmpty else { return }
-
-        // Enforce rate limit (30 seconds between posts)
-        let uid = sanitized.authorId
-        if let lastTime = Self.lastPostTimes[uid],
-           Date().timeIntervalSince(lastTime) < Self.postCooldownSeconds {
-            throw CircleError.rateLimited
-        }
-
-        try circlePostsRef(sanitized.circleId).addDocument(from: sanitized)
-        Self.lastPostTimes[uid] = Date()
+        try circlePostsRef(post.circleId).addDocument(from: post)
     }
 
     func reactToPost(circleId: String, postId: String, emoji: String) async throws {
@@ -557,23 +533,12 @@ class FirestoreService {
     /// Deletes all user data from Firestore before the Auth account is removed.
     /// Order: leave circles → delete entries → delete drift logs → delete user doc.
     func deleteUserData(uid: String) async throws {
-        // 1. Delete user's posts and comments from every circle
+        // 1. Remove from every circle the user belongs to
         let circles = (try? await fetchUserCircles(uid: uid)) ?? []
         for circle in circles {
-            guard let circleId = circle.id else { continue }
-
-            // Delete posts authored by this user
-            let posts = try? await circlePostsRef(circleId)
-                .whereField("authorId", isEqualTo: uid)
-                .getDocuments()
-            if let postDocs = posts?.documents, !postDocs.isEmpty {
-                let batch = db.batch()
-                postDocs.forEach { batch.deleteDocument($0.reference) }
-                try? await batch.commit()
+            if let circleId = circle.id {
+                try? await leaveCircle(circleId: circleId, uid: uid)
             }
-
-            // Remove from circle membership
-            try? await leaveCircle(circleId: circleId, uid: uid)
         }
 
         // 2. Delete entries subcollection in batches (Firestore max 500/batch)
@@ -695,7 +660,7 @@ class FirestoreService {
             let doc = try await postRef.getDocument()
             if doc.exists { return } // Already posted today
 
-            let devotionals = DevotionalLibrary.dailyDevotionals
+            let devotionals = Self.dailyDevotionals
             let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
             let devotional = devotionals[(dayOfYear - 1) % devotionals.count]
 
@@ -770,13 +735,11 @@ enum CircleError: LocalizedError {
     case invalidCode
     case full
     case alreadyMember
-    case rateLimited
 
     var errorDescription: String? {
         switch self {
         case .invalidCode:    return "That invite code doesn't match any circle."
-        case .full:           return "This circle is full."
-        case .rateLimited:    return "Please wait a moment before posting again."
+        case .full:           return "This circle is full (8 members max)."
         case .alreadyMember:  return "You're already in this circle."
         }
     }

@@ -61,8 +61,6 @@ extension FirestoreService {
         return snapshot.documents.compactMap { doc in
             let data = doc.data()
             guard let reporterId = data["reporterId"] as? String,
-                  let circleId = data["circleId"] as? String,
-                  let postId = data["postId"] as? String,
                   let reason = data["reason"] as? String,
                   let statusVal = data["status"] as? String,
                   let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
@@ -71,8 +69,8 @@ extension FirestoreService {
             return ContentReport(
                 id: doc.documentID,
                 reporterId: reporterId,
-                circleId: circleId,
-                postId: postId,
+                circleId: (data["circleId"] as? String) ?? "",
+                postId: (data["postId"] as? String) ?? "",
                 commentId: data["commentId"] as? String,
                 reason: reason,
                 status: statusVal,

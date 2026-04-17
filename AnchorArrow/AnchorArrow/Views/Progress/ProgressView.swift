@@ -4,10 +4,9 @@
 import SwiftUI
 import FirebaseAuth
 
-struct ProgressDashboardView: View {
+struct ProgressView: View {
     @EnvironmentObject var userStore: UserStore
     @State private var selectedMonth = Date()
-    @State private var progressTab = 0
     @State private var calendarEntries: [String: DailyEntry] = [:]
 
     private let calendar = Calendar.current
@@ -19,56 +18,49 @@ struct ProgressDashboardView: View {
                 if userStore.isLoading && userStore.appUser == nil {
                     progressSkeleton
                 } else {
-                VStack(spacing: 0) {
+                VStack(spacing: 24) {
 
-                    // Streak header (always visible)
+                    // Streak header
                     streakHeroSection
-                        .padding(.horizontal, 20)
-                        .padding(.top, 16)
-                        .padding(.bottom, 12)
 
-                    // Tab picker
-                    Picker("", selection: $progressTab) {
-                        Text("Overview").tag(0)
-                        Text("Badges").tag(1)
-                        Text("Drift").tag(2)
-                    }
-                    .pickerStyle(.segmented)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
+                    // Stats Grid
+                    statsGridSection
 
-                    // Tab content
-                    Group {
-                        switch progressTab {
-                        case 0:
-                            VStack(spacing: 24) {
-                                statsGridSection
-                                if userStore.isPremium { journalHistoryLink }
-                                calendarSection
-                                weeklySummarySection
-                                if userStore.isPremium { weeklyAccountabilityReport }
-                            }
-                        case 1:
-                            VStack(spacing: 24) {
-                                badgeGallerySection
-                            }
-                        case 2:
-                            VStack(spacing: 24) {
-                                if userStore.isPremium { driftInsightsSection }
-                                if userStore.driftLogs.isEmpty {
-                                    driftEmptyState
-                                } else {
-                                    driftHistorySection
-                                }
-                            }
-                        default:
-                            EmptyView()
-                        }
+                    // Journal History (Premium)
+                    if userStore.isPremium {
+                        journalHistoryLink
                     }
-                    .padding(.horizontal, 20)
+
+                    // Drift Insights (Premium)
+                    if userStore.isPremium {
+                        driftInsightsSection
+                    }
+
+                    // Streak Calendar
+                    calendarSection
+
+                    // Badge Gallery
+                    badgeGallerySection
+
+                    // Weekly Accountability Report (Premium)
+                    if userStore.isPremium {
+                        weeklyAccountabilityReport
+                    }
+
+                    // Weekly Summary
+                    weeklySummarySection
+
+                    // Drift History
+                    if userStore.driftLogs.isEmpty {
+                        driftEmptyState
+                    } else {
+                        driftHistorySection
+                    }
 
                     Spacer(minLength: 100)
                 }
+                .padding(.horizontal, 20)
+                .padding(.top, 16)
                 }
             }
             .refreshable {

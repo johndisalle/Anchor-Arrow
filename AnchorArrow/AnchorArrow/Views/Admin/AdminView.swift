@@ -179,6 +179,10 @@ private struct AdminReportsTab: View {
         }
         // Enrich with post previews
         for i in reports.indices {
+            if reports[i].circleId.isEmpty || reports[i].postId.isEmpty {
+                reports[i].postPreview = reports[i].type == "block" ? "[User block report]" : nil
+                continue
+            }
             reports[i].postPreview = try? await FirestoreService.shared.fetchPostContent(
                 circleId: reports[i].circleId, postId: reports[i].postId)
         }

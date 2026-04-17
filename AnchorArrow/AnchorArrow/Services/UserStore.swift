@@ -5,7 +5,7 @@ import SwiftUI
 import Combine
 import Firebase
 import FirebaseAuth
-import FirebaseAnalytics
+
 import FirebaseFirestore
 import UIKit
 import StoreKit
@@ -150,8 +150,8 @@ class UserStore: ObservableObject {
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
 
-            AnalyticsService.log(.arrowCompleted, params: ["role": role.rawValue, "streak": streakResult.streak])
-            if isAnchorDoneToday {
+            AnalyticsService.log(.anchorCompleted, params: ["streak": streakResult.streak])
+            if isArrowDoneToday {
                 AnalyticsService.log(.bothCompleted, params: ["streak": streakResult.streak])
             }
             await refreshRecent(uid: uid)

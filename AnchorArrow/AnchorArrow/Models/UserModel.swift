@@ -170,12 +170,6 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
     case prophetPriestKing = "prophet_priest_king"
     case strengthInLove = "strength_in_love"
     case guardTheGates = "guard_the_gates"
-    case theFathersHeart = "the_fathers_heart"
-    case warriorMindset = "warrior_mindset"
-    case theNarrowRoad = "the_narrow_road"
-    case rootedAndBuilt = "rooted_and_built"
-    case forgedInFire = "forged_in_fire"
-    case theSentLife = "the_sent_life"
 
     var id: String { rawValue }
 
@@ -187,12 +181,6 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .prophetPriestKing: return "Prophet, Priest, King"
         case .strengthInLove:    return "Strength in Love"
         case .guardTheGates:     return "Guard the Gates"
-        case .theFathersHeart:   return "The Father's Heart"
-        case .warriorMindset:    return "Warrior Mindset"
-        case .theNarrowRoad:     return "The Narrow Road"
-        case .rootedAndBuilt:    return "Rooted & Built"
-        case .forgedInFire:      return "Forged in Fire"
-        case .theSentLife:       return "The Sent Life"
         }
     }
 
@@ -204,12 +192,6 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .prophetPriestKing: return "30 Days in the Offices of Christ"
         case .strengthInLove:    return "30 Days in 1 Corinthians 16:13-14"
         case .guardTheGates:     return "30 Days in Nehemiah & 1 Peter 5"
-        case .theFathersHeart:   return "30 Days on God as Father"
-        case .warriorMindset:    return "30 Days on Spiritual Warfare"
-        case .theNarrowRoad:     return "30 Days in the Sermon on the Mount"
-        case .rootedAndBuilt:    return "30 Days in Colossians"
-        case .forgedInFire:      return "30 Days on Trials & Refinement"
-        case .theSentLife:       return "30 Days on Mission & Purpose"
         }
     }
 
@@ -221,12 +203,6 @@ enum JourneySeries: String, Codable, CaseIterable, Identifiable {
         case .prophetPriestKing: return "person.3.fill"
         case .strengthInLove:    return "heart.circle.fill"
         case .guardTheGates:     return "eye.fill"
-        case .theFathersHeart:   return "house.fill"
-        case .warriorMindset:    return "bolt.shield.fill"
-        case .theNarrowRoad:     return "road.lanes"
-        case .rootedAndBuilt:    return "tree.fill"
-        case .forgedInFire:      return "flame.fill"
-        case .theSentLife:       return "paperplane.fill"
         }
     }
 }
