@@ -152,6 +152,12 @@ struct PromptLibrary {
         case .prophetPriestKing: return prophetPriestKingJourneyDays()
         case .strengthInLove:    return strengthInLoveJourneyDays()
         case .guardTheGates:     return guardTheGatesJourneyDays()
+        case .theFathersHeart:   return JourneyLibrary.theFathersHeartDays()
+        case .warriorMindset:    return JourneyLibrary.warriorMindsetDays()
+        case .theNarrowRoad:     return JourneyLibrary.theNarrowRoadDays()
+        case .rootedAndBuilt:    return JourneyLibrary.rootedAndBuiltDays()
+        case .forgedInFire:      return JourneyLibrary.forgedInFireDays()
+        case .theSentLife:       return JourneyLibrary.theSentLifeDays()
         }
     }
 
