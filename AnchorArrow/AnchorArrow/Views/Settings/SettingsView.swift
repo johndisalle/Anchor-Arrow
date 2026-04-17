@@ -98,6 +98,20 @@ struct SettingsView: View {
                     }
                 }
 
+                // Admin Panel (only visible to admins)
+                if userStore.isAdmin {
+                    Section {
+                        NavigationLink {
+                            AdminView()
+                                .environmentObject(userStore)
+                        } label: {
+                            Label("Admin Panel", systemImage: "shield.lefthalf.filled")
+                        }
+                    } header: {
+                        Text("Administration")
+                    }
+                }
+
                 // Account Section
                 Section {
                     Button(role: .destructive) {
