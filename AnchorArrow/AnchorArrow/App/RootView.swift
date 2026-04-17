@@ -113,7 +113,7 @@ struct MainTabView: View {
         }
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
-                .presentationDetents([.large])
+                .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.hidden)
         }
         .fullScreenCover(isPresented: $showNotificationPrompt) {

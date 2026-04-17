@@ -63,10 +63,16 @@ struct ArrowView: View {
                 .padding(.horizontal, 20)
                 .padding(.top, AATheme.paddingMedium)
             }
-            .aaScreenBackground()
+            .background(
+                LinearGradient(
+                    colors: [AATheme.steel.opacity(0.08), AATheme.background, AATheme.background],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ).ignoresSafeArea()
+            )
             .navigationTitle(Calendar.current.component(.hour, from: Date()) >= 15 ? "Evening Arrow" : "Loose Your Arrow")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(AATheme.background, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {

@@ -56,10 +56,16 @@ struct AnchorView: View {
                 .padding(.top, AATheme.paddingMedium)
                 .padding(.bottom, 100)
             }
-            .aaScreenBackground()
+            .background(
+                LinearGradient(
+                    colors: [AATheme.warmGold.opacity(0.08), AATheme.background, AATheme.background],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ).ignoresSafeArea()
+            )
             .navigationTitle(Calendar.current.component(.hour, from: Date()) < 12 ? "Morning Anchor" : "Anchor Up")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbarBackground(AATheme.background, for: .navigationBar)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .keyboard) {

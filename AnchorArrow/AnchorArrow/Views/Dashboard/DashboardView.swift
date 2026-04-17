@@ -174,7 +174,7 @@ struct DashboardView: View {
                 anchorCompleted: userStore.isAnchorDoneToday,
                 arrowCompleted: userStore.isArrowDoneToday
             )
-            .frame(height: 350)
+            .frame(height: 220)
             .padding(.horizontal, AATheme.paddingLarge)
         }
         .buttonStyle(IllustrationPressStyle())
