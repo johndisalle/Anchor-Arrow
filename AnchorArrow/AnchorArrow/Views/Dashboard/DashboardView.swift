@@ -446,19 +446,6 @@ struct DashboardView: View {
         return min(1.0, Double(total) / 30.0)
     }
 
-}
-
-// MARK: - IllustrationPressStyle
-private struct IllustrationPressStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
-            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
-    }
-}
-
-
-
     // MARK: - Streak Freeze Warning
     private var showStreakFreezeWarning: Bool {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -559,6 +546,15 @@ private struct IllustrationPressStyle: ButtonStyle {
         .background(AATheme.cardBackground)
         .cornerRadius(AATheme.cornerRadius)
         .padding(.horizontal, AATheme.paddingLarge)
+    }
+}
+
+// MARK: - IllustrationPressStyle
+private struct IllustrationPressStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 
