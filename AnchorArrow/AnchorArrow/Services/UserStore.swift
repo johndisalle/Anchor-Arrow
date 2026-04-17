@@ -5,6 +5,7 @@ import SwiftUI
 import Combine
 import Firebase
 import FirebaseAuth
+import FirebaseAnalytics
 import FirebaseFirestore
 import UIKit
 import StoreKit
@@ -90,6 +91,13 @@ class UserStore: ObservableObject {
 
             // Schedule weekly summary notification
             await scheduleWeeklySummaryIfNeeded()
+
+            AnalyticsService.log(.appOpened)
+            AnalyticsService.setUserId(uid)
+
+            // Ensure user is in Global Brotherhood + seed daily devotional
+            _ = await firestoreService.ensureGlobalCircleMembership(uid: uid)
+            await firestoreService.seedGlobalBrotherhoodPost()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -141,13 +149,24 @@ class UserStore: ObservableObject {
             let streakResult = try await firestoreService.updateStreak(uid: uid)
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
+
+            AnalyticsService.log(.arrowCompleted, params: ["role": role.rawValue, "streak": streakResult.streak])
+            if isAnchorDoneToday {
+                AnalyticsService.log(.bothCompleted, params: ["streak": streakResult.streak])
+            }
             await refreshRecent(uid: uid)
             notificationHaptic(.success)
             if streakResult.graceDayBurned {
                 await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
             }
+            AnalyticsService.log(.anchorCompleted, params: ["streak": streakResult.streak])
+            if isArrowDoneToday {
+                AnalyticsService.log(.bothCompleted, params: ["streak": streakResult.streak])
+            }
+
             // Celebrate streak milestones
             if [7, 14, 30, 60, 100].contains(streakResult.streak) {
+                AnalyticsService.log(.streakMilestone, params: ["streak": streakResult.streak])
                 milestoneStreak = streakResult.streak
                 showStreakMilestone = true
             }
@@ -192,6 +211,7 @@ class UserStore: ObservableObject {
         do {
             try await firestoreService.saveDriftLog(uid: uid, log: log)
             driftLogs.insert(log, at: 0)
+            AnalyticsService.log(.driftLogged, params: ["category": category.rawValue])
             try await firestoreService.evaluateAndAwardBadges(uid: uid)
             haptic(.medium)
         } catch {

@@ -101,6 +101,22 @@ struct CirclesView: View {
             }
         }
         .task { await loadCircles() }
+        .onChange(of: pendingInviteCode) { _, code in
+            if let code = code, !code.isEmpty {
+                pendingInviteCode = nil
+                Task {
+                    do {
+                        let circle = try await FirestoreService.shared.joinCircle(code: code)
+                        if !circles.contains(where: { $0.id == circle.id }) {
+                            circles.append(circle)
+                        }
+                    } catch {
+                        // Code was invalid or join failed — open the join sheet with code pre-filled
+                        showJoinCircle = true
+                    }
+                }
+            }
+        }
         .refreshable { await loadCircles() }
     }
 

@@ -1,0 +1,86 @@
+/* Localizable.strings — Anchor & Arrow
+   Key user-facing strings for future localization.
+   Usage: Text("anchor_completed_banner", tableName: "Localizable") or
+   NSLocalizedString("anchor_completed_banner", comment: "")
+   
+   For now these serve as documentation. To localize:
+   1. Add a new language in Xcode → Project → Localizations
+   2. Xcode will auto-generate a copy of this file for each language
+   3. Translate each value
+*/
+
+// MARK: - Dashboard
+"dashboard_greeting_morning" = "Good morning";
+"dashboard_greeting_afternoon" = "Good afternoon";
+"dashboard_greeting_evening" = "Good evening";
+"dashboard_anchor_waiting" = "Your Anchor is waiting.";
+"dashboard_both_done" = "Both done. Well fought, brother.";
+"dashboard_streak_at_risk" = "Your %d-day streak is at risk";
+"dashboard_complete_before_midnight" = "Complete your Anchor before midnight";
+"dashboard_yesterday" = "Yesterday";
+"dashboard_first_day_title" = "Your First Day";
+"dashboard_first_day_body" = "Start with your Morning Anchor — read the scripture, reflect, and pray. Then later today, log your Evening Arrow.";
+
+// MARK: - Anchor
+"anchor_title_morning" = "Morning Anchor";
+"anchor_title_late" = "Anchor Up";
+"anchor_completed_banner" = "You anchored this morning. Stand firm today.";
+"anchor_reflection_placeholder" = "Write your honest response here...";
+"anchor_your_reflection" = "Your Reflection";
+"anchor_open_in_prayer" = "OPEN IN PRAYER";
+"anchor_pray_out_loud" = "Pray this out loud";
+"anchor_drift_question" = "Any drift pulling at you today?";
+"anchor_drift_honest" = "Select all that apply — this is honest, not shameful.";
+"anchor_submit" = "Mark Anchor Complete";
+"anchor_completion_message" = "Anchored.\nStand firm today.";
+"anchor_continue_to_arrow" = "Continue to Arrow";
+
+// MARK: - Arrow
+"arrow_title_evening" = "Evening Arrow";
+"arrow_title_early" = "Loose Your Arrow";
+"arrow_completed_banner" = "Arrow loosed. You advanced the kingdom today.";
+"arrow_role_question" = "Which role did God call you into today?";
+"arrow_reflection_prompt" = "What kingdom action did you take today?";
+"arrow_submit" = "Loose the Arrow";
+"arrow_completion_message" = "Arrow Loosed.\nWell done, brother.";
+"arrow_close_in_prayer" = "CLOSE IN PRAYER";
+
+// MARK: - Drift
+"drift_log_title" = "Log a Drift";
+"drift_success_title" = "Logged. Now pray.";
+"drift_rate_limited" = "Please wait a moment before posting again.";
+
+// MARK: - Circles
+"circles_empty_title" = "No Circles Yet";
+"circles_empty_body" = "Start or join a circle of brothers to share wins, struggles, and accountability.";
+"circles_create" = "Create Circle";
+"circles_join" = "Join Circle";
+"circles_browse" = "Browse Public";
+
+// MARK: - Journey
+"journey_day_of" = "Day %d of %d";
+"journey_start_today" = "%d-day guided plan — start today";
+
+// MARK: - Progress
+"progress_overview" = "Overview";
+"progress_badges" = "Badges";
+"progress_drift" = "Drift";
+
+// MARK: - Settings
+"settings_title" = "Profile & Settings";
+"settings_rate_app" = "Rate Anchor & Arrow";
+"settings_sign_out" = "Sign Out";
+"settings_delete_account" = "Delete Account";
+
+// MARK: - Premium
+"premium_title" = "Anchor & Arrow\nPremium";
+"premium_kingdom_funded" = "Kingdom Funded — All profits donated to missions & service";
+"premium_journeys" = "11 additional 30-day journeys (330 devotionals)";
+
+// MARK: - Onboarding
+"onboarding_problem" = "You know the feeling.";
+"onboarding_solution" = "There's a way back.";
+"onboarding_brotherhood" = "You weren't meant to fight alone.";
+"onboarding_cta" = "Ready to stand firm?";
+"onboarding_create_account" = "Create My Account";
+"onboarding_free" = "Free to start. No credit card required.";

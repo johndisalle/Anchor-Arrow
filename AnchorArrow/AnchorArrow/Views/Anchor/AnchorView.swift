@@ -223,6 +223,7 @@ struct AnchorView: View {
             Text("Your Reflection")
                 .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
+                .accessibilityAddTraits(.isHeader)
 
             ZStack(alignment: .topLeading) {
                 if reflection.isEmpty {
@@ -256,6 +257,7 @@ struct AnchorView: View {
             Text("Any drift pulling at you today?")
                 .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
+                .accessibilityAddTraits(.isHeader)
 
             Text("Select all that apply — this is honest, not shameful.")
                 .font(.system(size: 13))
@@ -285,6 +287,7 @@ struct AnchorView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .tracking(1.5)
                 .foregroundColor(AATheme.secondaryText)
+                .accessibilityAddTraits(.isHeader)
 
             VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
                 HStack(spacing: 6) {

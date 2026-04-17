@@ -111,6 +111,8 @@ struct ArrowView: View {
         .background(AATheme.cardBackground)
         .cornerRadius(12)
         .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Today's arrow scripture: \(prompt.verseReference)")
     }
 
     private var roleSelectorSection: some View {
@@ -118,6 +120,7 @@ struct ArrowView: View {
             Text("Which role did God call you into today?")
                 .font(AATheme.subheadlineFont)
                 .foregroundColor(AATheme.primaryText)
+                .accessibilityAddTraits(.isHeader)
 
             FlowLayout(spacing: AATheme.cornerRadiusSmall) {
                 ForEach(ArrowRole.allCases) { role in
@@ -169,6 +172,8 @@ struct ArrowView: View {
         .cornerRadius(AATheme.cornerRadius)
         .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(selectedRole.displayName) prompt: \(matchingPrompt.question)")
     }
 
     private var quickResponses: [String] {
@@ -274,6 +279,7 @@ struct ArrowView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .tracking(1.5)
                 .foregroundColor(AATheme.secondaryText)
+                .accessibilityAddTraits(.isHeader)
 
             VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
                 HStack(spacing: 6) {

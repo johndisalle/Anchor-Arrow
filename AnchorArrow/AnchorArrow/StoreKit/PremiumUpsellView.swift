@@ -5,6 +5,9 @@ import SwiftUI
 import StoreKit
 
 struct PremiumUpsellView: View {
+    init() {
+        AnalyticsService.log(.premiumUpsellViewed)
+    }
     let reason: String?
     @EnvironmentObject var storeKitManager: StoreKitManager
     @EnvironmentObject var userStore: UserStore
