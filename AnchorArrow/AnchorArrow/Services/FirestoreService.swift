@@ -410,7 +410,7 @@ class FirestoreService {
         var circle = try doc.data(as: Circle.self)
 
         guard circle.isPublic else { throw CircleError.invalidCode }
-        guard circle.memberCount < 8 else { throw CircleError.full }
+        guard !circle.isFull else { throw CircleError.full }
         guard !circle.memberIds.contains(uid) else { throw CircleError.alreadyMember }
 
         try await circlesRef().document(circleId).updateData([
@@ -434,7 +434,7 @@ class FirestoreService {
         var circle = try doc.data(as: Circle.self)
         guard let circleId = circle.id else { throw CircleError.invalidCode }
 
-        guard circle.memberCount < 8 else { throw CircleError.full }
+        guard !circle.isFull else { throw CircleError.full }
         guard !circle.memberIds.contains(uid) else { throw CircleError.alreadyMember }
 
         try await circlesRef().document(circleId).updateData([
@@ -750,7 +750,7 @@ enum CircleError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidCode:    return "That invite code doesn't match any circle."
-        case .full:           return "This circle is full (8 members max)."
+        case .full:           return "This circle is full."
         case .alreadyMember:  return "You're already in this circle."
         }
     }

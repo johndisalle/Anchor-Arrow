@@ -13,8 +13,13 @@ struct Circle: Codable, Identifiable {
     var memberIds: [String]
     var createdAt: Date
     var isPublic: Bool
+    var maxMembers: Int?     // nil = unlimited
 
     var memberCount: Int { memberIds.count }
+    var isFull: Bool {
+        guard let max = maxMembers else { return false }
+        return memberCount >= max
+    }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -25,26 +30,29 @@ struct Circle: Codable, Identifiable {
         memberIds  = try c.decode([String].self, forKey: .memberIds)
         createdAt  = try c.decode(Date.self, forKey: .createdAt)
         isPublic   = try c.decodeIfPresent(Bool.self, forKey: .isPublic) ?? false
+        maxMembers = try c.decodeIfPresent(Int.self, forKey: .maxMembers)
     }
 
     init(name: String, inviteCode: String, creatorId: String,
-         memberIds: [String], createdAt: Date, isPublic: Bool = false) {
+         memberIds: [String], createdAt: Date, isPublic: Bool = false, maxMembers: Int? = nil) {
         self.name = name
         self.inviteCode = inviteCode
         self.creatorId = creatorId
         self.memberIds = memberIds
         self.createdAt = createdAt
         self.isPublic = isPublic
+        self.maxMembers = maxMembers
     }
 
-    static func new(name: String, creatorId: String, isPublic: Bool = false) -> Circle {
+    static func new(name: String, creatorId: String, isPublic: Bool = false, maxMembers: Int? = nil) -> Circle {
         Circle(
             name: name,
             inviteCode: Circle.generateCode(),
             creatorId: creatorId,
             memberIds: [creatorId],
             createdAt: Date(),
-            isPublic: isPublic
+            isPublic: isPublic,
+            maxMembers: maxMembers
         )
     }
 

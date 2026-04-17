@@ -1521,6 +1521,8 @@ struct CreateCircleView: View {
     @Environment(\.dismiss) var dismiss
     @State private var circleName = ""
     @State private var isPublic = false
+    @State private var hasMemberLimit = false
+    @State private var memberLimitText = "20"
     @State private var isCreating = false
     @State private var errorMessage = ""
     @FocusState private var focused: Bool
@@ -1573,6 +1575,37 @@ struct CreateCircleView: View {
                     .background(Color("CardBackground"))
                     .cornerRadius(10)
                     .animation(.easeInOut(duration: 0.2), value: isPublic)
+
+                    // Member Limit
+                    Toggle(isOn: $hasMemberLimit) {
+                        HStack(spacing: 8) {
+                            Image(systemName: hasMemberLimit ? "person.3.fill" : "infinity")
+                                .foregroundColor(hasMemberLimit ? AATheme.amber : AATheme.secondaryText)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(hasMemberLimit ? "Limited Members" : "Unlimited Members")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(AATheme.primaryText)
+                            }
+                        }
+                    }
+                    .tint(AATheme.amber)
+
+                    if hasMemberLimit {
+                        HStack {
+                            Text("Max members:")
+                                .font(.system(size: 14))
+                                .foregroundColor(AATheme.secondaryText)
+                            TextField("20", text: $memberLimitText)
+                                .keyboardType(.numberPad)
+                                .font(.system(size: 16, weight: .semibold))
+                                .frame(width: 60)
+                                .multilineTextAlignment(.center)
+                                .padding(8)
+                                .background(AATheme.background)
+                                .cornerRadius(8)
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
 
@@ -1640,7 +1673,8 @@ struct CreateCircleView: View {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         guard isCircleNameValid else { return }
         isCreating = true
-        var newCircle = Circle.new(name: trimmedCircleName, creatorId: uid, isPublic: isPublic)
+        let memberLimit = hasMemberLimit ? Int(memberLimitText) : nil
+        var newCircle = Circle.new(name: trimmedCircleName, creatorId: uid, isPublic: isPublic, maxMembers: memberLimit)
         do {
             let id = try await FirestoreService.shared.createCircle(circle: newCircle)
             // Use the local circle with the Firestore-assigned ID instead of re-fetching,
