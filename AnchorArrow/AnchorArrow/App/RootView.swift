@@ -57,7 +57,7 @@ struct MainTabView: View {
                 AnchorView().tag(1)
                 ArrowView().tag(2)
                 ProgressDashboardView().tag(3)
-                CirclesView().tag(4)
+                CirclesView(pendingInviteCode: $pendingCircleCode).tag(4)
             }
             .toolbar(.hidden, for: .tabBar)
             .safeAreaInset(edge: .bottom) {

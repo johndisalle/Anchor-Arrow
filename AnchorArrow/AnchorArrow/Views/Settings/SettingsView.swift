@@ -12,6 +12,8 @@ struct SettingsView: View {
     @EnvironmentObject var notificationManager: NotificationManager
 
     @State private var showSignOutConfirm = false
+    @State private var isEditingName = false
+    @State private var editedName = ""
     @State private var showDeleteConfirm = false
     @State private var showPremiumUpsell = false
     @State private var morningTime = Date()
@@ -279,9 +281,39 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text(userStore.displayName)
-                    .font(AATheme.subheadlineFont)
-                    .foregroundColor(AATheme.primaryText)
+                if isEditingName {
+                    HStack {
+                        TextField("Display name", text: $editedName)
+                            .font(AATheme.subheadlineFont)
+                            .textFieldStyle(.roundedBorder)
+                        Button("Save") {
+                            let trimmed = editedName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            guard !trimmed.isEmpty else { return }
+                            Task {
+                                guard let uid = Auth.auth().currentUser?.uid else { return }
+                                try? await FirestoreService.shared.updateUser(uid: uid, fields: ["displayName": trimmed])
+                                userStore.appUser?.displayName = trimmed
+                                isEditingName = false
+                            }
+                        }
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(AATheme.steel)
+                    }
+                } else {
+                    HStack {
+                        Text(userStore.displayName)
+                            .font(AATheme.subheadlineFont)
+                            .foregroundColor(AATheme.primaryText)
+                        Button {
+                            editedName = userStore.displayName
+                            isEditingName = true
+                        } label: {
+                            Image(systemName: "pencil")
+                                .font(.system(size: 13))
+                                .foregroundColor(AATheme.steel)
+                        }
+                    }
+                }
                 Text(authManager.userEmail)
                     .font(.system(size: 13))
                     .foregroundColor(AATheme.secondaryText)

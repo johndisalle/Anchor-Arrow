@@ -6,12 +6,19 @@ import FirebaseAuth
 
 // MARK: - CirclesView
 struct CirclesView: View {
+    @Binding var pendingInviteCode: String?
     @EnvironmentObject var userStore: UserStore
+
+    // Convenience init for usage without deep link
+    init(pendingInviteCode: Binding<String?> = .constant(nil)) {
+        _pendingInviteCode = pendingInviteCode
+    }
     @EnvironmentObject var storeKitManager: StoreKitManager
     @State private var circles: [Circle] = []
     @State private var publicCircles: [Circle] = []
     @State private var showCreateCircle = false
     @State private var showJoinCircle = false
+    @State private var autoJoinTriggered = false
     @State private var showBrowsePublic = false
     @State private var showPremiumUpsell = false
     @State private var isLoading = false
@@ -113,7 +120,7 @@ struct CirclesView: View {
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                     .padding(.horizontal, 32)
-                Text("Start or join a circle of 3–8 brothers to share wins, struggles, and accountability.")
+                Text("Start or join a circle of brothers to share wins, struggles, and accountability.")
                     .font(.system(size: 14))
                     .foregroundColor(Color("TextSecondary"))
                     .multilineTextAlignment(.center)

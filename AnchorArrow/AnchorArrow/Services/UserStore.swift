@@ -24,6 +24,8 @@ class UserStore: ObservableObject {
     @Published var errorMessage: String?
     @Published var showJourneyComplete = false
     @Published var completedJourneySeries: JourneySeries?
+    @Published var showStreakMilestone = false
+    @Published var milestoneStreak: Int = 0
 
     /// Theme stored locally for instant switching — no Firestore round-trip needed
     @AppStorage("appTheme") var savedTheme: String = AppTheme.system.rawValue
@@ -77,7 +79,9 @@ class UserStore: ObservableObject {
             driftLogs = try await fetchedDrifts
 
             // Sync theme from server on first load
-            savedTheme = user.theme.rawValue
+            if let theme = user.theme {
+                savedTheme = theme.rawValue
+            }
 
             // Recalculate streak on app open (catches multi-day absences)
             try await firestoreService.updateStreak(uid: uid)
@@ -143,6 +147,11 @@ class UserStore: ObservableObject {
             notificationHaptic(.success)
             if streakResult.graceDayBurned {
                 await NotificationManager().sendGraceDayNotification(streakSaved: streakResult.streak)
+            }
+            // Celebrate streak milestones
+            if [7, 14, 30, 60, 100].contains(streakResult.streak) {
+                milestoneStreak = streakResult.streak
+                showStreakMilestone = true
             }
             // Prompt for App Store review at streak milestones (7, 21, 50)
             if [7, 21, 50].contains(streakResult.streak) {

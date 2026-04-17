@@ -11,6 +11,7 @@ struct AnchorView: View {
     @State private var dismissTask: Task<Void, Never>?
     @State private var isSubmitting = false
     @State private var showVerseShare = false
+    @State private var showArrowView = false
     @State private var verseShareImage: UIImage?
     @FocusState private var reflectionFocused: Bool
     @Environment(\.dismiss) var dismiss
@@ -71,10 +72,21 @@ struct AnchorView: View {
         }
         .overlay {
             if showCompletionAnimation {
-                CompletionOverlay(color: "BrandAnchor", message: "Anchored.\nStand firm today.") {
+                CompletionOverlay(
+                    color: "BrandAnchor",
+                    message: "Anchored.\nStand firm today.",
+                    actionLabel: userStore.isArrowDoneToday ? nil : "Continue to Arrow",
+                    onAction: userStore.isArrowDoneToday ? nil : {
+                        withAnimation { showCompletionAnimation = false }
+                        showArrowView = true
+                    }
+                ) {
                     withAnimation { showCompletionAnimation = false }
                 }
             }
+        }
+        .navigationDestination(isPresented: $showArrowView) {
+            ArrowView()
         }
         .sheet(isPresented: $showVerseShare) {
             if let image = verseShareImage {
@@ -425,6 +437,8 @@ struct CompletedBanner: View {
 struct CompletionOverlay: View {
     let color: String
     let message: String
+    var actionLabel: String? = nil
+    var onAction: (() -> Void)? = nil
     let onDismiss: () -> Void
 
     @State private var scale: CGFloat = 0.3
@@ -448,6 +462,22 @@ struct CompletionOverlay: View {
                     .font(.system(size: 22, weight: .heavy, design: .rounded))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
+
+                if let label = actionLabel, let action = onAction {
+                    Button(action: action) {
+                        HStack(spacing: 6) {
+                            Text(label)
+                            Image(systemName: "arrow.right")
+                        }
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 12)
+                        .background(Color(color))
+                        .cornerRadius(AATheme.cornerRadius)
+                    }
+                    .padding(.top, 4)
+                }
             }
             .scaleEffect(scale)
             .opacity(opacity)

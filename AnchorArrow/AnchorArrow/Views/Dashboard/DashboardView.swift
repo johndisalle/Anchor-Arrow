@@ -11,6 +11,7 @@ struct DashboardView: View {
     @State private var animateTree = false
     @State private var showPremiumUpsell = false
     @State private var heroCardPulsing = false
+    @State private var showStreakCelebration = false
 
     var body: some View {
         NavigationStack {
@@ -45,6 +46,17 @@ struct DashboardView: View {
             }
             .aaScreenBackground()
             .toolbar(.hidden, for: .navigationBar)
+            .onChange(of: userStore.showStreakMilestone) { _, show in
+                if show {
+                    showStreakCelebration = true
+                    userStore.showStreakMilestone = false
+                }
+            }
+            .fullScreenCover(isPresented: $showStreakCelebration) {
+                StreakMilestoneCelebration(streak: userStore.milestoneStreak) {
+                    showStreakCelebration = false
+                }
+            }
         }
         .sheet(isPresented: $showJourney) {
             JourneyView()
@@ -72,6 +84,12 @@ struct DashboardView: View {
                     .font(.system(size: 13, weight: .medium))
                     .foregroundColor(AATheme.secondaryText)
                     .lineLimit(1)
+                if userStore.currentStreak >= 3 {
+                    Text(streakEncouragement)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AATheme.amber)
+                        .lineLimit(1)
+                }
             }
             Spacer(minLength: AATheme.paddingSmall)
 
@@ -107,6 +125,19 @@ struct DashboardView: View {
     private var firstName: String {
         let name = userStore.displayName
         return name.components(separatedBy: " ").first ?? name
+    }
+
+    private var streakEncouragement: String {
+        let streak = userStore.currentStreak
+        switch streak {
+        case 3...6:   return "\(streak) days anchored. Building momentum."
+        case 7...13:  return "\(streak)-day streak. You are sharpening iron."
+        case 14...29: return "\(streak) days standing firm. Roots run deep."
+        case 30...59: return "\(streak) days. A month of faithfulness."
+        case 60...99: return "\(streak) days. Unshakeable. Keep going."
+        case 100...:  return "\(streak) days. Act like men, be strong."
+        default:      return ""
+        }
     }
 
     private var inlineDateString: String {
@@ -261,12 +292,37 @@ struct DashboardView: View {
                 .accessibilityLabel("Log your Arrow")
                 .accessibilityHint("Tap to record your kingdom action")
             } else if userStore.isAnchorDoneToday && userStore.isArrowDoneToday {
-                // Both done — celebration
-                HStack(spacing: 12) {
-                    AAIcon("checkmark.seal.fill", size: 28, color: AATheme.success)
-                    Text("Both done. Well fought, brother.")
-                        .font(.system(.title3, design: .serif, weight: .semibold))
-                        .foregroundColor(AATheme.primaryText)
+                // Both done — celebration with streak
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        AAIcon("checkmark.seal.fill", size: 28, color: AATheme.success)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Both done. Well fought, brother.")
+                                .font(.system(.title3, design: .serif, weight: .semibold))
+                                .foregroundColor(AATheme.primaryText)
+                            if userStore.currentStreak > 1 {
+                                Text("\(userStore.currentStreak)-day streak and counting")
+                                    .font(.system(size: 13, weight: .medium))
+                                    .foregroundColor(AATheme.success)
+                            }
+                        }
+                        Spacer()
+                    }
+
+                    // Completion timestamps
+                    HStack(spacing: AATheme.paddingLarge) {
+                        if let anchorTime = userStore.todayEntry?.anchorCompletedAt {
+                            Label("Anchored \(anchorTime, style: .time)", systemImage: "anchor")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(AATheme.secondaryText)
+                        }
+                        if let arrowTime = userStore.todayEntry?.arrowCompletedAt {
+                            Label("Arrow \(arrowTime, style: .time)", systemImage: "arrow.up.right")
+                                .font(.system(size: 11, weight: .medium))
+                                .foregroundColor(AATheme.secondaryText)
+                        }
+                        Spacer()
+                    }
                 }
                 .padding(AATheme.paddingMedium)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -383,5 +439,69 @@ private struct IllustrationPressStyle: ButtonStyle {
         configuration.label
             .scaleEffect(configuration.isPressed ? 0.97 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
+
+
+// MARK: - Streak Milestone Celebration
+struct StreakMilestoneCelebration: View {
+    let streak: Int
+    let onDismiss: () -> Void
+    @State private var scale: CGFloat = 0.3
+    @State private var opacity: Double = 0
+
+    private var milestoneMessage: String {
+        switch streak {
+        case 7:   return "One week standing firm.\nYou are building something real."
+        case 14:  return "Two weeks anchored.\nRoots are growing deep."
+        case 30:  return "One month of faithfulness.\nThis is what it looks like."
+        case 60:  return "Sixty days unshakeable.\nIron sharpens iron."
+        case 100: return "One hundred days.\nAct like men. Be strong."
+        default:  return "\(streak) days anchored.\nWell done, brother."
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.7).ignoresSafeArea()
+                .onTapGesture(perform: onDismiss)
+
+            VStack(spacing: 24) {
+                ZStack {
+                    SwiftUI.Circle()
+                        .fill(AATheme.amber.opacity(0.2))
+                        .frame(width: 120, height: 120)
+                    VStack(spacing: 4) {
+                        AAIcon("flame.fill", size: 36, color: AATheme.amber)
+                        Text("\(streak)")
+                            .font(.system(size: 28, weight: .black, design: .rounded))
+                            .foregroundColor(AATheme.amber)
+                    }
+                }
+
+                Text(milestoneMessage)
+                    .font(.system(size: 20, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+
+                Button(action: onDismiss) {
+                    Text("Keep Going")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 14)
+                        .background(AATheme.amber)
+                        .cornerRadius(AATheme.cornerRadius)
+                }
+            }
+            .scaleEffect(scale)
+            .opacity(opacity)
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                scale = 1.0
+                opacity = 1.0
+            }
+        }
     }
 }

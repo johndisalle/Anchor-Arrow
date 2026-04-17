@@ -197,7 +197,7 @@ private struct AdminReportsTab: View {
 
     private func removeReportedUser(_ report: ContentReport) async {
         // Get the post author
-        if let content = try? await FirestoreService.shared.fetchPostContent(circleId: report.circleId, postId: report.postId) {
+        if (try? await FirestoreService.shared.fetchPostContent(circleId: report.circleId, postId: report.postId)) != nil {
             // Remove from circle + delete the post
             try? await FirestoreService.shared.deletePost(circleId: report.circleId, postId: report.postId)
         }

@@ -50,6 +50,9 @@ struct ArrowView: View {
                     // Examples (collapsible)
                     examplesDisclosure
 
+                    // Close in Prayer
+                    eveningPrayerSection
+
                     // Submit
                     if !userStore.isArrowDoneToday {
                         submitButton
@@ -92,9 +95,10 @@ struct ArrowView: View {
     private var scriptureChip: some View {
         HStack {
             AAIcon("book.fill", size: 13, weight: .semibold, color: AATheme.amber)
-            Text("\"Let all that you do be done in love.\" — 1 Cor 16:14")
+            Text("\"\(prompt.question.prefix(60))...\" — \(prompt.verseReference)")
                 .font(AATheme.scriptureFont)
                 .foregroundColor(AATheme.secondaryText)
+                .lineLimit(2)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
@@ -125,8 +129,12 @@ struct ArrowView: View {
     }
 
     private var promptCard: some View {
-        let matchingPrompt = PromptLibrary.arrowPrompts.first { $0.role == selectedRole }
-            ?? PromptLibrary.arrowPromptForToday()
+        // Rotate through all prompts matching the selected role, indexed by day
+        let rolePrompts = PromptLibrary.allArrowPrompts.filter { $0.role == selectedRole }
+        let dayOfYear = max(1, Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1)
+        let matchingPrompt = rolePrompts.isEmpty
+            ? PromptLibrary.arrowPromptForToday()
+            : rolePrompts[(dayOfYear - 1) % rolePrompts.count]
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack {
@@ -252,6 +260,33 @@ struct ArrowView: View {
         .background(AATheme.cardBackground)
         .cornerRadius(12)
         .animation(.easeInOut(duration: 0.2), value: selectedRole)
+    }
+
+    private var eveningPrayerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("CLOSE IN PRAYER")
+                .font(.system(size: 14, weight: .semibold))
+                .tracking(1.5)
+                .foregroundColor(AATheme.secondaryText)
+
+            VStack(alignment: .leading, spacing: AATheme.cornerRadiusSmall) {
+                HStack(spacing: 6) {
+                    AAIcon("hands.sparkles.fill", size: 14, weight: .semibold, color: AATheme.amber)
+                    Text("Pray this out loud")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(AATheme.amber)
+                }
+
+                Text(PrayerLibrary.eveningPrayerForToday())
+                    .font(AATheme.scriptureFont)
+                    .foregroundColor(AATheme.primaryText)
+                    .lineSpacing(6)
+            }
+            .padding(AATheme.paddingMedium)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+        }
     }
 
     private var submitButton: some View {
