@@ -84,6 +84,7 @@ struct NotificationPromptView: View {
 /// If the user granted permission via System Settings after dismissing the prompt,
 /// this ensures reminders get scheduled automatically.
 struct NotificationCheckModifier: ViewModifier {
+    @EnvironmentObject var userStore: UserStore
     @StateObject private var notificationManager = NotificationManager()
     @Environment(\.scenePhase) private var scenePhase
 
@@ -94,7 +95,9 @@ struct NotificationCheckModifier: ViewModifier {
                     Task {
                         await notificationManager.checkPermission()
                         if notificationManager.permissionGranted {
-                            await notificationManager.scheduleReminders(morningHour: 7, eveningHour: 20)
+                            let morning = userStore.appUser?.morningReminderHour ?? 7
+                            let evening = userStore.appUser?.eveningReminderHour ?? 20
+                            await notificationManager.scheduleReminders(morningHour: morning, eveningHour: evening)
                         }
                     }
                 }
@@ -104,6 +107,7 @@ struct NotificationCheckModifier: ViewModifier {
 
 extension View {
     func checkNotificationPermission() -> some View {
+        // Note: requires .environmentObject(userStore) in the ancestor view hierarchy
         modifier(NotificationCheckModifier())
     }
 }

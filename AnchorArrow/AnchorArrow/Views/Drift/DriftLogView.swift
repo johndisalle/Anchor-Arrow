@@ -2,6 +2,7 @@
 // Drift Log — one-tap category, note, instant anchoring prayer
 
 import SwiftUI
+import UIKit
 
 struct DriftLogView: View {
     @EnvironmentObject var userStore: UserStore
@@ -332,6 +333,7 @@ struct DriftLogView: View {
         await userStore.logDrift(category: category, note: note, customCategory: selectedCustomCategory)
         isLogging = false
 
+        UINotificationFeedbackGenerator().notificationOccurred(.warning)
         withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
             showSuccess = true
         }
@@ -342,26 +344,6 @@ struct DriftLogView: View {
         return DriftPrayerLibrary.prayer(for: tag)
     }
 
-    private func _oldDriftPrayerText(for tag: AnchorTag) -> String {
-        switch tag {
-        case .temptation, .lust:
-            return "Lord Jesus, anchor me firm right now. I reject this temptation. It has no power over me because I belong to You. Fill me with Your Spirit. Let me walk in Your freedom. Amen."
-        case .pride:
-            return "Father, forgive me for exalting myself. Humble me now. You are God, I am not. Let me decrease and You increase in every part of my life. Amen."
-        case .anger:
-            return "God, I bring this anger to You. Let me be slow to anger and slow to speak. Guard my tongue. Protect those around me from my flesh. Give me Your peace. Amen."
-        case .selfReliance:
-            return "Lord, I repent of trusting in my own strength. Without You I can do nothing. I surrender this to You right now. Be my strength. Amen."
-        case .avoidance:
-            return "Jesus, give me the courage to face what I am running from. I choose obedience over comfort. You equip what You call. Let me take the next step. Amen."
-        case .anxiety:
-            return "Father, I cast this anxiety on You because You care for me. You hold tomorrow. You are not surprised. Let Your peace guard my heart and mind in Christ Jesus. Amen."
-        case .doubt:
-            return "Lord, I believe. Help my unbelief. Your Word is true whether I feel it or not. Anchor me in truth, not feelings. I stand on Your faithfulness. Amen."
-        default:
-            return "Lord Jesus, anchor me firm right now. I reject this lie. I stand on Your truth. Fill me with Your Spirit. Amen."
-        }
-    }
 }
 
 // MARK: - DriftCategoryButton

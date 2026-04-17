@@ -30,11 +30,26 @@ struct DashboardView: View {
                     // Tiny completion legend (only when something is done)
                     completionLegend
 
+                    // New user guidance (first day only)
+                    if userStore.recentEntries.isEmpty && userStore.currentStreak == 0 {
+                        newUserGuidance
+                    }
+
                     // Smart contextual CTA
                     todayStatusSection
 
                     // Journey CTA
                     journeyCTASection
+
+                    // Streak freeze warning (after 6 PM, nothing done)
+                    if showStreakFreezeWarning {
+                        streakFreezeCard
+                    }
+
+                    // Yesterday's reflection (if exists)
+                    if yesterdayEntry != nil {
+                        yesterdayReflectionCard
+                    }
                 }
                 .padding(.top, AATheme.paddingSmall)
                 .padding(.bottom, 80) // floating drift button clearance
@@ -442,6 +457,110 @@ private struct IllustrationPressStyle: ButtonStyle {
     }
 }
 
+
+
+    // MARK: - Streak Freeze Warning
+    private var showStreakFreezeWarning: Bool {
+        let hour = Calendar.current.component(.hour, from: Date())
+        return hour >= 18 && !userStore.isAnchorDoneToday && userStore.currentStreak >= 3
+    }
+
+    private var streakFreezeCard: some View {
+        HStack(spacing: 12) {
+            AAIcon("exclamationmark.triangle.fill", size: 22, color: AATheme.warning)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Your \(userStore.currentStreak)-day streak is at risk")
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(AATheme.primaryText)
+                Text("Complete your Anchor before midnight")
+                    .font(.system(size: 13))
+                    .foregroundColor(AATheme.secondaryText)
+            }
+            Spacer()
+        }
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.warning.opacity(0.1))
+        .cornerRadius(AATheme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                .stroke(AATheme.warning.opacity(0.4), lineWidth: 1)
+        )
+        .padding(.horizontal, AATheme.paddingLarge)
+    }
+
+    // MARK: - Yesterday's Reflection
+    private var yesterdayEntry: DailyEntry? {
+        userStore.recentEntries.first { entry in
+            Calendar.current.isDateInYesterday(entry.date)
+        }
+    }
+
+    private var yesterdayReflectionCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                AAIcon("clock.arrow.circlepath", size: 14, color: AATheme.secondaryText)
+                Text("Yesterday")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(AATheme.secondaryText)
+            }
+
+            if let entry = yesterdayEntry {
+                if !entry.anchorReflection.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            AAIcon("anchor", size: 11, color: AATheme.steel)
+                            Text("Anchor")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(AATheme.steel)
+                        }
+                        Text(entry.anchorReflection)
+                            .font(.system(size: 14))
+                            .foregroundColor(AATheme.primaryText)
+                            .lineLimit(2)
+                    }
+                }
+
+                if !entry.arrowReflection.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(spacing: 4) {
+                            AAIcon("arrow.up.right", size: 11, color: AATheme.amber)
+                            Text("Arrow")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(AATheme.amber)
+                        }
+                        Text(entry.arrowReflection)
+                            .font(.system(size: 14))
+                            .foregroundColor(AATheme.primaryText)
+                            .lineLimit(2)
+                    }
+                }
+            }
+        }
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .padding(.horizontal, AATheme.paddingLarge)
+    }
+
+    // MARK: - New User Empty State
+    private var newUserGuidance: some View {
+        VStack(spacing: 14) {
+            AAIcon("sunrise.fill", size: 28, color: AATheme.warmGold)
+            Text("Your First Day")
+                .font(AATheme.subheadlineFont)
+                .foregroundColor(AATheme.primaryText)
+            Text("Start with your Morning Anchor — read the scripture, reflect, and pray. Then later today, log your Evening Arrow.")
+                .font(.system(size: 14))
+                .foregroundColor(AATheme.secondaryText)
+                .multilineTextAlignment(.center)
+                .lineSpacing(4)
+        }
+        .padding(AATheme.paddingLarge)
+        .background(AATheme.cardBackground)
+        .cornerRadius(AATheme.cornerRadius)
+        .padding(.horizontal, AATheme.paddingLarge)
+    }
+}
 
 // MARK: - Streak Milestone Celebration
 struct StreakMilestoneCelebration: View {

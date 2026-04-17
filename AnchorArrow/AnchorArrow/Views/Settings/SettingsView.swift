@@ -189,6 +189,11 @@ struct SettingsView: View {
 
                 // About Section
                 Section {
+                    Button {
+                        ReviewManager.requestReviewIfAppropriate()
+                    } label: {
+                        Label("Rate Anchor & Arrow", systemImage: "star.fill")
+                    }
                     LabeledContent("Version", value: appVersionString)
                     LabeledContent("Built on", value: "1 Corinthians 16:13-14")
                 } header: {

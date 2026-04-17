@@ -57,7 +57,7 @@ struct AnchorView: View {
                 .padding(.bottom, 100)
             }
             .aaScreenBackground()
-            .navigationTitle("Morning Anchor")
+            .navigationTitle(Calendar.current.component(.hour, from: Date()) < 12 ? "Morning Anchor" : "Anchor Up")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

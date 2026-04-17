@@ -64,7 +64,7 @@ struct ArrowView: View {
                 .padding(.top, AATheme.paddingMedium)
             }
             .aaScreenBackground()
-            .navigationTitle("Evening Arrow")
+            .navigationTitle(Calendar.current.component(.hour, from: Date()) >= 15 ? "Evening Arrow" : "Loose Your Arrow")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
