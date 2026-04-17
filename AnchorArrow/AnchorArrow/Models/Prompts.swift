@@ -1294,18 +1294,27 @@ struct PromptLibrary {
     }
 
     // MARK: - Today's Prompt
+    /// Combined prompt pool — originals + extended content
+    static var allAnchorPrompts: [AnchorPrompt] {
+        anchorPrompts + PromptLibrary.extraAnchorPrompts
+    }
+
+    static var allArrowPrompts: [ArrowPrompt] {
+        arrowPrompts + PromptLibrary.extraArrowPrompts
+    }
+
     static func anchorPromptForToday() -> AnchorPrompt {
-        let count = anchorPrompts.count
-        precondition(count > 0, "anchorPrompts must not be empty")
+        let all = allAnchorPrompts
+        precondition(!all.isEmpty, "anchorPrompts must not be empty")
         let dayOfYear = max(1, Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1)
-        return anchorPrompts[(dayOfYear - 1) % count]
+        return all[(dayOfYear - 1) % all.count]
     }
 
     static func arrowPromptForToday() -> ArrowPrompt {
-        let count = arrowPrompts.count
-        precondition(count > 0, "arrowPrompts must not be empty")
+        let all = allArrowPrompts
+        precondition(!all.isEmpty, "arrowPrompts must not be empty")
         let dayOfYear = max(1, Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1)
-        return arrowPrompts[(dayOfYear - 1) % count]
+        return all[(dayOfYear - 1) % all.count]
     }
 
     // MARK: - Circle Daily Prompts

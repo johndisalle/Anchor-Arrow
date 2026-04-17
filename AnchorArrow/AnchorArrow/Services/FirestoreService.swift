@@ -671,7 +671,7 @@ class FirestoreService {
             let doc = try await postRef.getDocument()
             if doc.exists { return } // Already posted today
 
-            let devotionals = Self.dailyDevotionals
+            let devotionals = DevotionalLibrary.dailyDevotionals
             let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
             let devotional = devotionals[(dayOfYear - 1) % devotionals.count]
 

@@ -276,16 +276,7 @@ struct AnchorView: View {
                         .foregroundColor(AATheme.steel)
                 }
 
-                Text("""
-                    Lord Jesus, I anchor myself in You this morning.
-                    Not in my own strength, my plans, or what the world is offering.
-                    You are my rock. You are my truth.
-                    Open my eyes to what is pulling me today.
-                    I reject the lies. I stand on Your Word.
-                    Give me courage to act like the man You've called me to be — watchful, firm, strong in love.
-                    Let everything I do today be done for Your glory.
-                    Amen.
-                    """)
+                Text(PrayerLibrary.morningPrayerForToday())
                     .font(AATheme.scriptureFont)
                     .foregroundColor(AATheme.primaryText)
                     .lineSpacing(6)

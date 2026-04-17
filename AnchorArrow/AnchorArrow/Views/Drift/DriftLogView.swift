@@ -339,6 +339,10 @@ struct DriftLogView: View {
 
     // MARK: - Prayer text per category
     private func driftPrayerText(for tag: AnchorTag) -> String {
+        return DriftPrayerLibrary.prayer(for: tag)
+    }
+
+    private func _oldDriftPrayerText(for tag: AnchorTag) -> String {
         switch tag {
         case .temptation, .lust:
             return "Lord Jesus, anchor me firm right now. I reject this temptation. It has no power over me because I belong to You. Fill me with Your Spirit. Let me walk in Your freedom. Amen."
