@@ -12,6 +12,7 @@ struct DashboardView: View {
     @State private var showPremiumUpsell = false
     @State private var heroCardPulsing = false
     @State private var showStreakCelebration = false
+    @AppStorage("hasSeenGoDeeper") private var hasSeenGoDeeper = false
 
     var body: some View {
         NavigationStack {
@@ -43,6 +44,11 @@ struct DashboardView: View {
 
                     // Brotherhood CTA
                     brotherhoodCTASection
+
+                    // Go Deeper prompt (one-time, after 7-day streak, free users only)
+                    if !userStore.isPremium && userStore.currentStreak >= 7 && !hasSeenGoDeeper {
+                        goDeepCard
+                    }
 
                     // Streak freeze warning (after 6 PM, nothing done)
                     if showStreakFreezeWarning {
@@ -458,6 +464,58 @@ struct DashboardView: View {
     private var arrowProgress: Double {
         let total = max(1, userStore.appUser?.totalArrowDays ?? 0)
         return min(1.0, Double(total) / 30.0)
+    }
+
+    // MARK: - Go Deeper Prompt
+    private var goDeepCard: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 10) {
+                AAIcon("flame.fill", size: 22, color: AATheme.amber)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("You've been faithful for \(userStore.currentStreak) days")
+                        .font(.system(size: 16, weight: .bold, design: .serif))
+                        .foregroundColor(AATheme.primaryText)
+                    Text("11 guided journeys are waiting to take you deeper")
+                        .font(.system(size: 13))
+                        .foregroundColor(AATheme.secondaryText)
+                }
+                Spacer()
+            }
+
+            HStack(spacing: 12) {
+                Button {
+                    showPremiumUpsell = true
+                } label: {
+                    HStack(spacing: 4) {
+                        AAIcon("crown.fill", size: 13, color: .white)
+                        Text("See Journeys")
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(AATheme.amber)
+                    .cornerRadius(AATheme.cornerRadiusSmall)
+                }
+
+                Button {
+                    withAnimation { hasSeenGoDeeper = true }
+                } label: {
+                    Text("Maybe Later")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(AATheme.secondaryText)
+                }
+            }
+        }
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.amber.opacity(0.06))
+        .cornerRadius(AATheme.cornerRadius)
+        .overlay(
+            RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                .stroke(AATheme.amber.opacity(0.2), lineWidth: 1)
+        )
+        .padding(.horizontal, AATheme.paddingLarge)
+        .transition(.opacity.combined(with: .move(edge: .top)))
     }
 
     // MARK: - Brotherhood CTA

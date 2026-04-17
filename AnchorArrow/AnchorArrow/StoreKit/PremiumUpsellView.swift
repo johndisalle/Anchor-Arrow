@@ -5,10 +5,11 @@ import SwiftUI
 import StoreKit
 
 struct PremiumUpsellView: View {
-    init() {
+    let reason: String?
+    init(reason: String? = nil) {
+        self.reason = reason
         AnalyticsService.log(.premiumUpsellViewed)
     }
-    let reason: String?
     @EnvironmentObject var storeKitManager: StoreKitManager
     @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss

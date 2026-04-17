@@ -357,7 +357,7 @@ class UserStore: ObservableObject {
             let newOnes = after.subtracting(before)
             if let first = newOnes.first, let badge = BadgeType(rawValue: first) {
                 await MainActor.run {
-                    newBadgeName = badge.displayName
+                    newBadgeName = badge.name
                     showBadgeCelebration = true
                 }
             }

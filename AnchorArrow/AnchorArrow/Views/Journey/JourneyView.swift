@@ -12,6 +12,9 @@ struct JourneyView: View {
     @State private var isStarting = false
     @State private var selectedSeries: JourneySeries = .standFirm
     @State private var showSeriesPicker = false
+    @State private var previewSeries: JourneySeries?
+    @State private var showPreview = false
+    @State private var showPremiumFromPreview = false
     @State private var showAbandonAlert = false
 
     var body: some View {
@@ -305,6 +308,9 @@ struct JourneyView: View {
                     if isAvailable {
                         selectedSeries = series
                         journeyDays = PromptLibrary.journeyDays(for: series)
+                    } else {
+                        previewSeries = series
+                        showPreview = true
                     }
                 } label: {
                     HStack(spacing: 14) {
@@ -419,48 +425,6 @@ struct JourneyView: View {
                 (2, "Guard Your Home", Color.blue),
                 (3, "Guard Your Brothers", AATheme.amber),
                 (4, "Guard the Mission", Color.red)
-            ]
-        case .theFathersHeart:
-            return [
-                (1, "The God Who Runs", AATheme.steel),
-                (2, "Fatherhood Lived Out", Color.blue),
-                (3, "Healing the Father Wound", AATheme.amber),
-                (4, "Fathering the Next Generation", Color.red)
-            ]
-        case .warriorMindset:
-            return [
-                (1, "Know Your Enemy", AATheme.steel),
-                (2, "The Weapons", Color.blue),
-                (3, "The Inner War", AATheme.amber),
-                (4, "The Warrior's Mission", Color.red)
-            ]
-        case .theNarrowRoad:
-            return [
-                (1, "The Beatitudes", AATheme.steel),
-                (2, "Salt, Light & the Law", Color.blue),
-                (3, "Trust & Worry", AATheme.amber),
-                (4, "Build on the Rock", Color.red)
-            ]
-        case .rootedAndBuilt:
-            return [
-                (1, "The Supremacy of Christ", AATheme.steel),
-                (2, "The New Wardrobe", Color.blue),
-                (3, "Walking Wisely", AATheme.amber),
-                (4, "Home & Mission", Color.red)
-            ]
-        case .forgedInFire:
-            return [
-                (1, "Into the Furnace", AATheme.steel),
-                (2, "Thorns & Grace", Color.blue),
-                (3, "Beauty from Ashes", AATheme.amber),
-                (4, "Coming Forth as Gold", Color.red)
-            ]
-        case .theSentLife:
-            return [
-                (1, "You Are Sent", AATheme.steel),
-                (2, "Go to Your Neighbor", Color.blue),
-                (3, "Bold & Unhindered", AATheme.amber),
-                (4, "Finish the Race", Color.red)
             ]
         }
     }
@@ -886,4 +850,139 @@ struct ConfettiParticle: Identifiable {
     let position: CGPoint
     let duration: Double
     let delay: Double
+}
+
+
+// MARK: - Journey Preview Sheet (Free Users)
+struct JourneyPreviewSheet: View {
+    let series: JourneySeries
+    let onUpgrade: () -> Void
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: AATheme.paddingLarge) {
+
+                    // Header
+                    VStack(spacing: 10) {
+                        ZStack {
+                            SwiftUI.Circle()
+                                .fill(AATheme.amber.opacity(0.15))
+                                .frame(width: 64, height: 64)
+                            AAIcon(series.icon, size: 28, color: AATheme.amber)
+                        }
+                        Text(series.displayName)
+                            .font(.system(size: 24, weight: .heavy, design: .serif))
+                            .foregroundColor(AATheme.primaryText)
+                        Text(series.subtitle)
+                            .font(.system(size: 14))
+                            .foregroundColor(AATheme.secondaryText)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, AATheme.paddingMedium)
+
+                    // Day 1 Preview
+                    let day1 = PromptLibrary.journeyDays(for: series).first
+                    if let day = day1 {
+                        VStack(alignment: .leading, spacing: 14) {
+                            HStack {
+                                Text("DAY 1 PREVIEW")
+                                    .font(.system(size: 11, weight: .heavy))
+                                    .foregroundColor(AATheme.amber)
+                                    .tracking(1.5)
+                                Spacer()
+                                Text(day.scripture)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(AATheme.secondaryText)
+                            }
+
+                            Text(day.theme)
+                                .font(.system(size: 18, weight: .bold, design: .serif))
+                                .foregroundColor(AATheme.primaryText)
+
+                            Text(day.devotional)
+                                .font(.system(size: 15, design: .serif))
+                                .foregroundColor(AATheme.primaryText)
+                                .lineSpacing(6)
+
+                            Divider()
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    AAIcon("arrow.down.to.line", size: 13, color: AATheme.steel)
+                                    Text("Anchor Prompt")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(AATheme.steel)
+                                }
+                                Text(day.anchorPrompt)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(AATheme.secondaryText)
+                                    .lineSpacing(4)
+                            }
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    AAIcon("arrow.up.right", size: 13, color: AATheme.amber)
+                                    Text("Arrow Prompt")
+                                        .font(.system(size: 12, weight: .bold))
+                                        .foregroundColor(AATheme.amber)
+                                }
+                                Text(day.arrowPrompt)
+                                    .font(.system(size: 14))
+                                    .foregroundColor(AATheme.secondaryText)
+                                    .lineSpacing(4)
+                            }
+                        }
+                        .padding(20)
+                        .background(AATheme.cardBackground)
+                        .cornerRadius(AATheme.cornerRadius)
+                        .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+
+                        // Locked Days 2-30 tease
+                        HStack(spacing: 10) {
+                            AAIcon("lock.fill", size: 14, color: AATheme.warmGold)
+                            Text("Days 2\u{2013}30 require Premium")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(AATheme.secondaryText)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(14)
+                        .background(AATheme.warmGold.opacity(0.08))
+                        .cornerRadius(AATheme.cornerRadiusSmall)
+                    }
+
+                    // Upgrade CTA
+                    Button(action: {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            onUpgrade()
+                        }
+                    }) {
+                        HStack {
+                            Text("Unlock This Journey")
+                            Image(systemName: "arrow.right")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(AAPremiumButtonStyle())
+
+                    Text("Plus 10 more guided journeys with Premium")
+                        .font(.system(size: 12))
+                        .foregroundColor(AATheme.secondaryText)
+                        .frame(maxWidth: .infinity)
+
+                    Spacer(minLength: 40)
+                }
+                .padding(.horizontal, 20)
+            }
+            .aaScreenBackground()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") { dismiss() }
+                }
+            }
+        }
+    }
 }
