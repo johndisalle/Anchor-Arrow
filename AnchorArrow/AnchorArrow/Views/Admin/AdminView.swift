@@ -3,6 +3,7 @@
 // Only accessible to users with isAdmin == true
 
 import SwiftUI
+import Firebase
 import FirebaseAuth
 
 // MARK: - Admin Panel
@@ -47,6 +48,7 @@ private struct AdminDashboardTab: View {
     @State private var circleCount = 0
     @State private var pendingReports = 0
     @State private var isLoading = true
+    @State private var errorMessage: String?
 
     var body: some View {
         ScrollView {
@@ -64,6 +66,15 @@ private struct AdminDashboardTab: View {
                         StatCard(title: "Reports", value: "\(pendingReports)", icon: "exclamationmark.triangle.fill",
                                  color: pendingReports > 0 ? AATheme.destructive : AATheme.success)
                     }
+
+                    if let error = errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(AATheme.destructive)
+                            .padding(AATheme.paddingMedium)
+                            .background(AATheme.destructive.opacity(0.1))
+                            .cornerRadius(AATheme.cornerRadiusSmall)
+                    }
                 }
             }
             .padding(AATheme.paddingMedium)
@@ -73,11 +84,16 @@ private struct AdminDashboardTab: View {
 
     private func loadStats() async {
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
         let service = FirestoreService.shared
-        userCount = (try? await service.userCount()) ?? 0
-        circleCount = (try? await service.circleCount()) ?? 0
-        pendingReports = (try? await service.pendingReportCount()) ?? 0
+        do {
+            userCount = try await service.userCount()
+            circleCount = try await service.circleCount()
+            pendingReports = try await service.pendingReportCount()
+        } catch {
+            errorMessage = "Failed to load stats: \(error.localizedDescription)"
+        }
     }
 }
 
@@ -111,6 +127,7 @@ private struct StatCard: View {
 private struct AdminReportsTab: View {
     @State private var reports: [ContentReport] = []
     @State private var isLoading = true
+    @State private var errorMessage: String?
     @State private var selectedReport: ContentReport?
 
     var body: some View {
@@ -118,6 +135,11 @@ private struct AdminReportsTab: View {
             LazyVStack(spacing: 12) {
                 if isLoading {
                     ProgressView().padding(.top, 40)
+                } else if let error = errorMessage {
+                    Text(error)
+                        .font(.system(size: 13))
+                        .foregroundColor(AATheme.destructive)
+                        .padding(.top, 40)
                 } else if reports.isEmpty {
                     VStack(spacing: 12) {
                         Image(systemName: "checkmark.shield.fill")
@@ -147,14 +169,20 @@ private struct AdminReportsTab: View {
 
     private func loadReports() async {
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
-        reports = (try? await FirestoreService.shared.fetchReports()) ?? []
+        do {
+            reports = try await FirestoreService.shared.fetchReports()
+        } catch {
+            errorMessage = "Failed to load reports: \(error.localizedDescription)"
+            return
+        }
         // Enrich with post previews
         for i in reports.indices {
             reports[i].postPreview = try? await FirestoreService.shared.fetchPostContent(
                 circleId: reports[i].circleId, postId: reports[i].postId)
         }
-    }
+    }  // end loadReports
 
     private func resolveReport(_ report: ContentReport, resolution: String) async {
         try? await FirestoreService.shared.resolveReport(reportId: report.id, resolution: resolution)
@@ -244,6 +272,7 @@ private struct ReportRow: View {
 private struct AdminCirclesTab: View {
     @State private var circles: [AdminCircleSummary] = []
     @State private var isLoading = true
+    @State private var errorMessage: String?
     @State private var selectedCircle: AdminCircleSummary?
     @State private var memberNames: [String: String] = [:]
     @State private var showDeleteConfirm = false
@@ -254,6 +283,15 @@ private struct AdminCirclesTab: View {
             LazyVStack(spacing: 12) {
                 if isLoading {
                     ProgressView().padding(.top, 40)
+                } else if let error = errorMessage {
+                    Text(error)
+                        .font(.system(size: 13))
+                        .foregroundColor(AATheme.destructive)
+                        .padding(.top, 40)
+                } else if circles.isEmpty {
+                    Text("No circles found")
+                        .foregroundColor(AATheme.secondaryText)
+                        .padding(.top, 40)
                 } else {
                     ForEach(circles) { circle in
                         CircleAdminRow(
@@ -297,8 +335,13 @@ private struct AdminCirclesTab: View {
 
     private func loadCircles() async {
         isLoading = true
+        errorMessage = nil
         defer { isLoading = false }
-        circles = (try? await FirestoreService.shared.fetchAllCircles()) ?? []
+        do {
+            circles = try await FirestoreService.shared.fetchAllCircles()
+        } catch {
+            errorMessage = "Failed to load circles: \(error.localizedDescription)"
+        }
     }
 
     private func loadMembers(for circle: AdminCircleSummary) async {
