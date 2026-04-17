@@ -5,11 +5,10 @@ import SwiftUI
 import StoreKit
 
 struct PremiumUpsellView: View {
-    let reason: String?
-    init(reason: String? = nil) {
-        self.reason = reason
+    init() {
         AnalyticsService.log(.premiumUpsellViewed)
     }
+    let reason: String?
     @EnvironmentObject var storeKitManager: StoreKitManager
     @EnvironmentObject var userStore: UserStore
     @Environment(\.dismiss) var dismiss
@@ -44,10 +43,27 @@ struct PremiumUpsellView: View {
                 }
 
                 // Feature list
+                // Journey hero card
+                VStack(spacing: 10) {
+                    AAIcon("book.fill", size: 28, color: AATheme.amber)
+                    Text("11 Guided Journeys")
+                        .font(.system(size: 20, weight: .heavy, design: .serif))
+                        .foregroundColor(AATheme.primaryText)
+                    Text("330 daily devotionals across Spiritual Warfare, The Father's Heart, The Narrow Road, and more")
+                        .font(.system(size: 14))
+                        .foregroundColor(AATheme.secondaryText)
+                        .multilineTextAlignment(.center)
+                        .lineSpacing(3)
+                }
+                .padding(AATheme.paddingMedium)
+                .frame(maxWidth: .infinity)
+                .background(AATheme.amber.opacity(0.08))
+                .cornerRadius(AATheme.cornerRadius)
+                .padding(.horizontal, 24)
+
                 VStack(spacing: 12) {
                     PremiumFeatureRow(icon: "heart.fill", color: "BrandDanger", text: "Kingdom Funded — All profits donated to missions & service")
                     PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Post, comment & rally brothers in unlimited circles")
-                    PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "11 additional 30-day journeys (330 devotionals)")
                     PremiumFeatureRow(icon: "magnifyingglass", color: "BrandGold", text: "Journal History — search & revisit past reflections")
                     PremiumFeatureRow(icon: "chart.bar.fill", color: "BrandArrow", text: "Drift Insights & Weekly Report — see your patterns")
                     PremiumFeatureRow(icon: "tag.fill", color: "BrandWarning", text: "Custom Drift Categories — track your specific struggles")
@@ -65,8 +81,9 @@ struct PremiumUpsellView: View {
             case .success(.success(_)):
                 Task {
                     await storeKitManager.checkSubscriptionStatus()
-                    // Immediately mark premium in local state so views update
                     userStore.appUser?.isPremium = true
+                    AnalyticsService.log(.premiumSubscribed)
+                    userStore.showPremiumWelcome = true
                     dismiss()
                 }
             case .success(.userCancelled):

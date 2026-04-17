@@ -4,9 +4,11 @@
 import SwiftUI
 import FirebaseAuth
 
-struct ProgressView: View {
+struct ProgressDashboardView: View {
     @EnvironmentObject var userStore: UserStore
     @State private var selectedMonth = Date()
+    @State private var progressTab = 0
+    @State private var showPremiumUpsell = false
     @State private var calendarEntries: [String: DailyEntry] = [:]
 
     private let calendar = Calendar.current
@@ -18,49 +20,74 @@ struct ProgressView: View {
                 if userStore.isLoading && userStore.appUser == nil {
                     progressSkeleton
                 } else {
-                VStack(spacing: 24) {
+                VStack(spacing: 0) {
 
-                    // Streak header
+                    // Streak header (always visible)
                     streakHeroSection
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
 
-                    // Stats Grid
-                    statsGridSection
-
-                    // Journal History (Premium)
-                    if userStore.isPremium {
-                        journalHistoryLink
+                    // Tab picker
+                    Picker("", selection: $progressTab) {
+                        Text("Overview").tag(0)
+                        Text("Badges").tag(1)
+                        Text("Drift").tag(2)
                     }
+                    .pickerStyle(.segmented)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
 
-                    // Drift Insights (Premium)
-                    if userStore.isPremium {
-                        driftInsightsSection
+                    // Tab content
+                    Group {
+                        switch progressTab {
+                        case 0:
+                            VStack(spacing: 24) {
+                                statsGridSection
+                                if userStore.isPremium {
+                                    journalHistoryLink
+                                } else {
+                                    PremiumLockedOverlay(feature: "Journal History") {
+                                        showPremiumUpsell = true
+                                    }
+                                }
+                                calendarSection
+                                weeklySummarySection
+                                if userStore.isPremium {
+                                    weeklyAccountabilityReport
+                                } else {
+                                    PremiumLockedOverlay(feature: "Weekly Accountability Report") {
+                                        showPremiumUpsell = true
+                                    }
+                                }
+                            }
+                        case 1:
+                            VStack(spacing: 24) {
+                                badgeGallerySection
+                            }
+                        case 2:
+                            VStack(spacing: 24) {
+                                if userStore.isPremium {
+                                    driftInsightsSection
+                                } else {
+                                    PremiumLockedOverlay(feature: "Drift Insights & Patterns") {
+                                        showPremiumUpsell = true
+                                    }
+                                }
+                                if userStore.driftLogs.isEmpty {
+                                    driftEmptyState
+                                } else {
+                                    driftHistorySection
+                                }
+                            }
+                        default:
+                            EmptyView()
+                        }
                     }
-
-                    // Streak Calendar
-                    calendarSection
-
-                    // Badge Gallery
-                    badgeGallerySection
-
-                    // Weekly Accountability Report (Premium)
-                    if userStore.isPremium {
-                        weeklyAccountabilityReport
-                    }
-
-                    // Weekly Summary
-                    weeklySummarySection
-
-                    // Drift History
-                    if userStore.driftLogs.isEmpty {
-                        driftEmptyState
-                    } else {
-                        driftHistorySection
-                    }
+                    .padding(.horizontal, 20)
 
                     Spacer(minLength: 100)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 16)
                 }
             }
             .refreshable {
@@ -70,6 +97,9 @@ struct ProgressView: View {
             }
             .aaScreenBackground()
             .navigationTitle("Progress")
+            .sheet(isPresented: $showPremiumUpsell) {
+                PremiumUpsellView(reason: "Unlock deep insights into your spiritual growth")
+            }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(AATheme.background, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -1049,5 +1079,37 @@ struct WeeklyReportStat: View {
                 .foregroundColor(AATheme.secondaryText)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+
+// MARK: - Premium Locked Overlay
+struct PremiumLockedOverlay: View {
+    let feature: String
+    let action: () -> Void
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 6) {
+                AAIcon("lock.fill", size: 13, color: AATheme.warmGold)
+                Text("PREMIUM")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundColor(AATheme.warmGold)
+            }
+            Text("Upgrade to unlock \(feature)")
+                .font(.system(size: 13))
+                .foregroundColor(AATheme.secondaryText)
+            Button("See Plans", action: action)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundColor(.white)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 8)
+                .background(AATheme.warmGold)
+                .cornerRadius(AATheme.cornerRadiusSmall)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AATheme.paddingMedium)
+        .background(AATheme.warmGold.opacity(0.08))
+        .cornerRadius(AATheme.cornerRadius)
     }
 }

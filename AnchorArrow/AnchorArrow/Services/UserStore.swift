@@ -26,6 +26,9 @@ class UserStore: ObservableObject {
     @Published var showJourneyComplete = false
     @Published var completedJourneySeries: JourneySeries?
     @Published var showStreakMilestone = false
+    @Published var showPremiumWelcome = false
+    @Published var newBadgeName: String?
+    @Published var showBadgeCelebration = false
     @Published var milestoneStreak: Int = 0
 
     /// Theme stored locally for instant switching — no Firestore round-trip needed
@@ -150,10 +153,6 @@ class UserStore: ObservableObject {
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
 
-            AnalyticsService.log(.anchorCompleted, params: ["streak": streakResult.streak])
-            if isArrowDoneToday {
-                AnalyticsService.log(.bothCompleted, params: ["streak": streakResult.streak])
-            }
             await refreshRecent(uid: uid)
             notificationHaptic(.success)
             if streakResult.graceDayBurned {
@@ -194,6 +193,11 @@ class UserStore: ObservableObject {
             let streakResult = try await firestoreService.updateStreak(uid: uid)
             try await firestoreService.evaluateAndAwardBadges(uid: uid, entry: entry)
             todayEntry = entry
+
+            AnalyticsService.log(.arrowCompleted, params: ["role": role.rawValue, "streak": streakResult.streak])
+            if isAnchorDoneToday {
+                AnalyticsService.log(.bothCompleted, params: ["streak": streakResult.streak])
+            }
             await refreshRecent(uid: uid)
             notificationHaptic(.success)
             if streakResult.graceDayBurned {
@@ -342,6 +346,23 @@ class UserStore: ObservableObject {
     var isAnchorDoneToday: Bool { todayEntry?.anchorCompleted ?? false }
     var isArrowDoneToday: Bool { todayEntry?.arrowCompleted ?? false }
     var isBothDoneToday: Bool { todayEntry?.bothCompleted ?? false }
+
+    func checkForNewBadges() {
+        let before = Set(appUser?.badges ?? [])
+        Task {
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+            try? await firestoreService.evaluateAndAwardBadges(uid: uid)
+            let user = try? await firestoreService.fetchUser(uid: uid)
+            let after = Set(user?.badges ?? [])
+            let newOnes = after.subtracting(before)
+            if let first = newOnes.first, let badge = BadgeType(rawValue: first) {
+                await MainActor.run {
+                    newBadgeName = badge.displayName
+                    showBadgeCelebration = true
+                }
+            }
+        }
+    }
 
     var earnedBadges: [BadgeType] {
         (appUser?.badges ?? []).compactMap { BadgeType(rawValue: $0) }

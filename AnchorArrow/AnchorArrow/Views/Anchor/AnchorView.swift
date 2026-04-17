@@ -27,6 +27,17 @@ struct AnchorView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: AATheme.paddingLarge) {
 
+                    // Error banner
+                    if let error = userStore.errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(AATheme.destructive)
+                            .padding(12)
+                            .frame(maxWidth: .infinity)
+                            .background(AATheme.destructive.opacity(0.1))
+                            .cornerRadius(AATheme.cornerRadiusSmall)
+                    }
+
                     // Already completed banner
                     if userStore.isAnchorDoneToday {
                         CompletedBanner(
@@ -169,7 +180,7 @@ struct AnchorView: View {
     private var scriptureCard: some View {
         VStack(alignment: .leading, spacing: AATheme.paddingMedium) {
             HStack {
-                Label(prompt.theme.displayName, systemImage: "anchor")
+                Label(prompt.theme.displayName, systemImage: "arrow.down.to.line")
                     .font(.system(size: 12, weight: .bold))
                     .foregroundColor(AATheme.steel)
                     .padding(.horizontal, AATheme.cornerRadiusSmall)
@@ -193,12 +204,17 @@ struct AnchorView: View {
                     verseShareImage = generateVerseShareImage()
                     showVerseShare = true
                 } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AATheme.steel)
-                        .padding(8)
-                        .background(AATheme.steel.opacity(0.1))
-                        .clipShape(SwiftUI.Circle())
+                    HStack(spacing: 5) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 13, weight: .semibold))
+                        Text("Share")
+                            .font(.system(size: 13, weight: .semibold))
+                    }
+                    .foregroundColor(AATheme.steel)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 7)
+                    .background(AATheme.steel.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadiusSmall)
                 }
                 .buttonStyle(.plain)
             }

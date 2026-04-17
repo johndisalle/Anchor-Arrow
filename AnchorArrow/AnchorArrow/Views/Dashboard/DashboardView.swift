@@ -41,6 +41,9 @@ struct DashboardView: View {
                     // Journey CTA
                     journeyCTASection
 
+                    // Brotherhood CTA
+                    brotherhoodCTASection
+
                     // Streak freeze warning (after 6 PM, nothing done)
                     if showStreakFreezeWarning {
                         streakFreezeCard
@@ -68,7 +71,14 @@ struct DashboardView: View {
                 }
             }
             .fullScreenCover(isPresented: $showStreakCelebration) {
-                StreakMilestoneCelebration(streak: userStore.milestoneStreak) {
+                StreakMilestoneCelebration(
+                    streak: userStore.milestoneStreak,
+                    showUpgrade: !userStore.isPremium,
+                    onUpgrade: {
+                        showStreakCelebration = false
+                        showPremiumUpsell = true
+                    }
+                ) {
                     showStreakCelebration = false
                 }
             }
@@ -450,6 +460,44 @@ struct DashboardView: View {
         return min(1.0, Double(total) / 30.0)
     }
 
+    // MARK: - Brotherhood CTA
+    private var brotherhoodCTASection: some View {
+        Button {
+            // Switch to Circles tab
+            NotificationCenter.default.post(name: NSNotification.Name("switchToCircles"), object: nil)
+        } label: {
+            HStack(spacing: AATheme.paddingMedium) {
+                ZStack {
+                    SwiftUI.Circle()
+                        .fill(AATheme.steel.opacity(0.15))
+                        .frame(width: 48, height: 48)
+                    AAIcon("person.3.fill", size: 20, color: AATheme.steel)
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Your Brotherhood")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundColor(AATheme.primaryText)
+                    Text("Check in with your brothers")
+                        .font(.system(size: 13))
+                        .foregroundColor(AATheme.secondaryText)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AATheme.secondaryText)
+            }
+            .padding(AATheme.paddingMedium)
+            .background(AATheme.cardBackground)
+            .cornerRadius(AATheme.cornerRadius)
+            .shadow(color: AATheme.cardShadow, radius: AATheme.cardShadowRadius, x: 0, y: 2)
+            .padding(.horizontal, AATheme.paddingLarge)
+        }
+        .buttonStyle(.plain)
+    }
+
     // MARK: - Streak Freeze Warning
     private var showStreakFreezeWarning: Bool {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -565,6 +613,8 @@ private struct IllustrationPressStyle: ButtonStyle {
 // MARK: - Streak Milestone Celebration
 struct StreakMilestoneCelebration: View {
     let streak: Int
+    var showUpgrade: Bool = false
+    var onUpgrade: (() -> Void)? = nil
     let onDismiss: () -> Void
     @State private var scale: CGFloat = 0.3
     @State private var opacity: Double = 0
@@ -611,6 +661,18 @@ struct StreakMilestoneCelebration: View {
                         .padding(.vertical, 14)
                         .background(AATheme.amber)
                         .cornerRadius(AATheme.cornerRadius)
+                }
+
+                if showUpgrade {
+                    Button(action: onUpgrade ?? {}) {
+                        HStack(spacing: 6) {
+                            AAIcon("crown.fill", size: 14, color: AATheme.warmGold)
+                            Text("Unlock 11 Journeys")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundColor(AATheme.warmGold)
+                        }
+                    }
+                    .padding(.top, 4)
                 }
             }
             .scaleEffect(scale)

@@ -23,6 +23,17 @@ struct ArrowView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: AATheme.paddingLarge) {
 
+                    // Error banner
+                    if let error = userStore.errorMessage {
+                        Text(error)
+                            .font(.system(size: 13))
+                            .foregroundColor(AATheme.destructive)
+                            .padding(12)
+                            .frame(maxWidth: .infinity)
+                            .background(AATheme.destructive.opacity(0.1))
+                            .cornerRadius(AATheme.cornerRadiusSmall)
+                    }
+
                     // Completed banner
                     if userStore.isArrowDoneToday {
                         CompletedBanner(
@@ -50,13 +61,13 @@ struct ArrowView: View {
                     // Examples (collapsible)
                     examplesDisclosure
 
-                    // Close in Prayer
-                    eveningPrayerSection
-
                     // Submit
                     if !userStore.isArrowDoneToday {
                         submitButton
                     }
+
+                    // Close in Prayer (post-completion blessing)
+                    eveningPrayerSection
 
                     Spacer(minLength: 80)
                 }

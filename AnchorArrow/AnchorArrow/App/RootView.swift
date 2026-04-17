@@ -2,6 +2,7 @@
 // Root navigation controller — routes between Onboarding and Main app
 
 import SwiftUI
+import Combine
 
 struct RootView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -76,13 +77,23 @@ struct MainTabView: View {
                         Button {
                             showDriftLog = true
                         } label: {
-                            ZStack {
-                                SwiftUI.Circle()
-                                    .fill(AATheme.amber)
-                                    .frame(width: 42, height: 42)
+                            HStack(spacing: 8) {
+                                ZStack {
+                                    SwiftUI.Circle()
+                                        .fill(AATheme.amber)
+                                        .frame(width: 42, height: 42)
 
-                                AAIcon("exclamationmark.shield.fill", size: 22, weight: .semibold, color: .white)
+                                    AAIcon("exclamationmark.shield.fill", size: 22, weight: .semibold, color: .white)
+                                }
+                                Text("Drift")
+                                    .font(.system(size: 13, weight: .bold, design: .serif))
+                                    .foregroundColor(AATheme.amber)
                             }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(AATheme.cardBackground)
+                            .cornerRadius(24)
+                            .shadow(color: AATheme.cardShadow, radius: 6)
                         }
                         .padding(.trailing, AATheme.paddingLarge)
                         .padding(.bottom, 83 + AATheme.paddingMedium)
@@ -111,6 +122,35 @@ struct MainTabView: View {
                 .zIndex(99)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("switchToCircles"))) { _ in
+            selectedTab = 4
+        }
+        .sheet(isPresented: $userStore.showPremiumWelcome) {
+            PremiumWelcomeView()
+        }
+        .overlay(alignment: .top) {
+            if userStore.showBadgeCelebration, let name = userStore.newBadgeName {
+                HStack(spacing: 10) {
+                    AAIcon("medal.fill", size: 20, color: AATheme.warmGold)
+                    Text("Badge Earned: \(name)")
+                        .font(.system(size: 15, weight: .bold, design: .serif))
+                        .foregroundColor(AATheme.primaryText)
+                }
+                .padding(AATheme.paddingMedium)
+                .background(AATheme.warmGold.opacity(0.15))
+                .cornerRadius(AATheme.cornerRadius)
+                .shadow(color: AATheme.cardShadow, radius: 8)
+                .padding(.top, 60)
+                .padding(.horizontal, AATheme.paddingLarge)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                        withAnimation { userStore.showBadgeCelebration = false }
+                    }
+                }
+            }
+        }
+        .animation(.spring(response: 0.4), value: userStore.showBadgeCelebration)
         .sheet(isPresented: $showDriftLog) {
             DriftLogView()
                 .presentationDetents([.medium, .large])
