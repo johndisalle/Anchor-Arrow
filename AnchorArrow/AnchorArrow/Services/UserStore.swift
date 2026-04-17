@@ -90,14 +90,6 @@ class UserStore: ObservableObject {
 
             // Schedule weekly summary notification
             await scheduleWeeklySummaryIfNeeded()
-
-            // Ensure user is in Global Brotherhood + seed daily devotional
-            if let error = await firestoreService.ensureGlobalCircleMembership(uid: uid) {
-                #if DEBUG
-                print("[UserStore] Global Brotherhood: \(error)")
-                #endif
-            }
-            await firestoreService.seedGlobalBrotherhoodPost()
         } catch {
             errorMessage = error.localizedDescription
         }

@@ -420,6 +420,48 @@ struct JourneyView: View {
                 (3, "Guard Your Brothers", AATheme.amber),
                 (4, "Guard the Mission", Color.red)
             ]
+        case .theFathersHeart:
+            return [
+                (1, "The God Who Runs", AATheme.steel),
+                (2, "Fatherhood Lived Out", Color.blue),
+                (3, "Healing the Father Wound", AATheme.amber),
+                (4, "Fathering the Next Generation", Color.red)
+            ]
+        case .warriorMindset:
+            return [
+                (1, "Know Your Enemy", AATheme.steel),
+                (2, "The Weapons", Color.blue),
+                (3, "The Inner War", AATheme.amber),
+                (4, "The Warrior's Mission", Color.red)
+            ]
+        case .theNarrowRoad:
+            return [
+                (1, "The Beatitudes", AATheme.steel),
+                (2, "Salt, Light & the Law", Color.blue),
+                (3, "Trust & Worry", AATheme.amber),
+                (4, "Build on the Rock", Color.red)
+            ]
+        case .rootedAndBuilt:
+            return [
+                (1, "The Supremacy of Christ", AATheme.steel),
+                (2, "The New Wardrobe", Color.blue),
+                (3, "Walking Wisely", AATheme.amber),
+                (4, "Home & Mission", Color.red)
+            ]
+        case .forgedInFire:
+            return [
+                (1, "Into the Furnace", AATheme.steel),
+                (2, "Thorns & Grace", Color.blue),
+                (3, "Beauty from Ashes", AATheme.amber),
+                (4, "Coming Forth as Gold", Color.red)
+            ]
+        case .theSentLife:
+            return [
+                (1, "You Are Sent", AATheme.steel),
+                (2, "Go to Your Neighbor", Color.blue),
+                (3, "Bold & Unhindered", AATheme.amber),
+                (4, "Finish the Race", Color.red)
+            ]
         }
     }
 }

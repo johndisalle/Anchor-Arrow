@@ -43,7 +43,7 @@ struct PremiumUpsellView: View {
                 VStack(spacing: 12) {
                     PremiumFeatureRow(icon: "heart.fill", color: "BrandDanger", text: "Kingdom Funded — All profits donated to missions & service")
                     PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Post, comment & rally brothers in unlimited circles")
-                    PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "5 additional 30-day journeys (150 devotionals)")
+                    PremiumFeatureRow(icon: "book.fill", color: "BrandArrow", text: "11 additional 30-day journeys (330 devotionals)")
                     PremiumFeatureRow(icon: "magnifyingglass", color: "BrandGold", text: "Journal History — search & revisit past reflections")
                     PremiumFeatureRow(icon: "chart.bar.fill", color: "BrandArrow", text: "Drift Insights & Weekly Report — see your patterns")
                     PremiumFeatureRow(icon: "tag.fill", color: "BrandWarning", text: "Custom Drift Categories — track your specific struggles")

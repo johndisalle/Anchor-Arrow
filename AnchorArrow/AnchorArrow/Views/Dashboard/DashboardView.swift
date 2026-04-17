@@ -155,10 +155,14 @@ struct DashboardView: View {
         }
     }
 
-    private var inlineDateString: String {
+    private static let _dateFormatter: DateFormatter = {
         let df = DateFormatter()
         df.dateFormat = "EEEE d MMM"
-        return df.string(from: Date())
+        return df
+    }()
+
+    private var inlineDateString: String {
+        return Self._dateFormatter.string(from: Date())
     }
 
     private var illustrationSection: some View {
