@@ -81,7 +81,7 @@ struct JourneyView: View {
                 Text("Your progress on \(activeSeries.displayName) will be lost. You can start any journey again anytime.")
             }
             .sheet(item: $showDayDetail) { day in
-                JourneyDayDetailView(day: day) { anchorText, arrowText in
+                JourneyDayDetailView(day: day, series: selectedSeries) { anchorText, arrowText in
                     Task {
                         await userStore.completeJourneyDay(anchorReflection: anchorText, arrowReflection: arrowText)
                     }
@@ -566,7 +566,16 @@ struct JourneyDayRow: View {
 // MARK: - JourneyDayDetailView
 struct JourneyDayDetailView: View {
     let day: JourneyDay
+    let series: JourneySeries
     let onComplete: (_ anchorReflection: String, _ arrowReflection: String) -> Void
+
+    private var journeyQueue: [AudioAsset] {
+        [
+            .journeyDevotional(series: series.rawValue, day: day.id),
+            .journeyAnchor(series: series.rawValue, day: day.id),
+            .journeyArrow(series: series.rawValue, day: day.id)
+        ]
+    }
 
     @State private var anchorReflection = ""
     @State private var arrowReflection = ""
@@ -581,12 +590,13 @@ struct JourneyDayDetailView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: AATheme.paddingLarge) {
 
-                    // Day chip
+                    // Day chip + Play All
                     HStack {
                         Label("Day \(day.id) of \(kJourneyDays) — Week \(day.week)", systemImage: "map")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(AATheme.amber)
                         Spacer()
+                        AudioPlayButton(queue: journeyQueue, label: "Play All")
                     }
 
                     // Theme + Scripture

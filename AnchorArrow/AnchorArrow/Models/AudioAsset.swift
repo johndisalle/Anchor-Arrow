@@ -121,4 +121,28 @@ extension AudioAsset {
             estimatedDurationSec: 180
         )
     }
+
+    static func journeyAnchor(series: String, day: Int) -> AudioAsset {
+        let padded = String(format: "%02d", day)
+        return AudioAsset(
+            id: "journey_\(series)_day\(padded)_anchor",
+            kind: .journeyAnchor,
+            title: "Day \(day) Anchor Reflection",
+            subtitle: nil,
+            storagePath: "audio/journey/\(series)/day_\(padded)_anchor.mp3",
+            estimatedDurationSec: 30
+        )
+    }
+
+    static func journeyArrow(series: String, day: Int) -> AudioAsset {
+        let padded = String(format: "%02d", day)
+        return AudioAsset(
+            id: "journey_\(series)_day\(padded)_arrow",
+            kind: .journeyArrow,
+            title: "Day \(day) Arrow Reflection",
+            subtitle: nil,
+            storagePath: "audio/journey/\(series)/day_\(padded)_arrow.mp3",
+            estimatedDurationSec: 30
+        )
+    }
 }
