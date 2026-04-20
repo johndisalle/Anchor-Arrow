@@ -49,6 +49,7 @@ final class AudioService: ObservableObject {
 
     private var player: AVPlayer?
     private var timeObserver: Any?
+    private var timeObserverPlayer: AVPlayer?
     private var endObserver: NSObjectProtocol?
 
     // MARK: - Cache
@@ -131,6 +132,7 @@ final class AudioService: ObservableObject {
         do {
             let url = try await resolveURL(for: asset)
             print("[Audio] resolved URL: \(url)")
+            removeObservers()
             let item = AVPlayerItem(url: url)
             player = AVPlayer(playerItem: item)
             player?.rate = playbackRate
@@ -189,9 +191,8 @@ final class AudioService: ObservableObject {
     // MARK: - Observers
 
     private func attachObservers(to item: AVPlayerItem) {
-        removeObservers()
-
         let interval = CMTime(seconds: 0.25, preferredTimescale: 600)
+        timeObserverPlayer = player
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self else { return }
             let seconds = time.seconds
@@ -213,7 +214,11 @@ final class AudioService: ObservableObject {
     }
 
     private func removeObservers() {
-        if let t = timeObserver { player?.removeTimeObserver(t); timeObserver = nil }
+        if let t = timeObserver {
+            timeObserverPlayer?.removeTimeObserver(t)
+            timeObserver = nil
+            timeObserverPlayer = nil
+        }
         if let e = endObserver { NotificationCenter.default.removeObserver(e); endObserver = nil }
     }
 
