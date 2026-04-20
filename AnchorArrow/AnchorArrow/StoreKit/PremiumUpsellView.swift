@@ -80,7 +80,6 @@ struct PremiumUpsellView: View {
 
                 // Lifetime option inline (no longer a floating overlay that collides with subscription buttons)
                 LifetimePurchaseButton()
-                    .padding(.horizontal, 24)
                     .padding(.top, 8)
 
                 // Or a subscription — callout
@@ -169,32 +168,38 @@ struct LifetimePurchaseButton: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        Group {
+        Button {
             if let product = lifetimeProduct {
-                Button {
-                    Task { await purchaseLifetime(product) }
-                } label: {
-                    VStack(spacing: 4) {
-                        Text("Lifetime Access — \(product.displayPrice)")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(AATheme.warmGold)
-                        Text("One payment. Forever.")
-                            .font(.system(size: 12))
-                            .foregroundColor(AATheme.secondaryText)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(AATheme.warmGold.opacity(0.1))
-                    .cornerRadius(AATheme.cornerRadius)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: AATheme.cornerRadius)
-                            .stroke(AATheme.warmGold.opacity(0.3), lineWidth: 1)
-                    )
-                    .padding(.horizontal, 24)
-                }
-                .disabled(isPurchasing)
+                Task { await purchaseLifetime(product) }
             }
+        } label: {
+            VStack(spacing: 4) {
+                if let product = lifetimeProduct {
+                    Text("Lifetime Access — \(product.displayPrice)")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(AATheme.warmGold)
+                    Text("One payment. Forever.")
+                        .font(.system(size: 12))
+                        .foregroundColor(AATheme.secondaryText)
+                } else {
+                    Text("Lifetime Access")
+                        .font(.system(size: 15, weight: .bold))
+                        .foregroundColor(AATheme.warmGold)
+                    Text("Loading price...")
+                        .font(.system(size: 12))
+                        .foregroundColor(AATheme.secondaryText)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(AATheme.warmGold.opacity(0.1))
+            .cornerRadius(AATheme.cornerRadius)
+            .overlay(
+                RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                    .stroke(AATheme.warmGold.opacity(0.3), lineWidth: 1)
+            )
         }
+        .disabled(isPurchasing || lifetimeProduct == nil)
         .task {
             if let products = try? await Product.products(for: [SubscriptionConfig.lifetimeID]) {
                 lifetimeProduct = products.first
