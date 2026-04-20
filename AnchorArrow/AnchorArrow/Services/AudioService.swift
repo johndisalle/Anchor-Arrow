@@ -25,7 +25,6 @@ import AVFoundation
 import FirebaseStorage
 import Combine
 
-@MainActor
 final class AudioService: ObservableObject {
 
     static let shared = AudioService()
@@ -120,7 +119,7 @@ final class AudioService: ObservableObject {
 
     // MARK: - Load & play one asset
 
-    private func loadAndPlay(_ asset: AudioAsset) async {
+    @MainActor private func loadAndPlay(_ asset: AudioAsset) async {
         currentAsset = asset
         isLoading = true
         error = nil
@@ -204,7 +203,7 @@ final class AudioService: ObservableObject {
             object: item,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor [weak self] in self?.advanceQueue() }
+            DispatchQueue.main.async { self?.advanceQueue() }
         }
     }
 
