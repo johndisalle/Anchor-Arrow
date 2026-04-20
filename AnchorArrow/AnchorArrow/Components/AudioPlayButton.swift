@@ -1,11 +1,6 @@
 // AudioPlayButton.swift
 // A small amber circle button that drops onto scripture/prompt/prayer cards.
 // Handles premium gating — free users see the button but tapping triggers upsell.
-//
-// Usage:
-//   AudioPlayButton(queue: [scriptureAsset, promptAsset, prayerAsset],
-//                   label: "Play All")
-//   AudioPlayButton(queue: [prayerAsset])  // icon-only, no label
 
 import SwiftUI
 
@@ -35,6 +30,7 @@ struct AudioPlayButton: View {
                     Circle()
                         .fill(AATheme.amber)
                         .frame(width: 36, height: 36)
+
                     if audio.isLoading && isCurrent {
                         ProgressView()
                             .progressViewStyle(.circular)
@@ -43,15 +39,15 @@ struct AudioPlayButton: View {
                         Image(systemName: isActive ? "pause.fill" : "play.fill")
                             .font(.system(size: 14, weight: .bold))
                             .foregroundColor(.white)
-                            .offset(x: isActive ? 0 : 1)  // visual center for play icon
+                            .offset(x: isActive ? 0 : 1)
                     }
+
                     if !storeKit.hasActiveSubscription {
-                        // Small lock overlay in bottom-right
                         Image(systemName: "lock.fill")
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(AATheme.amber)
                             .padding(3)
-                            .background(Circle().fill(.white))
+                            .background(Circle().fill(Color.white))
                             .offset(x: 12, y: 12)
                     }
                 }
@@ -65,13 +61,13 @@ struct AudioPlayButton: View {
         }
         .buttonStyle(.plain)
         .sheet(isPresented: $showPaywall) {
-            PremiumUpsellView(trigger: .audio)
+            PremiumUpsellView(reason: "audio")
         }
     }
 
     private func tap() {
         guard storeKit.hasActiveSubscription else {
-            AnalyticsService.shared.log(.premiumUpsellShown, params: ["trigger": "audio_play"])
+            AnalyticsService.log(.premiumUpsellViewed, params: ["trigger": "audio_play"])
             showPaywall = true
             return
         }
@@ -79,8 +75,8 @@ struct AudioPlayButton: View {
             audio.togglePlayPause()
         } else {
             audio.playQueue(queue)
-            AnalyticsService.shared.log(.audioStarted, params: [
-                "kind": queue.first?.kind.rawValue ?? "",
+            AnalyticsService.log(.audioStarted, params: [
+                "audio_kind": queue.first?.kind.rawValue ?? "",
                 "queue_length": queue.count
             ])
         }

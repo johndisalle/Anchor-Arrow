@@ -41,6 +41,11 @@ enum AnalyticsEvent: String {
     case appOpened = "app_opened"
     case verseShared = "verse_shared"
     case notificationEnabled = "notification_enabled"
+
+    // Audio
+    case audioStarted = "audio_started"
+    case audioCompleted = "audio_completed"
+    case audioQueueCompleted = "audio_queue_completed"
 }
 
 // MARK: - Analytics Service
