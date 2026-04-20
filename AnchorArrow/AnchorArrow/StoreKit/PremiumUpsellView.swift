@@ -78,24 +78,26 @@ struct PremiumUpsellView: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Free trial callout
+                // Lifetime option inline (no longer a floating overlay that collides with subscription buttons)
+                LifetimePurchaseButton()
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+
+                // Or a subscription — callout
                 VStack(spacing: 6) {
-                    Text("Start your free trial")
+                    Text("Or subscribe")
                         .font(.system(size: 17, weight: .heavy, design: .serif))
                         .foregroundColor(AATheme.primaryText)
-                    Text("Try everything free. Cancel anytime.")
+                    Text("3-day free trial. Cancel anytime.")
                         .font(.system(size: 13))
                         .foregroundColor(AATheme.secondaryText)
                 }
                 .padding(.top, 8)
             }
+            .padding(.bottom, 120)  // room for Apple's SubscriptionStoreView buttons at bottom
         }
         .subscriptionStoreButtonLabel(.multiline)
         .storeButton(.visible, for: .restorePurchases)
-        .overlay(alignment: .bottom) {
-            LifetimePurchaseButton()
-                .padding(.bottom, 80)
-        }
         .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!, for: .termsOfService)
         .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!, for: .privacyPolicy)
         .onInAppPurchaseCompletion { _, result in
