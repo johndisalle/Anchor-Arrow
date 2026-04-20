@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Anchor & Arrow — Firebase Storage rules
+// Audio files are readable by any authenticated user; premium gating is
+// enforced client-side in AudioPlayButton. Write access is admin-only
+// (uploads happen via the generator script using Firebase Admin SDK).
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Audio library (scriptures, prompts, prayers, journey devotionals)
+    match /audio/{path=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // Default deny — anything else is forbidden
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

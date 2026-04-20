@@ -11,5 +11,8 @@
       "codebase": "default",
       "runtime": "nodejs18"
     }
-  ]
+  ],
+  "storage": {
+    "rules": "storage.rules"
+  }
 }
