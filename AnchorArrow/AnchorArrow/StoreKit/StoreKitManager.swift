@@ -125,7 +125,7 @@ class StoreKitManager: ObservableObject {
 
     // MARK: - Update Firebase Premium Flag
     private func updatePremiumStatus(expiryDate: Date?, isLifetime: Bool = false) async {
-        let isPremium = expiryDate != nil && expiryDate! > Date()
+        let isPremium = isLifetime || (expiryDate != nil && expiryDate! > Date())
         hasActiveSubscription = isPremium
         activeSubscriptionExpiry = expiryDate
         guard let uid = Auth.auth().currentUser?.uid else {
