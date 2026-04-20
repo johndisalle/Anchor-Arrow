@@ -78,22 +78,13 @@ struct PremiumUpsellView: View {
                 }
                 .padding(.horizontal, 24)
 
-                // Lifetime option inline (no longer a floating overlay that collides with subscription buttons)
-                LifetimePurchaseButton()
-                    .padding(.top, 8)
-
-                // Or a subscription — callout
-                VStack(spacing: 6) {
-                    Text("Or subscribe")
-                        .font(.system(size: 17, weight: .heavy, design: .serif))
-                        .foregroundColor(AATheme.primaryText)
-                    Text("3-day free trial. Cancel anytime.")
-                        .font(.system(size: 13))
-                        .foregroundColor(AATheme.secondaryText)
-                }
-                .padding(.top, 8)
             }
-            .padding(.bottom, 120)  // room for Apple's SubscriptionStoreView buttons at bottom
+            .padding(.bottom, 200)  // room for Lifetime overlay + Apple's SubscriptionStoreView buttons
+        }
+        .overlay(alignment: .bottom) {
+            LifetimePurchaseButton()
+                .padding(.horizontal, 24)
+                .padding(.bottom, 140)  // sit well above Apple's subscription buttons
         }
         .subscriptionStoreButtonLabel(.multiline)
         .storeButton(.visible, for: .restorePurchases)
