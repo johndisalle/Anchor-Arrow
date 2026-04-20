@@ -25,10 +25,10 @@ struct AudioPlayerBar: View {
                 HStack(spacing: 12) {
                     // Progress ring around play button
                     ZStack {
-                        Circle()
+                        SwiftUI.Circle()
                             .stroke(AATheme.amber.opacity(0.25), lineWidth: 2)
                             .frame(width: 36, height: 36)
-                        Circle()
+                        SwiftUI.Circle()
                             .trim(from: 0, to: CGFloat(audio.progress))
                             .stroke(AATheme.amber, style: .init(lineWidth: 2, lineCap: .round))
                             .rotationEffect(.degrees(-90))
@@ -148,7 +148,7 @@ struct AudioFullPlayerView: View {
 
                 Button { audio.togglePlayPause() } label: {
                     ZStack {
-                        Circle().fill(AATheme.amber).frame(width: 68, height: 68)
+                        SwiftUI.Circle().fill(AATheme.amber).frame(width: 68, height: 68)
                         Image(systemName: audio.isPlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 26, weight: .bold))
                             .foregroundColor(.white)

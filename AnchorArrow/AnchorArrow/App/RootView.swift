@@ -1,410 +1,279 @@
-// RootView.swift
-// Root navigation controller — routes between Onboarding and Main app
-
 import SwiftUI
-import Combine
+import SwiftData
 
 struct RootView: View {
-    @EnvironmentObject var authManager: AuthManager
-    @EnvironmentObject var userStore: UserStore
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("hasSeenWelcomeGuide") private var hasSeenWelcomeGuide = false
+    @Query private var profiles: [UserProfile]
+    @State private var showSplash = true
+    @State private var showWelcomeGuide = false
+    @State private var deepLinkService = DeepLinkService.shared
 
     var body: some View {
         ZStack {
-            if authManager.isAuthenticated {
-                if userStore.hasCompletedOnboarding {
-                    MainTabView()
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .opacity
-                        ))
-                } else {
-                    OnboardingContainerView()
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .opacity
-                        ))
-                }
-            } else {
-                OnboardingContainerView()
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .trailing),
-                        removal: .opacity
-                    ))
-            }
-        }
-        .animation(.easeInOut(duration: 0.4), value: authManager.isAuthenticated)
-        .animation(.easeInOut(duration: 0.4), value: userStore.hasCompletedOnboarding)
-        .preferredColorScheme((AppTheme(rawValue: userStore.savedTheme) ?? .system).swiftUIColorScheme)
-    }
-}
-
-// MARK: - Main Tab View
-struct MainTabView: View {
-    @EnvironmentObject var userStore: UserStore
-    @EnvironmentObject var networkMonitor: NetworkMonitor
-    @State private var selectedTab = 0
-    @State private var showDriftLog = false
-    @State private var showNotificationPrompt = false
-    @State private var showWelcomeGuide = false
-    @State private var showErrorToast = false
-    @State private var errorToastMessage = ""
-    @State private var errorToastId = UUID()
-    @State private var pendingCircleCode: String?
-
-    var body: some View {
-        ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                DashboardView().tag(0)
-                AnchorView().tag(1)
-                ArrowView().tag(2)
-                ProgressDashboardView().tag(3)
-                CirclesView(pendingInviteCode: $pendingCircleCode).tag(4)
-            }
-            .toolbar(.hidden, for: .tabBar)
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 83)
-            }
-
-            // Custom Tab Bar (supports Canvas icons)
-            CustomTabBar(selectedTab: $selectedTab)
-
-            // Floating Drift Log Button
-            if !showDriftLog {
-                VStack {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        Button {
-                            showDriftLog = true
-                        } label: {
-                            HStack(spacing: 8) {
-                                ZStack {
-                                    SwiftUI.Circle()
-                                        .fill(AATheme.amber)
-                                        .frame(width: 42, height: 42)
-
-                                    AAIcon("exclamationmark.shield.fill", size: 22, weight: .semibold, color: .white)
-                                }
-                                Text("Drift")
-                                    .font(.system(size: 13, weight: .bold, design: .serif))
-                                    .foregroundColor(AATheme.amber)
-                            }
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(AATheme.cardBackground)
-                            .cornerRadius(24)
-                            .shadow(color: AATheme.cardShadow, radius: 6)
+            if hasCompletedOnboarding && !profiles.isEmpty {
+                MainTabView()
+                    .sheet(isPresented: $showWelcomeGuide) {
+                        WelcomeGuideView {
+                            hasSeenWelcomeGuide = true
+                            showWelcomeGuide = false
                         }
-                        .padding(.trailing, AATheme.paddingLarge)
-                        .padding(.bottom, 83 + AATheme.paddingMedium)
-                        .accessibilityLabel("Log a drift moment")
                     }
-                }
+                    .sheet(isPresented: $deepLinkService.showCouplesInviteSheet) {
+                        if let invite = deepLinkService.pendingCouplesInvite {
+                            AcceptCouplesInviteView(invite: invite)
+                        }
+                    }
+                    .sheet(isPresented: $deepLinkService.showGiftClaimSheet) {
+                        if let gift = deepLinkService.pendingGiftClaim {
+                            ClaimGiftJourneyView(gift: gift)
+                        }
+                    }
+                    .onAppear {
+                        if !hasSeenWelcomeGuide {
+                            showWelcomeGuide = true
+                        }
+                    }
+            } else {
+                OnboardingFlowView()
+                    .onAppear {
+                        if hasCompletedOnboarding && profiles.isEmpty {
+                            hasCompletedOnboarding = false
+                        }
+                    }
             }
 
-            // Offline banner
-            if !networkMonitor.isConnected {
-                VStack {
-                    HStack(spacing: AATheme.paddingSmall) {
-                        Image(systemName: "wifi.slash")
-                            .font(.system(size: 13, weight: .semibold))
-                        Text("No internet connection")
-                            .font(.system(size: 13, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .padding(.vertical, AATheme.paddingSmall)
-                    .frame(maxWidth: .infinity)
-                    .background(AATheme.secondaryText.opacity(0.85))
-                    Spacer()
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.easeInOut(duration: 0.3), value: networkMonitor.isConnected)
-                .zIndex(99)
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("switchToCircles"))) { _ in
-            selectedTab = 4
-        }
-        .sheet(isPresented: $userStore.showPremiumWelcome) {
-            PremiumWelcomeView()
-        }
-        .overlay(alignment: .top) {
-            if userStore.showBadgeCelebration, let name = userStore.newBadgeName {
-                HStack(spacing: 10) {
-                    AAIcon("medal.fill", size: 20, color: AATheme.warmGold)
-                    Text("Badge Earned: \(name)")
-                        .font(.system(size: 15, weight: .bold, design: .serif))
-                        .foregroundColor(AATheme.primaryText)
-                }
-                .padding(AATheme.paddingMedium)
-                .background(AATheme.warmGold.opacity(0.15))
-                .cornerRadius(AATheme.cornerRadius)
-                .shadow(color: AATheme.cardShadow, radius: 8)
-                .padding(.top, 60)
-                .padding(.horizontal, AATheme.paddingLarge)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation { userStore.showBadgeCelebration = false }
-                    }
-                }
-            }
-        }
-        .animation(.spring(response: 0.4), value: userStore.showBadgeCelebration)
-        .sheet(isPresented: $showDriftLog) {
-            DriftLogView()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.hidden)
-        }
-        .fullScreenCover(isPresented: $showNotificationPrompt) {
-            NotificationPromptView(isPresented: $showNotificationPrompt)
-                .environmentObject(userStore)
-        }
-        .fullScreenCover(isPresented: $showWelcomeGuide) {
-            WelcomeGuideView(isPresented: $showWelcomeGuide)
-        }
-        .checkNotificationPermission()
-        .onOpenURL { url in
-            // Deep link: anchorarrow://join?code=ABC123
-            if url.scheme == "anchorarrow", url.host == "join",
-               let code = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-                .queryItems?.first(where: { $0.name == "code" })?.value {
-                selectedTab = 4 // Switch to Circles tab
-                pendingCircleCode = code
+            if showSplash {
+                SplashView()
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
         .onAppear {
-            // Show welcome guide first, then notification prompt
-            let guideKey = "hasSeenWelcomeGuide"
-            let notifKey = "hasSeenNotificationPrompt"
-            if !UserDefaults.standard.bool(forKey: guideKey) {
-                UserDefaults.standard.set(true, forKey: guideKey)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                    showWelcomeGuide = true
-                }
-            } else if !UserDefaults.standard.bool(forKey: notifKey) {
-                UserDefaults.standard.set(true, forKey: notifKey)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    showNotificationPrompt = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation(.easeOut(duration: 0.4)) {
+                    showSplash = false
                 }
             }
         }
-        // Show notification prompt after welcome guide dismisses
-        .onChange(of: showWelcomeGuide) { _, isShowing in
-            if !isShowing {
-                let notifKey = "hasSeenNotificationPrompt"
-                if !UserDefaults.standard.bool(forKey: notifKey) {
-                    UserDefaults.standard.set(true, forKey: notifKey)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showNotificationPrompt = true
-                    }
+        .task {
+            await AuthService.shared.checkCredentialState()
+        }
+    }
+}
+
+// MARK: - Splash View
+
+struct SplashView: View {
+    @State private var opacity: Double = 0
+
+    var body: some View {
+        ZStack {
+            AJTheme.splashGradient
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Image(systemName: "book.closed.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(.white.opacity(0.9))
+
+                VStack(spacing: 6) {
+                    Text("Abide Journey")
+                        .font(.system(.title2, design: .serif, weight: .bold))
+                        .foregroundStyle(.white)
+
+                    Text("Abide in Him.")
+                        .font(.system(.subheadline, design: .serif))
+                        .foregroundStyle(.white.opacity(0.7))
                 }
             }
+            .opacity(opacity)
         }
-        .onChange(of: userStore.errorMessage) { _, newValue in
-            if let message = newValue, !message.isEmpty {
-                errorToastMessage = message
-                showErrorToast = true
-                // Rotate ID so identical consecutive messages still trigger animations
-                errorToastId = UUID()
-                userStore.errorMessage = nil
-                let dismissId = errorToastId
-                // Auto-dismiss after 4 seconds (only if no newer toast replaced it)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-                    if errorToastId == dismissId {
-                        showErrorToast = false
-                    }
-                }
-            }
-        }
-        .safeAreaInset(edge: .top) {
-            if showErrorToast {
-                HStack(spacing: AATheme.paddingSmall + 2) {
-                    AAIcon("exclamationmark.triangle.fill", size: 15, color: .white)
-                    Text(errorToastMessage)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.white)
-                        .lineLimit(2)
-                    Spacer()
-                    Button {
-                        showErrorToast = false
-                    } label: {
-                        AAIcon("xmark", size: 12, weight: .bold, color: .white.opacity(0.7))
-                    }
-                }
-                .padding(14)
-                .background(AATheme.destructive.cornerRadius(AATheme.cornerRadiusSmall + 2))
-                .padding(.horizontal, AATheme.paddingMedium)
-                .padding(.top, 4)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.spring(response: 0.4), value: showErrorToast)
-                .id(errorToastId)
+        .onAppear {
+            withAnimation(.easeIn(duration: 0.5)) {
+                opacity = 1
             }
         }
     }
 }
 
-// MARK: - Custom Tab Bar
-private struct CustomTabBar: View {
-    @Binding var selectedTab: Int
+// MARK: - Welcome Guide (Feature Tour)
 
-    private let tabs: [(label: String, tag: Int)] = [
-        ("Home", 0), ("Anchor", 1), ("Arrow", 2), ("Progress", 3), ("Circles", 4)
+struct WelcomeGuideView: View {
+    let onDismiss: () -> Void
+    @State private var currentPage = 0
+
+    private let pages: [(icon: String, color: Color, title: String, body: String, features: [(icon: String, color: Color, text: String)])] = [
+        (
+            icon: "book.closed.fill",
+            color: AJTheme.sage,
+            title: NSLocalizedString("tour.welcome.title", comment: ""),
+            body: NSLocalizedString("tour.welcome.body", comment: ""),
+            features: []
+        ),
+        (
+            icon: "sunrise.fill",
+            color: AJTheme.gold,
+            title: NSLocalizedString("tour.today.title", comment: ""),
+            body: NSLocalizedString("tour.today.body", comment: ""),
+            features: [
+                (icon: "text.book.closed.fill", color: .blue, text: "Scripture with your preferred translation"),
+                (icon: "heart.text.square.fill", color: .orange, text: "A devotional written for your situation"),
+                (icon: "hands.sparkles.fill", color: .purple, text: "A guided prayer you can pray along with"),
+                (icon: "headphones", color: .indigo, text: "Listen Mode — AI-narrated devotionals with soundscapes"),
+            ]
+        ),
+        (
+            icon: "safari",
+            color: AJTheme.sage,
+            title: "Discover",
+            body: "Browse journey themes, create custom AI journeys, and explore everything the app has to offer.",
+            features: [
+                (icon: "map.fill", color: .blue, text: "13+ journey themes from Knowing God to Healing Relationships"),
+                (icon: "wand.and.stars", color: .purple, text: "Custom AI Journeys built for your situation"),
+                (icon: "heart.circle.fill", color: .pink, text: "Couples and Family journey options"),
+                (icon: "gift.fill", color: .orange, text: "Gift a journey to someone you love"),
+            ]
+        ),
+        (
+            icon: "sparkles",
+            color: AJTheme.gold,
+            title: "Sanctuary",
+            body: "Your spiritual home base. Pray, breathe, share testimonies, and connect with believers.",
+            features: [
+                (icon: "hands.sparkles.fill", color: .blue, text: "Prayer Wall — submit requests and pray for others"),
+                (icon: "text.quote", color: .orange, text: "Testimony Wall — read and share stories of faith"),
+                (icon: "wind", color: .teal, text: "Breathing meditation with Scripture"),
+                (icon: "person.3.fill", color: .green, text: "Community — connect with believers worldwide"),
+            ]
+        ),
+        (
+            icon: "flame.fill",
+            color: AJTheme.gold,
+            title: NSLocalizedString("tour.progress.title", comment: ""),
+            body: NSLocalizedString("tour.progress.body", comment: ""),
+            features: [
+                (icon: "flame.fill", color: .orange, text: "Daily streak with grace days for missed days"),
+                (icon: "circle.grid.2x2.fill", color: .blue, text: "Habit rings — prayer, Scripture, reflection"),
+                (icon: "map.fill", color: .teal, text: "Faith Map — visualize your spiritual growth"),
+                (icon: "trophy.fill", color: .purple, text: "Achievements — celebrate milestones along the way"),
+            ]
+        ),
+        (
+            icon: "book.fill",
+            color: AJTheme.sage,
+            title: NSLocalizedString("tour.journal.title", comment: ""),
+            body: NSLocalizedString("tour.journal.body", comment: ""),
+            features: [
+                (icon: "pencil.line", color: .blue, text: "Write your thoughts and reflections"),
+                (icon: "mic.fill", color: .purple, text: "Voice journaling — speak your heart"),
+                (icon: "heart.text.square.fill", color: .pink, text: "Your reflections become a record of growth"),
+            ]
+        ),
     ]
 
     var body: some View {
-        VStack(spacing: 0) {
-            Divider()
-            HStack(spacing: 0) {
-                ForEach(tabs, id: \.tag) { tab in
+        NavigationStack {
+            VStack(spacing: 0) {
+                TabView(selection: $currentPage) {
+                    ForEach(Array(pages.enumerated()), id: \.offset) { index, page in
+                        tourPage(page: page)
+                            .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                .animation(.easeInOut, value: currentPage)
+
+                // Bottom button
+                Button {
+                    if currentPage < pages.count - 1 {
+                        withAnimation { currentPage += 1 }
+                    } else {
+                        onDismiss()
+                    }
+                } label: {
+                    Text(currentPage < pages.count - 1
+                         ? NSLocalizedString("action.next", comment: "")
+                         : NSLocalizedString("action.letsBegin", comment: ""))
+                }
+                .buttonStyle(AJPrimaryButtonStyle())
+                .padding(.horizontal, AJTheme.paddingXLarge)
+                .padding(.bottom, 16)
+
+                if currentPage < pages.count - 1 {
                     Button {
-                        selectedTab = tab.tag
+                        onDismiss()
                     } label: {
-                        VStack(spacing: 3) {
-                            tabIcon(tag: tab.tag)
-                                .frame(width: 26, height: 26)
-                            Text(tab.label)
-                                .font(.system(size: 10, weight: .medium))
+                        Text(NSLocalizedString("action.skip", comment: ""))
+                            .font(.caption)
+                            .foregroundStyle(AJTheme.secondaryText)
+                    }
+                    .padding(.bottom, AJTheme.paddingLarge)
+                }
+            }
+            .background(AJTheme.background.ignoresSafeArea())
+            .interactiveDismissDisabled()
+        }
+    }
+
+    private func tourPage(page: (icon: String, color: Color, title: String, body: String, features: [(icon: String, color: Color, text: String)])) -> some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                Spacer().frame(height: 40)
+
+                ZStack {
+                    Circle()
+                        .fill(page.color.opacity(0.12))
+                        .frame(width: 100, height: 100)
+                    Image(systemName: page.icon)
+                        .font(.system(size: 40))
+                        .foregroundStyle(page.color)
+                }
+
+                Text(page.title)
+                    .font(AJTheme.headlineFont)
+                    .foregroundColor(AJTheme.primaryText)
+
+                Text(page.body)
+                    .font(AJTheme.bodyFont)
+                    .foregroundStyle(AJTheme.secondaryText)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.horizontal, AJTheme.paddingLarge)
+
+                if !page.features.isEmpty {
+                    VStack(alignment: .leading, spacing: 14) {
+                        ForEach(Array(page.features.enumerated()), id: \.offset) { _, feature in
+                            HStack(spacing: 14) {
+                                ZStack {
+                                    Circle()
+                                        .fill(feature.color.opacity(0.15))
+                                        .frame(width: 36, height: 36)
+                                    Image(systemName: feature.icon)
+                                        .font(.body)
+                                        .foregroundStyle(feature.color)
+                                }
+                                Text(feature.text)
+                                    .font(.system(.subheadline, design: .serif))
+                                    .foregroundColor(AJTheme.primaryText)
+                            }
                         }
-                        .foregroundColor(
-                            selectedTab == tab.tag
-                                ? AATheme.steel
-                                : AATheme.secondaryText
-                        )
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, AATheme.paddingSmall + 2)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(tab.label) tab")
-                    .accessibilityHint(selectedTab == tab.tag ? "Currently selected" : "Double tap to switch")
-                    .accessibilityAddTraits(selectedTab == tab.tag ? .isSelected : [])
+                    .padding()
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(AJTheme.cardBackground)
+                    )
+                    .padding(.horizontal, AJTheme.paddingLarge)
                 }
-            }
-            .padding(.bottom, AATheme.paddingSmall)
-        }
-        .background(AATheme.cardBackground.ignoresSafeArea(edges: .bottom))
-    }
 
-    @ViewBuilder
-    private func tabIcon(tag: Int) -> some View {
-        let tint = selectedTab == tag ? AATheme.steel : AATheme.secondaryText
-        switch tag {
-        case 0:
-            Image(systemName: selectedTab == 0 ? "house.fill" : "house")
-                .font(.system(size: 20))
-        case 1:
-            AnchorSymbolView(color: tint)
-        case 2:
-            SingleArcheryArrowView(color: tint)
-        case 3:
-            Image(systemName: "chart.bar.fill")
-                .font(.system(size: 20))
-        case 4:
-            Image(systemName: "person.3.fill")
-                .font(.system(size: 20))
-        default:
-            EmptyView()
-        }
-    }
-}
-
-// MARK: - Skeleton Shimmer
-struct ShimmerModifier: ViewModifier {
-    @State private var phase: CGFloat = 0
-
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                LinearGradient(
-                    colors: [.clear, .white.opacity(0.15), .clear],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-                .offset(x: phase)
-                .mask(content)
-            )
-            .onAppear {
-                withAnimation(.linear(duration: 1.5).repeatForever(autoreverses: false)) {
-                    phase = UIScreen.main.bounds.width
-                }
-            }
-    }
-}
-
-extension View {
-    func shimmer() -> some View { modifier(ShimmerModifier()) }
-}
-
-// MARK: - Skeleton Loading Cards
-struct SkeletonCard: View {
-    var height: CGFloat = 80
-
-    var body: some View {
-        RoundedRectangle(cornerRadius: AATheme.cornerRadius)
-            .fill(AATheme.cardBackground)
-            .frame(height: height)
-            .shimmer()
-    }
-}
-
-struct SkeletonCirclesList: View {
-    var body: some View {
-        VStack(spacing: AATheme.paddingMedium) {
-            ForEach(0..<3, id: \.self) { _ in
-                HStack(spacing: AATheme.paddingMedium) {
-                    SwiftUI.Circle()
-                        .fill(AATheme.cardBackground)
-                        .frame(width: 52, height: 52)
-                    VStack(alignment: .leading, spacing: AATheme.paddingSmall) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(AATheme.cardBackground)
-                            .frame(width: 140, height: 14)
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(AATheme.cardBackground)
-                            .frame(width: 90, height: 10)
-                    }
-                    Spacer()
-                }
-                .padding(AATheme.paddingMedium)
-                .background(AATheme.cardBackground.opacity(0.5))
-                .cornerRadius(AATheme.cornerRadius)
+                Spacer().frame(height: 60)
             }
         }
-        .shimmer()
-        .padding(.horizontal, 20)
-        .padding(.top, AATheme.paddingMedium)
     }
 }
 
-struct SkeletonPostFeed: View {
-    var body: some View {
-        VStack(spacing: 12) {
-            SkeletonCard(height: 100)
-            ForEach(0..<3, id: \.self) { _ in
-                VStack(alignment: .leading, spacing: AATheme.paddingSmall + 2) {
-                    HStack {
-                        RoundedRectangle(cornerRadius: AATheme.paddingSmall)
-                            .fill(AATheme.cardBackground)
-                            .frame(width: 70, height: 22)
-                        Spacer()
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(AATheme.cardBackground)
-                            .frame(width: 40, height: 10)
-                    }
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(AATheme.cardBackground)
-                        .frame(height: 12)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(AATheme.cardBackground)
-                        .frame(width: 200, height: 12)
-                }
-                .padding(14)
-                .background(AATheme.cardBackground.opacity(0.5))
-                .cornerRadius(AATheme.cornerRadiusSmall + 4)
-            }
-        }
-        .shimmer()
-        .padding(.horizontal, 20)
-        .padding(.top, AATheme.paddingMedium)
-    }
+#Preview {
+    RootView()
+        .modelContainer(for: UserProfile.self, inMemory: true)
 }

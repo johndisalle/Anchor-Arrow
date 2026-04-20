@@ -27,7 +27,7 @@ struct AudioPlayButton: View {
         Button(action: tap) {
             HStack(spacing: 8) {
                 ZStack {
-                    Circle()
+                    SwiftUI.Circle()
                         .fill(AATheme.amber)
                         .frame(width: 36, height: 36)
 
@@ -47,7 +47,7 @@ struct AudioPlayButton: View {
                             .font(.system(size: 9, weight: .bold))
                             .foregroundColor(AATheme.amber)
                             .padding(3)
-                            .background(Circle().fill(Color.white))
+                            .background(SwiftUI.Circle().fill(Color.white))
                             .offset(x: 12, y: 12)
                     }
                 }
