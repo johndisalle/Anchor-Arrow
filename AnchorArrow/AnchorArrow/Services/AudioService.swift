@@ -121,7 +121,6 @@ final class AudioService: ObservableObject {
     // MARK: - Load & play one asset
 
     @MainActor private func loadAndPlay(_ asset: AudioAsset) async {
-        print("[Audio] loadAndPlay: \(asset.id) path=\(asset.storagePath)")
         currentAsset = asset
         isLoading = true
         error = nil
@@ -131,8 +130,7 @@ final class AudioService: ObservableObject {
 
         do {
             let url = try await resolveURL(for: asset)
-            print("[Audio] resolved URL: \(url)")
-            removeObservers()
+                removeObservers()
             let item = AVPlayerItem(url: url)
             player = AVPlayer(playerItem: item)
             player?.rate = playbackRate
@@ -140,10 +138,8 @@ final class AudioService: ObservableObject {
             player?.playImmediately(atRate: playbackRate)
             isPlaying = true
             isLoading = false
-            print("[Audio] playback started")
-        } catch {
-            print("[Audio] FAILED: \(asset.id) — \(error.localizedDescription)")
-            self.error = "Couldn't load audio: \(error.localizedDescription)"
+            } catch {
+                self.error = "Couldn't load audio: \(error.localizedDescription)"
             isLoading = false
             isPlaying = false
             advanceQueue()
@@ -169,8 +165,7 @@ final class AudioService: ObservableObject {
                 try data.write(to: local)
             } catch {
                 // Non-fatal — we'll just re-download next time.
-                print("[Audio] Cache write failed: \(error)")
-            }
+                    }
         }
         return downloadURL
     }
@@ -179,12 +174,10 @@ final class AudioService: ObservableObject {
 
     private func advanceQueue() {
         queueIndex += 1
-        print("[Audio] advanceQueue: index=\(queueIndex) of \(queue.count)")
         if queueIndex < queue.count {
             Task { await loadAndPlay(queue[queueIndex]) }
         } else {
-            print("[Audio] queue exhausted, stopping")
-            stop()
+                stop()
         }
     }
 
@@ -230,7 +223,6 @@ final class AudioService: ObservableObject {
             try session.setCategory(.playback, mode: .spokenAudio, options: [])
             try session.setActive(true)
         } catch {
-            print("[Audio] Session config failed: \(error)")
-        }
+            }
     }
 }
