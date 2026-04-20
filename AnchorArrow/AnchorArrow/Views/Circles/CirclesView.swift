@@ -876,11 +876,12 @@ struct BattleFormationCard: View {
             }
 
             // Member dot row
-            HStack(spacing: 10) {
-                ForEach(memberIds, id: \.self) { uid in
-                    brotherDot(uid: uid, profile: profiles[uid])
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(memberIds, id: \.self) { uid in
+                        brotherDot(uid: uid, profile: profiles[uid])
+                    }
                 }
-                Spacer()
             }
 
             // Alert if anyone has gone dark

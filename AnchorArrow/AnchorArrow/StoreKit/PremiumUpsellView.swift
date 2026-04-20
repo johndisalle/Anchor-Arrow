@@ -17,7 +17,7 @@ struct PremiumUpsellView: View {
     @State private var showPendingAlert: Bool = false
 
     var body: some View {
-        SubscriptionStoreView(productIDs: SubscriptionConfig.allProductIDs) {
+        SubscriptionStoreView(productIDs: SubscriptionConfig.subscriptionIDs) {
             // Custom marketing header
             VStack(spacing: 20) {
                 // Icon
@@ -71,10 +71,25 @@ struct PremiumUpsellView: View {
                     PremiumFeatureRow(icon: "circle.fill", color: "BrandGold", text: "Grace Day — save your streak once per month")
                 }
                 .padding(.horizontal, 24)
+
+                // Free trial callout
+                VStack(spacing: 6) {
+                    Text("Start your free trial")
+                        .font(.system(size: 17, weight: .heavy, design: .serif))
+                        .foregroundColor(AATheme.primaryText)
+                    Text("Try everything free. Cancel anytime.")
+                        .font(.system(size: 13))
+                        .foregroundColor(AATheme.secondaryText)
+                }
+                .padding(.top, 8)
             }
         }
         .subscriptionStoreButtonLabel(.multiline)
         .storeButton(.visible, for: .restorePurchases)
+        .overlay(alignment: .bottom) {
+            LifetimePurchaseButton()
+                .padding(.bottom, 80)
+        }
         .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/terms-of-use.html")!, for: .termsOfService)
         .subscriptionStorePolicyDestination(url: URL(string: "https://johndisalle.github.io/Anchor-Arrow/privacy-policy.html")!, for: .privacyPolicy)
         .onInAppPurchaseCompletion { _, result in
@@ -132,6 +147,79 @@ struct PremiumFeatureRow: View {
             Spacer()
 
             AAIcon("checkmark", size: 13, weight: .bold, color: .green)
+        }
+    }
+}
+
+
+// MARK: - Lifetime Purchase Button
+struct LifetimePurchaseButton: View {
+    @EnvironmentObject var storeKitManager: StoreKitManager
+    @EnvironmentObject var userStore: UserStore
+    @State private var lifetimeProduct: Product?
+    @State private var isPurchasing = false
+    @State private var errorMessage: String?
+
+    var body: some View {
+        Group {
+            if let product = lifetimeProduct {
+                Button {
+                    Task { await purchaseLifetime(product) }
+                } label: {
+                    VStack(spacing: 4) {
+                        Text("Lifetime Access — \(product.displayPrice)")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(AATheme.warmGold)
+                        Text("One payment. Forever.")
+                            .font(.system(size: 12))
+                            .foregroundColor(AATheme.secondaryText)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(AATheme.warmGold.opacity(0.1))
+                    .cornerRadius(AATheme.cornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AATheme.cornerRadius)
+                            .stroke(AATheme.warmGold.opacity(0.3), lineWidth: 1)
+                    )
+                    .padding(.horizontal, 24)
+                }
+                .disabled(isPurchasing)
+            }
+        }
+        .task {
+            if let products = try? await Product.products(for: [SubscriptionConfig.lifetimeID]) {
+                lifetimeProduct = products.first
+            }
+        }
+    }
+
+    private func purchaseLifetime(_ product: Product) async {
+        isPurchasing = true
+        defer { isPurchasing = false }
+        do {
+            let result = try await product.purchase()
+            switch result {
+            case .success(let verification):
+                switch verification {
+                case .verified(let transaction):
+                    await transaction.finish()
+                    await storeKitManager.checkSubscriptionStatus()
+                    userStore.appUser?.isPremium = true
+                    AnalyticsService.log(.premiumSubscribed, params: ["type": "lifetime"])
+                    userStore.showPremiumWelcome = true
+                case .unverified:
+                    errorMessage = "Purchase could not be verified."
+                }
+            case .userCancelled:
+                break
+            case .pending:
+                break
+            @unknown default:
+                break
+            }
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }

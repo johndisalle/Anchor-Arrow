@@ -66,8 +66,8 @@ struct PremiumWelcomeView: View {
                         PremiumWelcomeCard(
                             icon: "map.fill",
                             iconColor: AATheme.amber,
-                            title: "5 New Journeys",
-                            description: "Armor of God, Surrender First, Prophet Priest King, Strength in Love, and Guard the Gates — 150 additional daily devotionals.",
+                            title: "11 New Journeys",
+                            description: "Warrior Mindset, The Father's Heart, The Narrow Road, Forged in Fire, Rooted & Built, and more — 330 additional daily devotionals.",
                             delay: 0.15
                         )
 

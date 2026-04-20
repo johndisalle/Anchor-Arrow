@@ -22,7 +22,7 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-<key>NSUserNotificationsUsageDescription</key>
+	<key>NSUserNotificationsUsageDescription</key>
 	<string>Anchor &amp; Arrow sends daily reminders to help you stay anchored and on mission.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -63,6 +63,10 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
 	</array>
 </dict>
 </plist>

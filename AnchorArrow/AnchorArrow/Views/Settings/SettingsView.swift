@@ -4,6 +4,7 @@
 import SwiftUI
 import StoreKit
 import FirebaseAuth
+import FirebaseFirestore
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthManager
@@ -13,6 +14,10 @@ struct SettingsView: View {
 
     @State private var showSignOutConfirm = false
     @State private var isEditingName = false
+    @State private var showGiftCodeEntry = false
+    @State private var giftCode = ""
+    @State private var giftCodeError: String?
+    @State private var giftCodeSuccess = false
     @State private var editedName = ""
     @State private var showDeleteConfirm = false
     @State private var showPremiumUpsell = false
@@ -40,6 +45,13 @@ struct SettingsView: View {
                 Section {
                     premiumRow
                     redeemOfferCodeRow
+                    if !userStore.isPremium {
+                        Button {
+                            showGiftCodeEntry = true
+                        } label: {
+                            Label("Enter Gift Code", systemImage: "gift.fill")
+                        }
+                    }
                 } header: {
                     Text("Subscription")
                 }
@@ -258,6 +270,29 @@ struct SettingsView: View {
             } message: {
                 Text("For security, please re-enter your password to delete your account.")
             }
+            .alert("Enter Gift Code", isPresented: $showGiftCodeEntry) {
+                TextField("Code", text: $giftCode)
+                    .autocapitalization(.allCharacters)
+                    .disableAutocorrection(true)
+                Button("Redeem") {
+                    Task { await redeemGiftCode() }
+                }
+                Button("Cancel", role: .cancel) {
+                    giftCode = ""
+                    giftCodeError = nil
+                }
+            } message: {
+                if let error = giftCodeError {
+                    Text(error)
+                } else {
+                    Text("Enter your gift code to unlock Premium.")
+                }
+            }
+            .alert("Premium Unlocked", isPresented: $giftCodeSuccess) {
+                Button("OK") {}
+            } message: {
+                Text("Welcome to Premium! All journeys and features are now unlocked.")
+            }
             .sheet(isPresented: $showPremiumUpsell) {
                 PremiumUpsellView(reason: nil)
             }
@@ -331,6 +366,59 @@ struct SettingsView: View {
     }
 
     // MARK: - Premium Row
+    // MARK: - Gift Code Redemption
+    private func redeemGiftCode() async {
+        let code = giftCode.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        guard !code.isEmpty else {
+            giftCodeError = "Please enter a code."
+            showGiftCodeEntry = true
+            return
+        }
+
+        // Check code against Firestore gift_codes collection
+        do {
+            let doc = try await Firestore.firestore().collection("gift_codes").document(code).getDocument()
+            guard doc.exists else {
+                giftCodeError = "Invalid code. Please try again."
+                showGiftCodeEntry = true
+                return
+            }
+
+            let data = doc.data() ?? [:]
+            let isUsed = data["isUsed"] as? Bool ?? false
+            let maxUses = data["maxUses"] as? Int ?? 1
+            let useCount = data["useCount"] as? Int ?? 0
+
+            if isUsed || useCount >= maxUses {
+                giftCodeError = "This code has already been redeemed."
+                showGiftCodeEntry = true
+                return
+            }
+
+            // Mark code as used
+            guard let uid = Auth.auth().currentUser?.uid else { return }
+            try await Firestore.firestore().collection("gift_codes").document(code).updateData([
+                "isUsed": maxUses <= 1 ? true : (useCount + 1 >= maxUses),
+                "useCount": FieldValue.increment(Int64(1)),
+                "redeemedBy": FieldValue.arrayUnion([uid]),
+                "lastRedeemedAt": Timestamp(date: Date())
+            ])
+
+            // Grant lifetime premium
+            try await FirestoreService.shared.setPremium(uid: uid, isPremium: true, expiry: nil)
+            try await FirestoreService.shared.updateUser(uid: uid, fields: ["isLifetime": true])
+            userStore.appUser?.isPremium = true
+            AnalyticsService.log(.premiumSubscribed, params: ["type": "gift_code", "code": code])
+
+            giftCode = ""
+            giftCodeError = nil
+            giftCodeSuccess = true
+        } catch {
+            giftCodeError = "Something went wrong. Please try again."
+            showGiftCodeEntry = true
+        }
+    }
+
     // MARK: - Redeem Offer Code
     private var redeemOfferCodeRow: some View {
         Button {

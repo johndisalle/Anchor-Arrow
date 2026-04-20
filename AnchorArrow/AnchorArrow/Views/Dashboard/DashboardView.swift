@@ -475,7 +475,7 @@ struct DashboardView: View {
                     Text("You've been faithful for \(userStore.currentStreak) days")
                         .font(.system(size: 16, weight: .bold, design: .serif))
                         .foregroundColor(AATheme.primaryText)
-                    Text("11 guided journeys are waiting to take you deeper")
+                    Text("11 guided journeys are waiting. Try free.")
                         .font(.system(size: 13))
                         .foregroundColor(AATheme.secondaryText)
                 }
@@ -725,7 +725,7 @@ struct StreakMilestoneCelebration: View {
                     Button(action: onUpgrade ?? {}) {
                         HStack(spacing: 6) {
                             AAIcon("crown.fill", size: 14, color: AATheme.warmGold)
-                            Text("Unlock 11 Journeys")
+                            Text("Try 11 Journeys Free")
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(AATheme.warmGold)
                         }

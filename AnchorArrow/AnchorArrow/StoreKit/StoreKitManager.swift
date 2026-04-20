@@ -13,10 +13,12 @@ enum SubscriptionConfig {
     static let groupID = "21994049"
 
     // Product IDs — must exactly match App Store Connect
-    static let monthlyID = "com.ellasid.anchorarrow.premium.monthly.v2"
-    static let annualID  = "com.ellasid.anchorarrow.premium.annual.v2"
+    static let monthlyID   = "com.ellasid.anchorarrow.premium.monthly.v2"
+    static let annualID    = "com.ellasid.anchorarrow.premium.annual.v2"
+    static let lifetimeID  = "com.ellasid.anchorarrow.premium.lifetime"
 
-    static let allProductIDs = [monthlyID, annualID]
+    static let subscriptionIDs = [monthlyID, annualID]
+    static let allProductIDs = [monthlyID, annualID, lifetimeID]
 }
 
 // MARK: - StoreKitManager
@@ -79,7 +81,13 @@ class StoreKitManager: ObservableObject {
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
-                if SubscriptionConfig.allProductIDs.contains(transaction.productID) {
+                if transaction.productID == SubscriptionConfig.lifetimeID {
+                    // Lifetime purchase — never expires
+                    foundActive = true
+                    activeSubscriptionExpiry = nil
+                    await updatePremiumStatus(expiryDate: nil, isLifetime: true)
+                    break
+                } else if SubscriptionConfig.subscriptionIDs.contains(transaction.productID) {
                     if let expiry = transaction.expirationDate, expiry > Date() {
                         foundActive = true
                         activeSubscriptionExpiry = expiry
@@ -116,7 +124,7 @@ class StoreKitManager: ObservableObject {
     }
 
     // MARK: - Update Firebase Premium Flag
-    private func updatePremiumStatus(expiryDate: Date?) async {
+    private func updatePremiumStatus(expiryDate: Date?, isLifetime: Bool = false) async {
         let isPremium = expiryDate != nil && expiryDate! > Date()
         hasActiveSubscription = isPremium
         activeSubscriptionExpiry = expiryDate

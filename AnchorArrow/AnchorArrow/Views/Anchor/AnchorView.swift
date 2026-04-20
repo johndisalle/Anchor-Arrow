@@ -18,6 +18,15 @@ struct AnchorView: View {
 
     private let prompt = PromptLibrary.anchorPromptForToday()
 
+    private var anchorQueue: [AudioAsset] {
+        let prayerIndex = (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1) - 1
+        return [
+            .anchorScripture(promptId: prompt.id, reference: prompt.reference),
+            .anchorPrompt(promptId: prompt.id),
+            .morningPrayer(index: prayerIndex % 200)
+        ]
+    }
+
     private var isReflectionEmpty: Bool {
         reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -188,6 +197,7 @@ struct AnchorView: View {
                     .background(AATheme.steel.opacity(0.12))
                     .cornerRadius(AATheme.paddingSmall)
                 Spacer()
+                AudioPlayButton(queue: anchorQueue, label: "Play All")
             }
 
             Text("\"\(prompt.scripture)\"")
