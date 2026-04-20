@@ -85,7 +85,9 @@ struct AudioFullPlayerView: View {
     @StateObject private var audio = AudioService.shared
     @Environment(\.dismiss) private var dismiss
 
-    private var speedLabel: String { "\(audio.playbackRate, specifier: "%.2g")×" }
+    private var speedLabel: String {
+        String(format: "%.2g×", audio.playbackRate)
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -164,7 +166,7 @@ struct AudioFullPlayerView: View {
             // Speed control
             Menu {
                 ForEach([0.8, 1.0, 1.25, 1.5], id: \.self) { rate in
-                    Button("\(rate, specifier: "%.2g")×") {
+                    Button(String(format: "%.2g×", rate)) {
                         audio.playbackRate = Float(rate)
                     }
                 }
