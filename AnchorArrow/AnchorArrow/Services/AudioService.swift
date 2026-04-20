@@ -120,6 +120,7 @@ final class AudioService: ObservableObject {
     // MARK: - Load & play one asset
 
     @MainActor private func loadAndPlay(_ asset: AudioAsset) async {
+        print("[Audio] loadAndPlay: \(asset.id) path=\(asset.storagePath)")
         currentAsset = asset
         isLoading = true
         error = nil
@@ -129,6 +130,7 @@ final class AudioService: ObservableObject {
 
         do {
             let url = try await resolveURL(for: asset)
+            print("[Audio] resolved URL: \(url)")
             let item = AVPlayerItem(url: url)
             player = AVPlayer(playerItem: item)
             player?.rate = playbackRate
@@ -136,11 +138,12 @@ final class AudioService: ObservableObject {
             player?.playImmediately(atRate: playbackRate)
             isPlaying = true
             isLoading = false
+            print("[Audio] playback started")
         } catch {
+            print("[Audio] FAILED: \(asset.id) — \(error.localizedDescription)")
             self.error = "Couldn't load audio: \(error.localizedDescription)"
             isLoading = false
             isPlaying = false
-            // Try to skip forward in queue so one bad asset doesn't stall the session
             advanceQueue()
         }
     }
@@ -174,9 +177,11 @@ final class AudioService: ObservableObject {
 
     private func advanceQueue() {
         queueIndex += 1
+        print("[Audio] advanceQueue: index=\(queueIndex) of \(queue.count)")
         if queueIndex < queue.count {
             Task { await loadAndPlay(queue[queueIndex]) }
         } else {
+            print("[Audio] queue exhausted, stopping")
             stop()
         }
     }
