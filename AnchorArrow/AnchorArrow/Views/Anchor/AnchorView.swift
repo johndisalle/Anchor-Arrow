@@ -110,9 +110,9 @@ struct AnchorView: View {
                     withAnimation { showCompletionAnimation = false }
                 }
             }
-        }
-        .navigationDestination(isPresented: $showArrowView) {
-            ArrowView()
+            .navigationDestination(isPresented: $showArrowView) {
+                ArrowView()
+            }
         }
         .sheet(isPresented: $showVerseShare) {
             if let image = verseShareImage {

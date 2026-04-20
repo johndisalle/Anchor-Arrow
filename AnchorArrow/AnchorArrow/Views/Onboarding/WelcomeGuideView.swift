@@ -37,7 +37,7 @@ struct WelcomeGuideView: View {
                 GuideStep(
                     number: "1",
                     color: AATheme.steel,
-                    icon: "anchor",
+                    icon: "arrow.down.to.line",
                     title: "Complete Your Morning Anchor",
                     description: "Read the scripture prompt, reflect, and anchor yourself in Christ."
                 )

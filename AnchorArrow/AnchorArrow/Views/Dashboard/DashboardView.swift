@@ -605,7 +605,7 @@ struct DashboardView: View {
                 if !entry.anchorReflection.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         HStack(spacing: 4) {
-                            AAIcon("anchor", size: 11, color: AATheme.steel)
+                            AAIcon("arrow.down.to.line", size: 11, color: AATheme.steel)
                             Text("Anchor")
                                 .font(.system(size: 11, weight: .bold))
                                 .foregroundColor(AATheme.steel)
