@@ -173,11 +173,24 @@ final class AudioService: ObservableObject {
     // MARK: - Queue advancement
 
     private func advanceQueue() {
+        if queueIndex < queue.count {
+            let finished = queue[queueIndex]
+            AnalyticsService.log(.audioCompleted, params: [
+                "audio_kind": finished.kind.rawValue,
+                "audio_id": finished.id
+            ])
+        }
         queueIndex += 1
         if queueIndex < queue.count {
             Task { await loadAndPlay(queue[queueIndex]) }
         } else {
-                stop()
+            if !queue.isEmpty {
+                AnalyticsService.log(.audioQueueCompleted, params: [
+                    "queue_length": queue.count,
+                    "first_kind": queue.first?.kind.rawValue ?? ""
+                ])
+            }
+            stop()
         }
     }
 
