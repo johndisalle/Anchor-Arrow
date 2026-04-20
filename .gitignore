@@ -69,3 +69,6 @@ node_modules/
 .dataconnect
 .DS_Store
 **/xcuserdata/
+generator/.env
+generator/firebase-admin-key.json
+generator/audio_failures.json

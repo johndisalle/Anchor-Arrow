@@ -41,16 +41,22 @@ struct PremiumUpsellView: View {
                         .foregroundColor(Color("TextSecondary"))
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 32)
+                } else {
+                    Text("Listen, don't just read.")
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(Color("TextSecondary"))
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
                 }
 
                 // Feature list
-                // Journey hero card
+                // Audio hero card — the lead differentiator
                 VStack(spacing: 10) {
-                    AAIcon("book.fill", size: 28, color: AATheme.amber)
-                    Text("11 Guided Journeys")
+                    AAIcon("waveform", size: 28, color: AATheme.amber)
+                    Text("Voice-Guided Sessions")
                         .font(.system(size: 20, weight: .heavy, design: .serif))
                         .foregroundColor(AATheme.primaryText)
-                    Text("330 daily devotionals across Spiritual Warfare, The Father's Heart, The Narrow Road, and more")
+                    Text("Listen to every scripture, reflection, and prayer. In the car. On a walk. Any time your eyes are busy.")
                         .font(.system(size: 14))
                         .foregroundColor(AATheme.secondaryText)
                         .multilineTextAlignment(.center)
@@ -64,10 +70,10 @@ struct PremiumUpsellView: View {
 
                 VStack(spacing: 12) {
                     PremiumFeatureRow(icon: "heart.fill", color: "BrandDanger", text: "Kingdom Funded — All profits donated to missions & service")
+                    PremiumFeatureRow(icon: "book.fill", color: "BrandGold", text: "11 Guided Journeys — 330 devotionals on warfare, fatherhood, the narrow road & more")
                     PremiumFeatureRow(icon: "person.3.fill", color: "BrandAnchor", text: "Post, comment & rally brothers in unlimited circles")
                     PremiumFeatureRow(icon: "magnifyingglass", color: "BrandGold", text: "Journal History — search & revisit past reflections")
                     PremiumFeatureRow(icon: "chart.bar.fill", color: "BrandArrow", text: "Drift Insights & Weekly Report — see your patterns")
-                    PremiumFeatureRow(icon: "tag.fill", color: "BrandWarning", text: "Custom Drift Categories — track your specific struggles")
                     PremiumFeatureRow(icon: "circle.fill", color: "BrandGold", text: "Grace Day — save your streak once per month")
                 }
                 .padding(.horizontal, 24)
