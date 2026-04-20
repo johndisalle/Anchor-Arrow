@@ -14,6 +14,18 @@ struct ArrowView: View {
 
     private let prompt = PromptLibrary.arrowPromptForToday()
 
+    private var arrowQueue: [AudioAsset] {
+        let prayerIndex = (Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1) - 1
+        let rolePrompts = PromptLibrary.allArrowPrompts.filter { $0.role == selectedRole }
+        let activePrompt = rolePrompts.isEmpty ? prompt : rolePrompts[prayerIndex % rolePrompts.count]
+        return [
+            .arrowScripture(promptId: activePrompt.id, reference: activePrompt.verseReference),
+            .arrowPrompt(promptId: activePrompt.id),
+            .eveningPrayer(index: prayerIndex % 200)
+        ]
+    }
+
+
     private var isReflectionEmpty: Bool {
         reflection.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -116,6 +128,8 @@ struct ArrowView: View {
                 .font(AATheme.scriptureFont)
                 .foregroundColor(AATheme.secondaryText)
                 .lineLimit(2)
+            Spacer(minLength: 8)
+            AudioPlayButton(queue: arrowQueue, label: "Play All")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

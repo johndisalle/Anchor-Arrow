@@ -64,6 +64,28 @@ extension AudioAsset {
         )
     }
 
+    static func arrowScripture(promptId: String, reference: String) -> AudioAsset {
+        AudioAsset(
+            id: "arrow_scripture_\(promptId)",
+            kind: .arrowScripture,
+            title: "Today's Scripture",
+            subtitle: reference,
+            storagePath: "audio/arrow/scripture/\(promptId).mp3",
+            estimatedDurationSec: 20
+        )
+    }
+
+    static func arrowPrompt(promptId: String) -> AudioAsset {
+        AudioAsset(
+            id: "arrow_prompt_\(promptId)",
+            kind: .arrowPrompt,
+            title: "Reflection",
+            subtitle: nil,
+            storagePath: "audio/arrow/prompts/\(promptId).mp3",
+            estimatedDurationSec: 30
+        )
+    }
+
     static func morningPrayer(index: Int) -> AudioAsset {
         let padded = String(format: "%03d", index + 1)
         return AudioAsset(
