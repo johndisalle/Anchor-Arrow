@@ -95,6 +95,9 @@ struct AnchorView: View {
                     }
                 }
             }
+            .navigationDestination(isPresented: $showArrowView) {
+                ArrowView()
+            }
         }
         .overlay {
             if showCompletionAnimation {
@@ -109,9 +112,6 @@ struct AnchorView: View {
                 ) {
                     withAnimation { showCompletionAnimation = false }
                 }
-            }
-            .navigationDestination(isPresented: $showArrowView) {
-                ArrowView()
             }
         }
         .sheet(isPresented: $showVerseShare) {
